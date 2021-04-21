@@ -13,6 +13,12 @@ using diet_tracker_api.Filters;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Data.SqlClient;
 using diet_tracker_api.DataLayer;
+using Auth0.ManagementApi;
+using diet_tracker_api.Services;
+using System.Collections.Generic;
+using System;
+using Microsoft.AspNetCore.Http;
+using System.Security.Principal;
 
 namespace diet_tracker_api
 {
@@ -28,13 +34,19 @@ namespace diet_tracker_api
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            var domain = $"https://{Configuration["Auth0:Domain"]}/";
+            var audience = Configuration["Auth0:Audience"];
 
             services.AddControllers(config =>
             {
                 config.Filters.Add<OperationCancelledExceptionFilter>();
             });
+
             services.AddHttpContextAccessor();
 
+            /**
+            * Setup the database configuration.
+            */
             var dbPassword = Configuration["DB_PASSWORD"];
             var userID = Configuration["DB_USERNAME"];
 
@@ -53,12 +65,27 @@ namespace diet_tracker_api
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "diet_tracker_api", Version = "v1" });
+                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                {
+                    Name = "Authorization",
+                    In = ParameterLocation.Header,
+                    Type = SecuritySchemeType.OAuth2,
+                    Flows = new OpenApiOAuthFlows
+                    {
+                        Implicit = new OpenApiOAuthFlow
+                        {
+                            Scopes = new Dictionary<string, string>
+                            {
+                                { "openid", "Open Id" }
+                            },
+                            AuthorizationUrl = new Uri(domain + "authorize?audience=" + audience)
+                        }
+                    }
+                });
+                c.OperationFilter<SecurityRequirementsOperationFilter>();
             });
 
-            var domain = $"https://{Configuration["Auth0:Domain"]}/";
-            var audience = Configuration["Auth0:Audience"];
-            services
-                .AddAuthentication(options =>
+            services.AddAuthentication(options =>
                 {
                     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -75,11 +102,15 @@ namespace diet_tracker_api
 
             services.AddSingleton<IAuthorizationHandler, HasScopeHandler>();
 
-            services
-                .AddAuthorization(options =>
+            services.AddAuthorization(options =>
                 {
                     options.AddPolicy("read:fuelings", policy => policy.Requirements.Add(new HasScopeRequirement("read:fuelings", domain)));
                 });
+
+            var clientSecret = Configuration["Auth0:ClientSecret"];
+            var apiClientId = Configuration["Auth0:ApiClientId"];
+
+            services.AddTransient<IAuth0ManagementApiClient>(provider => new Auth0ManagementApiClient(apiClientId, clientSecret, Configuration["Auth0:Domain"]));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -91,7 +122,11 @@ namespace diet_tracker_api
             {
                 app.UseDeveloperExceptionPage();
                 app.UseSwagger();
-                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "diet_tracker_api v1"));
+                app.UseSwaggerUI(c =>
+                {
+                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "diet_tracker_api v1");
+                    c.OAuthClientId(Configuration["Auth0:ClientId"]);
+                });
             }
 
             app.UseHttpsRedirection();
