@@ -1,8 +1,6 @@
-using System;
 using System.Threading.Tasks;
 using diet_tracker_api.DataLayer;
 using diet_tracker_api.DataLayer.Models;
-using diet_tracker_api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -16,11 +14,11 @@ namespace diet_tracker_api.Controllers
     [Produces("application/json")]
     public class UserController
     {
-        private readonly ILogger _logger;
+        private readonly ILogger<UserController> _logger;
         private readonly DietTrackerDbContext _dietTrackerDbContext;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public UserController(ILogger<NewUserController> logger, DietTrackerDbContext dietTrackerDbContext, IHttpContextAccessor httpContextAccessor)
+        public UserController(ILogger<UserController> logger, DietTrackerDbContext dietTrackerDbContext, IHttpContextAccessor httpContextAccessor)
         {
             _logger = logger;
             _dietTrackerDbContext = dietTrackerDbContext;
@@ -38,7 +36,9 @@ namespace diet_tracker_api.Controllers
             return data;
         }
 
-        [Authorize("read:user")]
+        /**
+        * Get the current user
+        */
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]

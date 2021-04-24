@@ -13,12 +13,12 @@ using diet_tracker_api.Filters;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Data.SqlClient;
 using diet_tracker_api.DataLayer;
-using Auth0.ManagementApi;
 using diet_tracker_api.Services;
 using System.Collections.Generic;
 using System;
-using Microsoft.AspNetCore.Http;
-using System.Security.Principal;
+using System.Text.RegularExpressions;
+using Microsoft.AspNetCore.Routing;
+using Microsoft.AspNetCore.Mvc.ApplicationModels;
 
 namespace diet_tracker_api
 {
@@ -39,6 +39,7 @@ namespace diet_tracker_api
 
             services.AddControllers(config =>
             {
+                config.Conventions.Add(new RouteTokenTransformerConvention(new SlugifyParameterTransformer()));
                 config.Filters.Add<OperationCancelledExceptionFilter>();
             });
 
@@ -102,9 +103,14 @@ namespace diet_tracker_api
 
             services.AddSingleton<IAuthorizationHandler, HasScopeHandler>();
 
+            var permissions = new string[] { "write:fuelings", "write:plans", "write:lean-and-greens", "write:user", "read:user:fuelings", "read:user:lean-and-green" };
+
             services.AddAuthorization(options =>
                 {
-                    options.AddPolicy("read:fuelings", policy => policy.Requirements.Add(new HasScopeRequirement("read:fuelings", domain)));
+                    foreach (var permission in permissions)
+                    {
+                        options.AddPolicy(permission, policy => policy.Requirements.Add(new HasScopeRequirement(permission, domain)));
+                    }
                 });
 
             var clientSecret = Configuration["Auth0:ClientSecret"];
@@ -163,6 +169,15 @@ namespace diet_tracker_api
                     context.Database.Migrate();
                 }
             }
+        }
+    }
+
+    public class SlugifyParameterTransformer : IOutboundParameterTransformer
+    {
+        public string TransformOutbound(object value)
+        {
+            // Slugify value
+            return value == null ? null : Regex.Replace(value.ToString(), "([a-z])([A-Z])", "$1-$2").ToLower();
         }
     }
 }

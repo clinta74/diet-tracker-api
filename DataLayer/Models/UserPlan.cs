@@ -2,7 +2,7 @@ using System;
 
 namespace diet_tracker_api.DataLayer.Models
 {
-    public class UserPlan
+    public record UserPlan
     {
         public string UserId { get; set; }
         public int PlanId { get; set; }

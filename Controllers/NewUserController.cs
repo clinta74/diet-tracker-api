@@ -2,6 +2,7 @@ using System;
 using System.Threading.Tasks;
 using diet_tracker_api.DataLayer;
 using diet_tracker_api.DataLayer.Models;
+using diet_tracker_api.Models;
 using diet_tracker_api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -17,7 +18,7 @@ namespace diet_tracker_api.Controllers
     public class NewUserController
     {
         private readonly IAuth0ManagementApiClient _managementApiClient;
-        private readonly ILogger _logger;
+        private readonly ILogger<NewUserController> _logger;
         private readonly DietTrackerDbContext _dietTrackerDbContext;
         private readonly IHttpContextAccessor _httpContextAccessor;
         
@@ -47,6 +48,24 @@ namespace diet_tracker_api.Controllers
             await _dietTrackerDbContext.SaveChangesAsync();
 
             return result.Entity;
+        }
+
+        [HttpGet]
+        public async Task<ActionResult<NewUser>> GetNewUserData()
+        {
+            var userId = _httpContextAccessor.HttpContext.User.Identity.Name;
+            var userData = await _managementApiClient.Client.Users.GetAsync(userId);
+
+            var result = new NewUser
+            {
+                UserId = userId,
+                FristName = userData.FirstName,
+                LastName = userData.LastName,
+                EmailAddress = userData.Email,
+                LastLogin = DateTime.Now
+            };
+
+            return result;
         }
     }
 }

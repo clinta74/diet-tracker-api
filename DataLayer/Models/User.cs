@@ -11,7 +11,6 @@ namespace diet_tracker_api.DataLayer.Models
         public string FristName { get; set; }
         public string LastName { get; set; }
         public string EmailAddress { get; set; }
-        public int PlanId { get; set; }
         public DateTime LastLogin { get; set; }
         public virtual ICollection<UserDay> UserDays { get; set; }
         public virtual ICollection<UserFueling> UserFuelings { get; set; }
