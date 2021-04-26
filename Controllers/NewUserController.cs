@@ -30,8 +30,8 @@ namespace diet_tracker_api.Controllers
             _httpContextAccessor = httpContextAccessor;
         }
 
-        [HttpPost]
-        public async Task<User> AddNewUser()
+        [HttpPost("create")]
+        public async Task<User> CreateNewUser()
         {
             var userId = _httpContextAccessor.HttpContext.User.Identity.Name;
             var userData = await _managementApiClient.Client.Users.GetAsync(userId);
@@ -39,7 +39,7 @@ namespace diet_tracker_api.Controllers
             var result = _dietTrackerDbContext.Users.Add(new User
             {
                 UserId = userId,
-                FristName = userData.FirstName,
+                FirstName = userData.FirstName,
                 LastName = userData.LastName,
                 EmailAddress = userData.Email,
                 LastLogin = DateTime.Now
@@ -50,22 +50,42 @@ namespace diet_tracker_api.Controllers
             return result.Entity;
         }
 
+        [HttpPost]
+        public async Task<ActionResult<string>> AddNewUser(NewUser userData)
+        {
+            var userId = _httpContextAccessor.HttpContext.User.Identity.Name;
+
+            var userPlans = new UserPlan[] { new UserPlan { PlanId = userData.PlanId, Start = DateTime.Now }};
+
+            var result = _dietTrackerDbContext.Users.Add(new User
+            {
+                UserId = userId,
+                FirstName = userData.FirstName,
+                LastName = userData.LastName,
+                EmailAddress = userData.EmailAddress,
+                LastLogin = DateTime.Now,
+                UserPlans = userPlans,
+            });
+
+            await _dietTrackerDbContext.SaveChangesAsync();
+
+            return result.Entity.UserId;
+        }
+
         [HttpGet]
-        public async Task<ActionResult<NewUser>> GetNewUserData()
+        public async Task<ActionResult<NewUser>> GetNewUser()
         {
             var userId = _httpContextAccessor.HttpContext.User.Identity.Name;
             var userData = await _managementApiClient.Client.Users.GetAsync(userId);
 
-            var result = new NewUser
+            return new NewUser
             {
                 UserId = userId,
-                FristName = userData.FirstName,
+                FirstName = userData.FirstName,
                 LastName = userData.LastName,
                 EmailAddress = userData.Email,
                 LastLogin = DateTime.Now
             };
-
-            return result;
         }
     }
 }

@@ -1,16 +1,16 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
+using diet_tracker_api.DataLayer.Models;
 
 namespace diet_tracker_api.Models
 {
-    public record NewUser
+    public record CurrentUser
     {
         public string UserId { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string EmailAddress { get; set; }
-        public int PlanId { get; set; }
         public DateTime LastLogin { get; set; }
+        public Plan CurrentPlan { get; set; }
     }
 }

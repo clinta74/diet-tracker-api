@@ -33,22 +33,22 @@ namespace diet_tracker_api.DataLayer
                 .HasForeignKey(userDay => userDay.UserId);
 
             modelBuilder.Entity<User>()
-                .HasMany(user => user.UserFuelings)
-                .WithOne(userFueling => userFueling.User)
-                .HasForeignKey(userFueling => userFueling.UserId);
-
-            modelBuilder.Entity<User>()
-                .HasMany(user => user.UserMeals)
-                .WithOne(userMeal => userMeal.User)
-                .HasForeignKey(userMeal => userMeal.UserId);
-
-            modelBuilder.Entity<User>()
                 .HasMany(user => user.UserPlans)
                 .WithOne(userPlan => userPlan.User)
                 .HasForeignKey(userPlan => userPlan.UserId);
 
             modelBuilder.Entity<UserDay>()
                 .HasKey(userDay => new { userDay.UserId, userDay.Day });
+
+            modelBuilder.Entity<UserDay>()
+                .HasMany(userDay => userDay.Fuelings)
+                .WithOne(userFueling => userFueling.UserDay)
+                .HasForeignKey(userFueling => new { userFueling.UserId, userFueling.Day });
+
+            modelBuilder.Entity<UserDay>()
+                .HasMany(user => user.Meals)
+                .WithOne(userMeal => userMeal.UserDay)
+                .HasForeignKey(userMeal => new { userMeal.UserId, userMeal.Day });
 
             modelBuilder.Entity<UserPlan>()
                 .HasKey(userPlan => new { userPlan.UserId, userPlan.PlanId });

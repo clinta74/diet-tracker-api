@@ -8,7 +8,7 @@ namespace diet_tracker_api.DataLayer.Models
     {
         [Key]
         public string UserId { get; set; }
-        public string FristName { get; set; }
+        public string FirstName { get; set; }
         public string LastName { get; set; }
         public string EmailAddress { get; set; }
         public DateTime LastLogin { get; set; }

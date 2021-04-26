@@ -31,7 +31,6 @@ namespace diet_tracker_api.Controllers
         }
 
         [HttpGet("/api/fuelings")]
-        [Authorize("read:fuelings")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public IAsyncEnumerable<Fueling> Get(CancellationToken cancellationToken)
         {
