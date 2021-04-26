@@ -83,7 +83,7 @@ namespace diet_tracker_api.Migrations
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<DateTime>("Day")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("date");
 
                     b.Property<int>("Condiments")
                         .HasColumnType("int");
@@ -106,6 +106,9 @@ namespace diet_tracker_api.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
+                    b.Property<DateTime>("Day")
+                        .HasColumnType("date");
+
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
@@ -117,7 +120,7 @@ namespace diet_tracker_api.Migrations
 
                     b.HasKey("UserFuelingId");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("UserId", "Day");
 
                     b.ToTable("UserFueling");
                 });
@@ -132,6 +135,9 @@ namespace diet_tracker_api.Migrations
                     b.Property<decimal>("Calories")
                         .HasColumnType("decimal(5,2)");
 
+                    b.Property<DateTime>("Day")
+                        .HasColumnType("date");
+
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
@@ -140,7 +146,7 @@ namespace diet_tracker_api.Migrations
 
                     b.HasKey("UserMealId");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("UserId", "Day");
 
                     b.ToTable("UserMeal");
                 });
@@ -176,20 +182,28 @@ namespace diet_tracker_api.Migrations
 
             modelBuilder.Entity("diet_tracker_api.DataLayer.Models.UserFueling", b =>
                 {
-                    b.HasOne("diet_tracker_api.DataLayer.Models.User", "User")
+                    b.HasOne("diet_tracker_api.DataLayer.Models.User", null)
                         .WithMany("UserFuelings")
                         .HasForeignKey("UserId");
 
-                    b.Navigation("User");
+                    b.HasOne("diet_tracker_api.DataLayer.Models.UserDay", "UserDay")
+                        .WithMany("Fuelings")
+                        .HasForeignKey("UserId", "Day");
+
+                    b.Navigation("UserDay");
                 });
 
             modelBuilder.Entity("diet_tracker_api.DataLayer.Models.UserMeal", b =>
                 {
-                    b.HasOne("diet_tracker_api.DataLayer.Models.User", "User")
+                    b.HasOne("diet_tracker_api.DataLayer.Models.User", null)
                         .WithMany("UserMeals")
                         .HasForeignKey("UserId");
 
-                    b.Navigation("User");
+                    b.HasOne("diet_tracker_api.DataLayer.Models.UserDay", "UserDay")
+                        .WithMany("Meals")
+                        .HasForeignKey("UserId", "Day");
+
+                    b.Navigation("UserDay");
                 });
 
             modelBuilder.Entity("diet_tracker_api.DataLayer.Models.UserPlan", b =>
@@ -225,6 +239,13 @@ namespace diet_tracker_api.Migrations
                     b.Navigation("UserMeals");
 
                     b.Navigation("UserPlans");
+                });
+
+            modelBuilder.Entity("diet_tracker_api.DataLayer.Models.UserDay", b =>
+                {
+                    b.Navigation("Fuelings");
+
+                    b.Navigation("Meals");
                 });
 #pragma warning restore 612, 618
         }

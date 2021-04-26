@@ -40,10 +40,9 @@ namespace diet_tracker_api.Migrations
                 columns: table => new
                 {
                     UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    FristName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    FirstName = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     LastName = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     EmailAddress = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    PlanId = table.Column<int>(type: "int", nullable: false),
                     LastLogin = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
@@ -56,7 +55,7 @@ namespace diet_tracker_api.Migrations
                 columns: table => new
                 {
                     UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    Day = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Day = table.Column<DateTime>(type: "date", nullable: false),
                     Water = table.Column<int>(type: "int", nullable: false),
                     Weight = table.Column<decimal>(type: "decimal(5,2)", nullable: false),
                     Condiments = table.Column<int>(type: "int", nullable: false)
@@ -70,48 +69,6 @@ namespace diet_tracker_api.Migrations
                         principalTable: "User",
                         principalColumn: "UserId",
                         onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "UserFueling",
-                columns: table => new
-                {
-                    UserFuelingId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: true),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    When = table.Column<DateTime>(type: "datetime2", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_UserFueling", x => x.UserFuelingId);
-                    table.ForeignKey(
-                        name: "FK_UserFueling_User_UserId",
-                        column: x => x.UserId,
-                        principalTable: "User",
-                        principalColumn: "UserId",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "UserMeal",
-                columns: table => new
-                {
-                    UserMealId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: true),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Calories = table.Column<decimal>(type: "decimal(5,2)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_UserMeal", x => x.UserMealId);
-                    table.ForeignKey(
-                        name: "FK_UserMeal_User_UserId",
-                        column: x => x.UserId,
-                        principalTable: "User",
-                        principalColumn: "UserId",
-                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -139,15 +96,71 @@ namespace diet_tracker_api.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
-            migrationBuilder.CreateIndex(
-                name: "IX_UserFueling_UserId",
-                table: "UserFueling",
-                column: "UserId");
+            migrationBuilder.CreateTable(
+                name: "UserFueling",
+                columns: table => new
+                {
+                    UserFuelingId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    Day = table.Column<DateTime>(type: "date", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    When = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserFueling", x => x.UserFuelingId);
+                    table.ForeignKey(
+                        name: "FK_UserFueling_User_UserId",
+                        column: x => x.UserId,
+                        principalTable: "User",
+                        principalColumn: "UserId",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_UserFueling_UserDay_UserId_Day",
+                        columns: x => new { x.UserId, x.Day },
+                        principalTable: "UserDay",
+                        principalColumns: new[] { "UserId", "Day" },
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "UserMeal",
+                columns: table => new
+                {
+                    UserMealId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    Day = table.Column<DateTime>(type: "date", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Calories = table.Column<decimal>(type: "decimal(5,2)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserMeal", x => x.UserMealId);
+                    table.ForeignKey(
+                        name: "FK_UserMeal_User_UserId",
+                        column: x => x.UserId,
+                        principalTable: "User",
+                        principalColumn: "UserId",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_UserMeal_UserDay_UserId_Day",
+                        columns: x => new { x.UserId, x.Day },
+                        principalTable: "UserDay",
+                        principalColumns: new[] { "UserId", "Day" },
+                        onDelete: ReferentialAction.Restrict);
+                });
 
             migrationBuilder.CreateIndex(
-                name: "IX_UserMeal_UserId",
+                name: "IX_UserFueling_UserId_Day",
+                table: "UserFueling",
+                columns: new[] { "UserId", "Day" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserMeal_UserId_Day",
                 table: "UserMeal",
-                column: "UserId");
+                columns: new[] { "UserId", "Day" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_UserPlan_PlanId",
@@ -161,9 +174,6 @@ namespace diet_tracker_api.Migrations
                 name: "Fueling");
 
             migrationBuilder.DropTable(
-                name: "UserDay");
-
-            migrationBuilder.DropTable(
                 name: "UserFueling");
 
             migrationBuilder.DropTable(
@@ -171,6 +181,9 @@ namespace diet_tracker_api.Migrations
 
             migrationBuilder.DropTable(
                 name: "UserPlan");
+
+            migrationBuilder.DropTable(
+                name: "UserDay");
 
             migrationBuilder.DropTable(
                 name: "Plan");
