@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using diet_tracker_api.DataLayer;
 
 namespace diet_tracker_api.Migrations
 {
     [DbContext(typeof(DietTrackerDbContext))]
-    partial class DietTrackerDbContextModelSnapshot : ModelSnapshot
+    [Migration("20210427013713_add-when-to-meals")]
+    partial class addwhentomeals
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -162,7 +164,7 @@ namespace diet_tracker_api.Migrations
                     b.Property<DateTime>("Start")
                         .HasColumnType("datetime2");
 
-                    b.HasKey("UserId", "PlanId", "Start");
+                    b.HasKey("UserId", "PlanId");
 
                     b.HasIndex("PlanId");
 

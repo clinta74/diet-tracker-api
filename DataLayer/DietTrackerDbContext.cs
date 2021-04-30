@@ -51,7 +51,7 @@ namespace diet_tracker_api.DataLayer
                 .HasForeignKey(userMeal => new { userMeal.UserId, userMeal.Day });
 
             modelBuilder.Entity<UserPlan>()
-                .HasKey(userPlan => new { userPlan.UserId, userPlan.PlanId });
+                .HasKey(userPlan => new { userPlan.UserId, userPlan.PlanId, userPlan.Start });
 
             // Configure Code First to ignore PluralizingTableName convention
             // If you keep this convention then the generated tables will have pluralized names.

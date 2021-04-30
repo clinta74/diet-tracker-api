@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using diet_tracker_api.DataLayer;
 using diet_tracker_api.DataLayer.Models;
@@ -31,7 +32,7 @@ namespace diet_tracker_api.Controllers
         }
 
         [HttpPost("create")]
-        public async Task<User> CreateNewUser()
+        public async Task<User> CreateNewUser(CancellationToken cancellationToken)
         {
             var userId = _httpContextAccessor.HttpContext.User.Identity.Name;
             var userData = await _managementApiClient.Client.Users.GetAsync(userId);
@@ -45,13 +46,13 @@ namespace diet_tracker_api.Controllers
                 LastLogin = DateTime.Now
             });
 
-            await _dietTrackerDbContext.SaveChangesAsync();
+            await _dietTrackerDbContext.SaveChangesAsync(cancellationToken);
 
             return result.Entity;
         }
 
         [HttpPost]
-        public async Task<ActionResult<string>> AddNewUser(NewUser userData)
+        public async Task<ActionResult<string>> AddNewUser(NewUser userData, CancellationToken cancellationToken)
         {
             var userId = _httpContextAccessor.HttpContext.User.Identity.Name;
 
@@ -67,13 +68,13 @@ namespace diet_tracker_api.Controllers
                 UserPlans = userPlans,
             });
 
-            await _dietTrackerDbContext.SaveChangesAsync();
+            await _dietTrackerDbContext.SaveChangesAsync(cancellationToken);
 
             return result.Entity.UserId;
         }
 
         [HttpGet]
-        public async Task<ActionResult<NewUser>> GetNewUser()
+        public async Task<ActionResult<NewUser>> GetNewUser(CancellationToken cancellationToken)
         {
             var userId = _httpContextAccessor.HttpContext.User.Identity.Name;
             var userData = await _managementApiClient.Client.Users.GetAsync(userId);

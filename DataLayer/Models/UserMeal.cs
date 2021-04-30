@@ -12,9 +12,7 @@ namespace diet_tracker_api.DataLayer.Models
         [Column(TypeName = "date")]
         public DateTime Day { get; set; }
         public string Name { get; set; }
-
-        [Column(TypeName = "decimal(5, 2)")]
-        public decimal Calories { get; set; }
+        public DateTime When { get; set; }
         public virtual UserDay UserDay { get; set; }     
     }
 }

@@ -19,6 +19,7 @@ using System;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
+using MediatR;
 
 namespace diet_tracker_api
 {
@@ -44,6 +45,8 @@ namespace diet_tracker_api
             });
 
             services.AddHttpContextAccessor();
+
+            services.AddMediatR(typeof(Startup));
 
             /**
             * Setup the database configuration.

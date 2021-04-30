@@ -1,4 +1,5 @@
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using diet_tracker_api.DataLayer;
 using diet_tracker_api.DataLayer.Models;
@@ -31,7 +32,7 @@ namespace diet_tracker_api.Controllers
         [Authorize("read:user")]
         [HttpGet("{userid}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<User>> GetUserById(string id)
+        public async Task<ActionResult<User>> GetUserById(string id, CancellationToken cancellationToken)
         {
             var data = await _dietTrackerDbContext.Users.FindAsync(id);
             if (data == null) return new NotFoundResult();
@@ -45,7 +46,7 @@ namespace diet_tracker_api.Controllers
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<CurrentUser>> GetCurrentUser()
+        public async Task<ActionResult<CurrentUser>> GetCurrentUser(CancellationToken cancellationToken)
         {
             var id = _httpContextAccessor.HttpContext.User.Identity.Name;
             var data = await _dietTrackerDbContext.Users
@@ -60,7 +61,7 @@ namespace diet_tracker_api.Controllers
                     CurrentPlan = user.UserPlans.OrderByDescending(up => up.Start).Select(up => up.Plan).FirstOrDefault(),
                 })
                 .AsNoTracking()
-                .FirstOrDefaultAsync();
+                .FirstOrDefaultAsync(cancellationToken);
 
             if (data == null) return new NotFoundResult();
 
@@ -70,7 +71,7 @@ namespace diet_tracker_api.Controllers
         [HttpGet("exists")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<bool>> GetCurrentUserExists()
+        public async Task<ActionResult<bool>> GetCurrentUserExists(CancellationToken cancellationToken)
         {
             var id = _httpContextAccessor.HttpContext.User.Identity.Name;
             var data = await _dietTrackerDbContext.Users.FindAsync(id);

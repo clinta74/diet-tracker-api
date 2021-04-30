@@ -32,7 +32,7 @@ namespace diet_tracker_api.Controllers
 
         [HttpGet("/api/fuelings")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public IAsyncEnumerable<Fueling> Get(CancellationToken cancellationToken)
+        public IAsyncEnumerable<Fueling> Get()
         {
             var data = _context.Fuelings
                 .AsNoTracking()
@@ -47,7 +47,7 @@ namespace diet_tracker_api.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<int>> Add(Fueling fueling, CancellationToken cancellationToken)
         {
-            if (fueling != null)
+            if (fueling == null)
             {
                 return new BadRequestResult();
             }
@@ -67,7 +67,7 @@ namespace diet_tracker_api.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<int>> Update(int id, Fueling fueling, CancellationToken cancellationToken)
         {
-            if (fueling != null)
+            if (fueling == null)
             {
                 return new BadRequestResult();
             }
@@ -103,7 +103,7 @@ namespace diet_tracker_api.Controllers
             {
                 _context.Remove(fueling);
 
-                await _context.SaveChangesAsync();
+                await _context.SaveChangesAsync(cancellationToken);
                 return new OkResult();
             }
 
