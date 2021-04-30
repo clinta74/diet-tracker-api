@@ -145,7 +145,7 @@ namespace diet_tracker_api
                 .WithOrigins(new string[]
                 {
                     "http://localhost:4000",
-                    "https://diet-tracker.pollyspeople.net"
+                    "https://food.pollyspeople.net"
                 })
                 .AllowAnyMethod()
                 .AllowAnyHeader());
