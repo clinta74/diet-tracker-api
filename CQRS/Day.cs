@@ -36,7 +36,9 @@ namespace diet_tracker_api.CQRS
                         Water = userDay.Water,
                         Weight = userDay.Weight,
                         Meals = userDay.Meals,
-                        Fuelings = userDay.Fuelings
+                        Fuelings = userDay.Fuelings,
+                        Condiments = userDay.Condiments,
+                        Notes = userDay.Notes,
                     })
                     .AsNoTracking()
                     .FirstOrDefaultAsync(cancellationToken);
@@ -64,8 +66,36 @@ namespace diet_tracker_api.CQRS
                         Weight = 0,
                         Meals = meals,
                         Fuelings = fuelings,
+                        Condiments = 0,
+                        Notes = "",
                     };
                 }
+
+                var weights = await _dietTrackerDbContext.UserDays
+                    .Where(userDay => userDay.UserId == request.UserId && userDay.Weight > 0)
+                    .OrderBy(userDay => userDay.Day)
+                    .Where(userDay => userDay.Day <= request.Date)
+                    .AsNoTracking()
+                    .Select(userDay => userDay.Weight)
+                    .ToListAsync(cancellationToken);
+
+                if (weights.Count > 1)
+                {
+                    return data with
+                    {
+                        CumulativeWeightChange = weights.First() - weights.Last(),
+                        WeightChange = weights[weights.Count - 2] - weights.Last(),
+                    };
+                }
+
+                if (weights.Count > 0)
+                {
+                    return data with
+                    {
+                        CumulativeWeightChange = weights.First() - weights.Last(),
+                    };
+                }
+
                 return data;
             }
         }

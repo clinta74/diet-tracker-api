@@ -51,38 +51,13 @@ namespace diet_tracker_api.Controllers
 
             var data = await _mediator.Send(new Day.GetDay(day, userId));
 
-            var weights = await _dietTrackerDbContext.UserDays
-                .Where(userDay => userDay.UserId == userId && userDay.Weight > 0)
-                .OrderBy(userDay => userDay.Day)
-                .Where(userDay => userDay.Day <= day.Date)
-                .AsNoTracking()
-                .Select(userDay => userDay.Weight)
-                .ToListAsync(cancellationToken);
-
-            if (weights.Count > 1)
-            {
-                return data with
-                {
-                    CumulativeWeightChange = weights.First() - weights.Last(),
-                    WeightChange = weights[weights.Count - 2] - weights.Last(),
-                };
-            }
-
-            if (weights.Count > 0)
-            {
-                return data with
-                {
-                    CumulativeWeightChange = weights.First() - weights.Last(),
-                };
-            }
-
             return data;
         }
 
         [HttpPut("{day}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult> UpdateCurrentUserDay(DateTime day, UserDay userDay, CancellationToken cancellationToken)
+        public async Task<ActionResult<CurrentUserDay>> UpdateCurrentUserDay(DateTime day, UserDay userDay, CancellationToken cancellationToken)
         {
             var userId = _httpContextAccessor.HttpContext.User.Identity.Name;
 
@@ -111,6 +86,7 @@ namespace diet_tracker_api.Controllers
                         Water = userDay.Water,
                         Weight = userDay.Weight,
                         Condiments = userDay.Condiments,
+                        Notes = userDay.Notes,
                     });
             }
             else
@@ -120,6 +96,7 @@ namespace diet_tracker_api.Controllers
                     Water = userDay.Water,
                     Weight = userDay.Weight,
                     Condiments = userDay.Condiments,
+                    Notes = userDay.Notes,
                 });
             }
 
@@ -190,7 +167,9 @@ namespace diet_tracker_api.Controllers
 
             await transaction.CommitAsync(cancellationToken);
 
-            return new OkResult();
+            var result = await _mediator.Send(new Day.GetDay(day, userId));
+
+            return result;
         }
     }
 }
