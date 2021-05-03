@@ -116,7 +116,7 @@ namespace diet_tracker_api.Controllers
         {
             var plan = await _dietTrackerDbContext
                 .Plans
-                .FindAsync(id, cancellationToken);
+                .FindAsync(id);
 
             if (plan != null)
             {

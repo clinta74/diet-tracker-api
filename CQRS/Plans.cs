@@ -12,47 +12,46 @@ namespace diet_tracker_api.CQRS
     public class Plans
     {
         public record GetPlanById(int planId) : IRequest<Plan>;
+        public record ChangeUserPlan(string UserId, int PlanId) : IRequest<int>;
+    }
 
-        public class GetByIdHandler : IRequestHandler<GetPlanById, Plan>
+    public class GetByIdHandler : IRequestHandler<Plans.GetPlanById, Plan>
+    {
+        private readonly DietTrackerDbContext ctx;
+        public GetByIdHandler(DietTrackerDbContext context)
         {
-            private readonly DietTrackerDbContext ctx;
-            public GetByIdHandler(DietTrackerDbContext context)
-            {
-                ctx = context;
-            }
-
-            public Task<Plan> Handle(GetPlanById request, CancellationToken cancellationToken)
-            {
-                return ctx.Plans
-                    .Where(plan => plan.PlanId == request.planId)
-                    .AsNoTracking()
-                    .FirstOrDefaultAsync();
-            }
+            ctx = context;
         }
 
-        public record ChangeUserPlan(string UserId, int PlanId) : IRequest<int>;
-
-        public class ChangeUserPlanHandler : IRequestHandler<ChangeUserPlan, int>
+        public Task<Plan> Handle(Plans.GetPlanById request, CancellationToken cancellationToken)
         {
-            private readonly DietTrackerDbContext ctx;
-            public ChangeUserPlanHandler(DietTrackerDbContext context)
-            {
-                ctx = context;
-            }
-
-            public async Task<int> Handle(ChangeUserPlan request, CancellationToken cancellationToken)
-            {
-                ctx.UserPlans.Add(new UserPlan
-                {
-                    UserId = request.UserId,
-                    PlanId = request.PlanId,
-                    Start = DateTime.Now,
-                });
-
-                await ctx.SaveChangesAsync();
-
-                return request.PlanId;
-            }
+            return ctx.Plans
+                .Where(plan => plan.PlanId == request.planId)
+                .AsNoTracking()
+                .FirstOrDefaultAsync();
         }
     }
+    public class ChangeUserPlanHandler : IRequestHandler<Plans.ChangeUserPlan, int>
+    {
+        private readonly DietTrackerDbContext ctx;
+        public ChangeUserPlanHandler(DietTrackerDbContext context)
+        {
+            ctx = context;
+        }
+
+        public async Task<int> Handle(Plans.ChangeUserPlan request, CancellationToken cancellationToken)
+        {
+            ctx.UserPlans.Add(new UserPlan
+            {
+                UserId = request.UserId,
+                PlanId = request.PlanId,
+                Start = DateTime.Now,
+            });
+
+            await ctx.SaveChangesAsync();
+
+            return request.PlanId;
+        }
+    }
+
 }

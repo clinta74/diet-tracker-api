@@ -16,5 +16,6 @@ namespace diet_tracker_api.DataLayer.Models
         public virtual ICollection<UserFueling> UserFuelings { get; set; }
         public virtual ICollection<UserMeal> UserMeals { get; set; }
         public virtual ICollection<UserPlan> UserPlans { get; set; }
+        public virtual ICollection<Victory> Victories { get; set; }
     }
 }

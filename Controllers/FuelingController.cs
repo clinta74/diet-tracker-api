@@ -45,7 +45,7 @@ namespace diet_tracker_api.Controllers
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<int>> Add(Fueling fueling, CancellationToken cancellationToken)
+        public async Task<ActionResult<Fueling>> Add(Fueling fueling, CancellationToken cancellationToken)
         {
             if (fueling == null)
             {
@@ -57,7 +57,7 @@ namespace diet_tracker_api.Controllers
 
             await _context.SaveChangesAsync(cancellationToken);
 
-            return result.Entity.FuelingId;
+            return result.Entity;
         }
 
         [Authorize("write:fuelings")]
@@ -97,7 +97,7 @@ namespace diet_tracker_api.Controllers
         {
             var fueling = await _context
                 .Fuelings
-                .FindAsync(id, cancellationToken);
+                .FindAsync(id);
 
             if (fueling != null)
             {

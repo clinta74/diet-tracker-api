@@ -19,6 +19,7 @@ namespace diet_tracker_api.DataLayer
         public DbSet<UserFueling> UserFuelings { get; set; }
         public DbSet<UserMeal> UserMeals { get; set; }
         public DbSet<UserPlan> UserPlans { get; set; }
+        public DbSet<Victory> Victories { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -36,6 +37,10 @@ namespace diet_tracker_api.DataLayer
                 .HasMany(user => user.UserPlans)
                 .WithOne(userPlan => userPlan.User)
                 .HasForeignKey(userPlan => userPlan.UserId);
+            modelBuilder.Entity<User>()
+                .HasMany(user => user.Victories)
+                .WithOne(victory => victory.User)
+                .HasForeignKey(victory => victory.UserId);
 
             modelBuilder.Entity<UserDay>()
                 .HasKey(userDay => new { userDay.UserId, userDay.Day });
