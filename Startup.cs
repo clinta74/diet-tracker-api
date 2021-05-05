@@ -20,6 +20,7 @@ using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using MediatR;
+using System.Text.Json.Serialization;
 
 namespace diet_tracker_api
 {
@@ -42,6 +43,11 @@ namespace diet_tracker_api
             {
                 config.Conventions.Add(new RouteTokenTransformerConvention(new SlugifyParameterTransformer()));
                 config.Filters.Add<OperationCancelledExceptionFilter>();
+            })
+            .AddControllersAsServices()
+            .AddJsonOptions(options =>
+            {
+                options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
             });
 
             services.AddHttpContextAccessor();

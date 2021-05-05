@@ -72,7 +72,9 @@ namespace diet_tracker_api.Controllers
                 return new BadRequestResult();
             }
 
-            var results = await _context.Fuelings.FindAsync(id);
+            var results = await _context.Fuelings
+                .AsNoTracking()
+                .FirstOrDefaultAsync(fueling => fueling.FuelingId == id);
 
             if (results != null)
             {

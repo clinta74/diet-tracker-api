@@ -10,10 +10,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace diet_tracker_api.CQRS
 {
-    public record GetVictories(string UserId, VictoryType Type) : IRequest<IEnumerable<Victory>>;
-    public record AddVictory(string UserId, string Name, DateTime When, VictoryType Type) : IRequest<Victory>;
-    public record UpdateVictory(int VictoryId, string UserId, string Name, DateTime When, VictoryType Type) : IRequest<Victory>;
-    public record DeleteVictory(int VictoryId) : IRequest<Unit>;
+    public record GetVictories(string UserId, Nullable<VictoryType> Type) : IRequest<IEnumerable<Victory>>;
+    public record AddVictory(string UserId, string Name, DateTime? When, VictoryType Type) : IRequest<Victory>;
+    public record UpdateVictory(int VictoryId, string UserId, string Name, DateTime? When, VictoryType Type) : IRequest<bool>;
+    public record DeleteVictory(int VictoryId) : IRequest<bool>;
 
     public class GetVictoriesHandler : IRequestHandler<GetVictories, IEnumerable<Victory>>
     {
@@ -24,10 +24,16 @@ namespace diet_tracker_api.CQRS
         }
         public async Task<IEnumerable<DataLayer.Models.Victory>> Handle(GetVictories request, CancellationToken cancellationToken)
         {
-            return await ctx.Victories
-                .Where(victory => victory.UserId == request.UserId)
+            var exp = ctx.Victories
+                .Where(victory => victory.UserId == request.UserId);
+            
+            if (request.Type.HasValue)
+            {
+                exp.Where(victory => victory.Type == request.Type.Value);
+            }
+            return await exp
                 .AsNoTracking()
-                .ToListAsync();
+                .ToListAsync(cancellationToken);
         }
     }
 
@@ -49,9 +55,60 @@ namespace diet_tracker_api.CQRS
                 Type = request.Type,
             });
 
-            await ctx.SaveChangesAsync();
+            await ctx.SaveChangesAsync(cancellationToken);
 
             return data.Entity;
+        }
+    }
+
+    public class UpdateVictoryHandler : IRequestHandler<UpdateVictory, bool>
+    {
+        private readonly DietTrackerDbContext ctx;
+        public UpdateVictoryHandler(DietTrackerDbContext context)
+        {
+            ctx = context;
+        }
+
+        public async Task<bool> Handle(UpdateVictory request, CancellationToken cancellationToken)
+        {
+            var data = await ctx.Victories
+                .AsNoTracking()
+                .FirstOrDefaultAsync(v => v.VictoryId == request.VictoryId, cancellationToken);
+
+            if (data == null) return false;
+
+            ctx.Victories.Update(data with {
+                Name = request.Name,
+                When = request.When,
+            });
+
+            await ctx.SaveChangesAsync(cancellationToken);
+
+            return true;
+        }
+    }
+
+    public class DeleteVictoryHandler : IRequestHandler<DeleteVictory, bool>
+    {
+        private readonly DietTrackerDbContext ctx;
+        public DeleteVictoryHandler(DietTrackerDbContext context)
+        {
+            ctx = context;
+        }
+
+        public async Task<bool> Handle(DeleteVictory request, CancellationToken cancellationToken)
+        {
+            var data = await ctx.Victories
+                .AsNoTracking()
+                .FirstOrDefaultAsync(v => v.VictoryId == request.VictoryId, cancellationToken);
+
+            if (data == null) return false;
+
+            ctx.Victories.Remove(data);
+
+            await ctx.SaveChangesAsync(cancellationToken);
+
+            return true;
         }
     }
 }

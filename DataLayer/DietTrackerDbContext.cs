@@ -58,6 +58,10 @@ namespace diet_tracker_api.DataLayer
             modelBuilder.Entity<UserPlan>()
                 .HasKey(userPlan => new { userPlan.UserId, userPlan.PlanId, userPlan.Start });
 
+            modelBuilder.Entity<Victory>()
+                .Property(v => v.Type)
+                .HasConversion<string>();
+
             // Configure Code First to ignore PluralizingTableName convention
             // If you keep this convention then the generated tables will have pluralized names.
             modelBuilder.RemovePluralizingTableNameConvention();
