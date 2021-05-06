@@ -27,7 +27,7 @@ namespace diet_tracker_api.Controllers
             _mediator = mediator;
         }
 
-        [HttpGet]
+        [HttpGet("/api/victories")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IEnumerable<Victory>> GetAll([FromQuery]VictoryType type)
         {
@@ -54,6 +54,18 @@ namespace diet_tracker_api.Controllers
 
             var userId = _httpContextAccessor.HttpContext.User.Identity.Name;
             var data = await _mediator.Send(new UpdateVictory(id, userId, victory.Name, victory.When, victory.Type));
+
+            if (data == false) return new NotFoundResult();
+
+            return new OkResult();
+        }
+
+        [HttpDelete("{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<Victory>> Delete(int id)
+        {
+            var data = await _mediator.Send(new DeleteVictory(id));
 
             if (data == false) return new NotFoundResult();
 
