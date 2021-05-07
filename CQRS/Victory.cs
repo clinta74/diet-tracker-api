@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using diet_tracker_api.CQRS.Victories;
 using diet_tracker_api.DataLayer;
 using diet_tracker_api.DataLayer.Models;
 using MediatR;
@@ -10,10 +11,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace diet_tracker_api.CQRS
 {
-    public record GetVictories(string UserId, Nullable<VictoryType> Type) : IRequest<IEnumerable<Victory>>;
-    public record AddVictory(string UserId, string Name, DateTime? When, VictoryType Type) : IRequest<Victory>;
-    public record UpdateVictory(int VictoryId, string UserId, string Name, DateTime? When, VictoryType Type) : IRequest<bool>;
-    public record DeleteVictory(int VictoryId) : IRequest<bool>;
+    namespace Victories
+    {
+        public record GetVictories(string UserId, Nullable<VictoryType> Type) : IRequest<IEnumerable<Victory>>;
+        public record AddVictory(string UserId, string Name, DateTime? When, VictoryType Type) : IRequest<Victory>;
+        public record UpdateVictory(int VictoryId, string UserId, string Name, DateTime? When, VictoryType Type) : IRequest<bool>;
+        public record DeleteVictory(int VictoryId) : IRequest<bool>;
+    }
 
     public class GetVictoriesHandler : IRequestHandler<GetVictories, IEnumerable<Victory>>
     {
@@ -26,7 +30,7 @@ namespace diet_tracker_api.CQRS
         {
             var exp = ctx.Victories
                 .Where(victory => victory.UserId == request.UserId);
-            
+
             if (request.Type.HasValue)
             {
                 exp.Where(victory => victory.Type == request.Type.Value);
@@ -77,7 +81,8 @@ namespace diet_tracker_api.CQRS
 
             if (data == null) return false;
 
-            ctx.Victories.Update(data with {
+            ctx.Victories.Update(data with
+            {
                 Name = request.Name,
                 When = request.When,
             });

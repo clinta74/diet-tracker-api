@@ -2,8 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using diet_tracker_api.CQRS.Fuelings;
 using diet_tracker_api.DataLayer;
 using diet_tracker_api.DataLayer.Models;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -22,23 +24,21 @@ namespace diet_tracker_api.Controllers
         private readonly ILogger<FuelingController> _logger;
         private readonly DietTrackerDbContext _context;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IMediator _mediator;
 
-        public FuelingController(ILogger<FuelingController> logger, DietTrackerDbContext dietTrackerDbContext, IHttpContextAccessor httpContextAccessor)
+        public FuelingController(ILogger<FuelingController> logger, DietTrackerDbContext dietTrackerDbContext, IHttpContextAccessor httpContextAccessor, IMediator mediator)
         {
             _logger = logger;
             _context = dietTrackerDbContext;
             _httpContextAccessor = httpContextAccessor;
+            _mediator = mediator;
         }
 
         [HttpGet("/api/fuelings")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public IAsyncEnumerable<Fueling> Get()
         {
-            var data = _context.Fuelings
-                .AsNoTracking()
-                .AsAsyncEnumerable();
-
-            return data;
+            return _mediator.Send(new GetFuelings()).Result;
         }
 
         [Authorize("write:fuelings")]

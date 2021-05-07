@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using diet_tracker_api.CQRS;
+using diet_tracker_api.CQRS.Plans;
 using diet_tracker_api.DataLayer;
 using diet_tracker_api.DataLayer.Models;
 using MediatR;
@@ -48,7 +49,7 @@ namespace diet_tracker_api.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<Plan>> GetById(int id, CancellationToken cancellationToken)
         {
-            var data = await _mediator.Send(new Plans.GetPlanById(id));
+            var data = await _mediator.Send(new GetPlanById(id));
             if (data == null)
             {
                 return new NotFoundResult();
@@ -144,7 +145,7 @@ namespace diet_tracker_api.Controllers
                 return new NotFoundObjectResult($"User not found.");
             }
 
-            return await _mediator.Send(new Plans.ChangeUserPlan(userId, planId));
+            return await _mediator.Send(new ChangeUserPlan(userId, planId));
         }
     }
 }

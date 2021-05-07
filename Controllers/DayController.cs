@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using diet_tracker_api.CQRS;
+using diet_tracker_api.CQRS.Days;
 using diet_tracker_api.DataLayer;
 using diet_tracker_api.DataLayer.Models;
 using diet_tracker_api.Models;
@@ -49,7 +50,7 @@ namespace diet_tracker_api.Controllers
                 return new NotFoundObjectResult($"User not found.");
             }
 
-            var data = await _mediator.Send(new Day.GetDay(day, userId));
+            var data = await _mediator.Send(new GetDay(day, userId));
 
             return data;
         }
@@ -167,7 +168,7 @@ namespace diet_tracker_api.Controllers
 
             await transaction.CommitAsync(cancellationToken);
 
-            var result = await _mediator.Send(new Day.GetDay(day, userId));
+            var result = await _mediator.Send(new GetDay(day, userId));
 
             return result;
         }

@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace diet_tracker_api.CQRS
 {
-    public class Plans
+    namespace Plans
     {
         public record GetPlanById(int planId) : IRequest<Plan>;
         public record ChangeUserPlan(string UserId, int PlanId) : IRequest<int>;

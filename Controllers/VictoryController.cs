@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using diet_tracker_api.CQRS;
+using diet_tracker_api.CQRS.Victories;
 using diet_tracker_api.DataLayer.Models;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;

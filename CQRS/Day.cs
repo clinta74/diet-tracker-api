@@ -10,12 +10,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace diet_tracker_api.CQRS
 {
-    public class Day
+    namespace Days
     {
         public record GetDay(DateTime Date, string UserId) : IRequest<CurrentUserDay>;
     }
 
-    public class GetDayHandler : IRequestHandler<Day.GetDay, CurrentUserDay>
+    public class GetDayHandler : IRequestHandler<Days.GetDay, CurrentUserDay>
     {
         private readonly DietTrackerDbContext _dietTrackerDbContext;
 
@@ -24,7 +24,7 @@ namespace diet_tracker_api.CQRS
             _dietTrackerDbContext = dietTrackerDbContext;
         }
 
-        public async Task<CurrentUserDay> Handle(Day.GetDay request, CancellationToken cancellationToken)
+        public async Task<CurrentUserDay> Handle(Days.GetDay request, CancellationToken cancellationToken)
         {
             var data = await _dietTrackerDbContext.UserDays
                 .Where(userDay => userDay.UserId == request.UserId && userDay.Day == request.Date)
