@@ -1,13 +1,12 @@
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using diet_tracker_api.DataLayer;
+using diet_tracker_api.CQRS.Users;
 using diet_tracker_api.DataLayer.Models;
 using diet_tracker_api.Models;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace diet_tracker_api.Controllers
@@ -19,22 +18,22 @@ namespace diet_tracker_api.Controllers
     public class UserController
     {
         private readonly ILogger<UserController> _logger;
-        private readonly DietTrackerDbContext _dietTrackerDbContext;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IMediator _mediator;
 
-        public UserController(ILogger<UserController> logger, DietTrackerDbContext dietTrackerDbContext, IHttpContextAccessor httpContextAccessor)
+        public UserController(ILogger<UserController> logger, IHttpContextAccessor httpContextAccessor, IMediator mediator)
         {
             _logger = logger;
-            _dietTrackerDbContext = dietTrackerDbContext;
             _httpContextAccessor = httpContextAccessor;
+            _mediator = mediator;
         }
 
         [Authorize("read:user")]
         [HttpGet("{userid}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<User>> GetUserById(string id, CancellationToken cancellationToken)
+        public async Task<ActionResult<User>> GetUserById(string userId, CancellationToken cancellationToken)
         {
-            var data = await _dietTrackerDbContext.Users.FindAsync(id);
+            var data = await _mediator.Send(new GetUserById(userId));
             if (data == null) return new NotFoundResult();
 
             return data;
@@ -48,20 +47,8 @@ namespace diet_tracker_api.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<CurrentUser>> GetCurrentUser(CancellationToken cancellationToken)
         {
-            var id = _httpContextAccessor.HttpContext.User.Identity.Name;
-            var data = await _dietTrackerDbContext.Users
-                .Where(user => user.UserId == id)
-                .Select(user => new CurrentUser
-                {
-                    UserId = user.UserId,
-                    FirstName = user.FirstName,
-                    LastName = user.LastName,
-                    EmailAddress = user.EmailAddress,
-                    LastLogin = user.LastLogin,
-                    CurrentPlan = user.UserPlans.OrderByDescending(up => up.Start).Select(up => up.Plan).FirstOrDefault(),
-                })
-                .AsNoTracking()
-                .FirstOrDefaultAsync(cancellationToken);
+            var userId = _httpContextAccessor.HttpContext.User.Identity.Name;
+            var data = await _mediator.Send(new GetCurrentUser(userId));
 
             if (data == null) return new NotFoundResult();
 
@@ -73,12 +60,9 @@ namespace diet_tracker_api.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<bool>> GetCurrentUserExists(CancellationToken cancellationToken)
         {
-            var id = _httpContextAccessor.HttpContext.User.Identity.Name;
-            var data = await _dietTrackerDbContext.Users.FindAsync(id);
+            var userId = _httpContextAccessor.HttpContext.User.Identity.Name;
 
-            if (data == null) return false;
-
-            return true;
+            return await _mediator.Send(new UserExists(userId));
         }
 
     }

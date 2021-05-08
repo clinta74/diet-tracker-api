@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using diet_tracker_api.CQRS;
+using diet_tracker_api.CQRS.Users;
 using diet_tracker_api.CQRS.Victories;
 using diet_tracker_api.DataLayer.Models;
 using MediatR;
@@ -41,7 +42,7 @@ namespace diet_tracker_api.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<Victory> Add(Victory victory)
         {
-            var userId = _httpContextAccessor.HttpContext.User.Identity.Name;
+            var userId = _httpContextAccessor.HttpContext.User.Identity.Name;            
             return await _mediator.Send(new AddVictory(userId, victory.Name, victory.When, victory.Type));
         }
 
@@ -52,7 +53,6 @@ namespace diet_tracker_api.Controllers
         public async Task<ActionResult<Victory>> Update(int id, Victory victory)
         {
             if (victory == null) return new BadRequestResult();
-
             var userId = _httpContextAccessor.HttpContext.User.Identity.Name;
             var data = await _mediator.Send(new UpdateVictory(id, userId, victory.Name, victory.When, victory.Type));
 
