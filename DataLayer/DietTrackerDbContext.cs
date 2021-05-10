@@ -19,6 +19,8 @@ namespace diet_tracker_api.DataLayer
         public DbSet<UserFueling> UserFuelings { get; set; }
         public DbSet<UserMeal> UserMeals { get; set; }
         public DbSet<UserPlan> UserPlans { get; set; }
+        public DbSet<UserDailyTracking> UserDailyTrackings { get; set; }
+        public DbSet<UserTracking> UserTrackings { get; set; }
         public DbSet<Victory> Victories { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -37,10 +39,24 @@ namespace diet_tracker_api.DataLayer
                 .HasMany(user => user.UserPlans)
                 .WithOne(userPlan => userPlan.User)
                 .HasForeignKey(userPlan => userPlan.UserId);
+
+            modelBuilder.Entity<User>()
+                .HasMany(user => user.UserTrackings)
+                .WithOne(userTracking => userTracking.User)
+                .HasForeignKey(userTracking => userTracking.UserId);
+
             modelBuilder.Entity<User>()
                 .HasMany(user => user.Victories)
                 .WithOne(victory => victory.User)
                 .HasForeignKey(victory => victory.UserId);
+
+            modelBuilder.Entity<User>()
+                .Property(p => p.WaterSize)
+                .HasDefaultValue(8);
+
+            modelBuilder.Entity<User>()
+                .Property(p => p.WaterTarget)
+                .HasDefaultValue(64);
 
             modelBuilder.Entity<UserDay>()
                 .HasKey(userDay => new { userDay.UserId, userDay.Day });
@@ -57,6 +73,19 @@ namespace diet_tracker_api.DataLayer
 
             modelBuilder.Entity<UserPlan>()
                 .HasKey(userPlan => new { userPlan.UserId, userPlan.PlanId, userPlan.Start });
+
+            modelBuilder.Entity<UserDay>()
+                .HasMany(user => user.Trackings)
+                .WithOne(userTracking => userTracking.UserDay)
+                .HasForeignKey(userTracking => new { userTracking.UserId, userTracking.Day });
+
+            modelBuilder.Entity<UserDailyTracking>()
+                .Property(v => v.Type)
+                .HasConversion<string>();
+            
+            modelBuilder.Entity<UserTracking>()
+                .Property(v => v.Type)
+                .HasConversion<string>();
 
             modelBuilder.Entity<Victory>()
                 .Property(v => v.Type)

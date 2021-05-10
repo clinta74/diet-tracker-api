@@ -43,7 +43,7 @@ namespace diet_tracker_api.Controllers
                 FirstName = userData.FirstName,
                 LastName = userData.LastName,
                 EmailAddress = userData.Email,
-                LastLogin = DateTime.Now
+                Created = DateTime.Now
             });
 
             await _dietTrackerDbContext.SaveChangesAsync(cancellationToken);
@@ -64,7 +64,7 @@ namespace diet_tracker_api.Controllers
                 FirstName = userData.FirstName,
                 LastName = userData.LastName,
                 EmailAddress = userData.EmailAddress,
-                LastLogin = DateTime.Now,
+                Created = DateTime.Now,
                 UserPlans = userPlans,
             });
 

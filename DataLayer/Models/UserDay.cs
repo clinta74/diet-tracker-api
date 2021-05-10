@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace diet_tracker_api.DataLayer.Models
@@ -20,5 +19,6 @@ namespace diet_tracker_api.DataLayer.Models
         public virtual User User { get; set; }
         public virtual ICollection<UserFueling> Fuelings { get; set; }
         public virtual ICollection<UserMeal> Meals { get; set; }
+        public virtual ICollection<UserDailyTracking> Trackings { get; set; }
     }
 }

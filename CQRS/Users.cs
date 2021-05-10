@@ -69,8 +69,9 @@ namespace diet_tracker_api.CQRS
                     FirstName = user.FirstName,
                     LastName = user.LastName,
                     EmailAddress = user.EmailAddress,
-                    LastLogin = user.LastLogin,
+                    Created = user.Created,
                     CurrentPlan = user.UserPlans.OrderByDescending(up => up.Start).Select(up => up.Plan).FirstOrDefault(),
+                    Started = user.UserPlans.OrderBy(up => up.Start).First().Start,
                 })
                 .AsNoTracking()
                 .FirstOrDefaultAsync(cancellationToken);

@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using diet_tracker_api.DataLayer;
 
 namespace diet_tracker_api.Migrations
 {
     [DbContext(typeof(DietTrackerDbContext))]
-    partial class DietTrackerDbContextModelSnapshot : ModelSnapshot
+    [Migration("20210510143650_rename-last-login-created")]
+    partial class renamelastlogincreated
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -72,49 +74,9 @@ namespace diet_tracker_api.Migrations
                     b.Property<string>("LastName")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("WaterSize")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasDefaultValue(8);
-
-                    b.Property<int>("WaterTarget")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasDefaultValue(64);
-
                     b.HasKey("UserId");
 
                     b.ToTable("User");
-                });
-
-            modelBuilder.Entity("diet_tracker_api.DataLayer.Models.UserDailyTracking", b =>
-                {
-                    b.Property<int>("UserDailyTrackingId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<DateTime>("Day")
-                        .HasColumnType("date");
-
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<int>("Value")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("When")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("UserDailyTrackingId");
-
-                    b.HasIndex("UserId", "Day");
-
-                    b.ToTable("UserDailyTracking");
                 });
 
             modelBuilder.Entity("diet_tracker_api.DataLayer.Models.UserDay", b =>
@@ -212,39 +174,6 @@ namespace diet_tracker_api.Migrations
                     b.ToTable("UserPlan");
                 });
 
-            modelBuilder.Entity("diet_tracker_api.DataLayer.Models.UserTracking", b =>
-                {
-                    b.Property<int>("UserTrackingId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("Occurance")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("Removed")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("UserTrackingId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("UserTracking");
-                });
-
             modelBuilder.Entity("diet_tracker_api.DataLayer.Models.Victory", b =>
                 {
                     b.Property<int>("VictoryId")
@@ -270,15 +199,6 @@ namespace diet_tracker_api.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Victory");
-                });
-
-            modelBuilder.Entity("diet_tracker_api.DataLayer.Models.UserDailyTracking", b =>
-                {
-                    b.HasOne("diet_tracker_api.DataLayer.Models.UserDay", "UserDay")
-                        .WithMany("Trackings")
-                        .HasForeignKey("UserId", "Day");
-
-                    b.Navigation("UserDay");
                 });
 
             modelBuilder.Entity("diet_tracker_api.DataLayer.Models.UserDay", b =>
@@ -337,15 +257,6 @@ namespace diet_tracker_api.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("diet_tracker_api.DataLayer.Models.UserTracking", b =>
-                {
-                    b.HasOne("diet_tracker_api.DataLayer.Models.User", "User")
-                        .WithMany("UserTrackings")
-                        .HasForeignKey("UserId");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("diet_tracker_api.DataLayer.Models.Victory", b =>
                 {
                     b.HasOne("diet_tracker_api.DataLayer.Models.User", "User")
@@ -370,8 +281,6 @@ namespace diet_tracker_api.Migrations
 
                     b.Navigation("UserPlans");
 
-                    b.Navigation("UserTrackings");
-
                     b.Navigation("Victories");
                 });
 
@@ -380,8 +289,6 @@ namespace diet_tracker_api.Migrations
                     b.Navigation("Fuelings");
 
                     b.Navigation("Meals");
-
-                    b.Navigation("Trackings");
                 });
 #pragma warning restore 612, 618
         }

@@ -10,7 +10,8 @@ namespace diet_tracker_api.Models
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string EmailAddress { get; set; }
-        public DateTime LastLogin { get; set; }
+        public DateTime Created { get; set; }
         public Plan CurrentPlan { get; set; }
+        public DateTime? Started { get; set; }
     }
 }
