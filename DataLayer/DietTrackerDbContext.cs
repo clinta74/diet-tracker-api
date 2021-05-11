@@ -71,18 +71,19 @@ namespace diet_tracker_api.DataLayer
                 .WithOne(userMeal => userMeal.UserDay)
                 .HasForeignKey(userMeal => new { userMeal.UserId, userMeal.Day });
 
-            modelBuilder.Entity<UserPlan>()
-                .HasKey(userPlan => new { userPlan.UserId, userPlan.PlanId, userPlan.Start });
-
             modelBuilder.Entity<UserDay>()
                 .HasMany(user => user.Trackings)
                 .WithOne(userTracking => userTracking.UserDay)
                 .HasForeignKey(userTracking => new { userTracking.UserId, userTracking.Day });
 
-            modelBuilder.Entity<UserDailyTracking>()
-                .Property(v => v.Type)
-                .HasConversion<string>();
-            
+            modelBuilder.Entity<UserPlan>()
+                .HasKey(userPlan => new { userPlan.UserId, userPlan.PlanId, userPlan.Start });
+
+            modelBuilder.Entity<UserTracking>()
+                .HasMany(userTracking => userTracking.Trackings)
+                .WithOne(userDailyTracking => userDailyTracking.Tracking)
+                .HasForeignKey(userDailyTracking => userDailyTracking.UserTrackingId);
+
             modelBuilder.Entity<UserTracking>()
                 .Property(v => v.Type)
                 .HasConversion<string>();

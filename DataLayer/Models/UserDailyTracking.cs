@@ -10,10 +10,11 @@ namespace diet_tracker_api.DataLayer.Models
         public int UserDailyTrackingId { get; set; }
         public string UserId { get; set; }
         [Column(TypeName = "date")]
+        public int UserTrackingId { get; set; }
         public DateTime Day { get; set; }
-        public UserTrackingType Type { get; set; }
         public int Value { get; set; }
         public DateTime When { get; set; }
         public virtual UserDay UserDay { get; set; }
+        public virtual UserTracking Tracking { get; set; }
     }
 }
