@@ -16,15 +16,15 @@ namespace diet_tracker_api.CQRS
 
     public class GetFuelingsHandler : RequestHandler<GetFuelings, IAsyncEnumerable<Fueling>>
     {
-        private readonly DietTrackerDbContext _dietTrackerDbContext;
-        public GetFuelingsHandler(DietTrackerDbContext dietTrackerDbContext)
+        private readonly DietTrackerDbContext _dbContext;
+        public GetFuelingsHandler(DietTrackerDbContext dbContext)
         {
-            _dietTrackerDbContext = dietTrackerDbContext;
+            _dbContext = dbContext;
         }
 
         protected override IAsyncEnumerable<Fueling> Handle(GetFuelings request)
         {
-            return _dietTrackerDbContext.Fuelings
+            return _dbContext.Fuelings
                 .AsNoTracking()
                 .AsAsyncEnumerable();
         }

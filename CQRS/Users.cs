@@ -19,15 +19,15 @@ namespace diet_tracker_api.CQRS
 
     public class UserExistsHandler : IRequestHandler<Users.UserExists, bool>
     {
-        private readonly DietTrackerDbContext _dietTrackerDbContext;
-        public UserExistsHandler(DietTrackerDbContext dietTrackerDbContext)
+        private readonly DietTrackerDbContext _dbContext;
+        public UserExistsHandler(DietTrackerDbContext dbContext)
         {
-            _dietTrackerDbContext = dietTrackerDbContext;
+            _dbContext = dbContext;
         }
 
         public async Task<bool> Handle(UserExists request, CancellationToken cancellationToken)
         {
-            var user = await _dietTrackerDbContext.Users
+            var user = await _dbContext.Users
                 .AsNoTracking()
                 .FirstOrDefaultAsync(user => user.UserId == request.UserId);
 
@@ -37,15 +37,15 @@ namespace diet_tracker_api.CQRS
 
     public class GetUserByIdHandler : IRequestHandler<Users.GetUserById, User>
     {
-        private readonly DietTrackerDbContext _dietTrackerDbContext;
-        public GetUserByIdHandler(DietTrackerDbContext dietTrackerDbContext)
+        private readonly DietTrackerDbContext _dbContext;
+        public GetUserByIdHandler(DietTrackerDbContext dbContext)
         {
-            _dietTrackerDbContext = dietTrackerDbContext;
+            _dbContext = dbContext;
         }
 
         public async Task<User> Handle(GetUserById request, CancellationToken cancellationToken)
         {
-            return await _dietTrackerDbContext.Users
+            return await _dbContext.Users
                 .AsNoTracking()
                 .FirstOrDefaultAsync(user => user.UserId == request.UserId);
         }
@@ -53,15 +53,15 @@ namespace diet_tracker_api.CQRS
 
     public class GetCurrentUserHandler : IRequestHandler<Users.GetCurrentUser, CurrentUser>
     {
-        private readonly DietTrackerDbContext _dietTrackerDbContext;
-        public GetCurrentUserHandler(DietTrackerDbContext dietTrackerDbContext)
+        private readonly DietTrackerDbContext _dbContext;
+        public GetCurrentUserHandler(DietTrackerDbContext dbContext)
         {
-            _dietTrackerDbContext = dietTrackerDbContext;
+            _dbContext = dbContext;
         }
 
         public async Task<CurrentUser> Handle(GetCurrentUser request, CancellationToken cancellationToken)
         {
-            return await _dietTrackerDbContext.Users
+            return await _dbContext.Users
                 .Where(user => user.UserId == request.UserId)
                 .Select(user => new CurrentUser
                 {

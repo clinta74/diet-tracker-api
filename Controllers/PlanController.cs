@@ -21,14 +21,14 @@ namespace diet_tracker_api.Controllers
     public class PlanController
     {
         private readonly ILogger<PlanController> _logger;
-        private readonly DietTrackerDbContext _dietTrackerDbContext;
+        private readonly DietTrackerDbContext _dbContext;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IMediator _mediator;
 
-        public PlanController(ILogger<PlanController> logger, DietTrackerDbContext dietTrackerDbContext, IHttpContextAccessor httpContextAccessor, IMediator mediator)
+        public PlanController(ILogger<PlanController> logger, DietTrackerDbContext dbContext, IHttpContextAccessor httpContextAccessor, IMediator mediator)
         {
             _logger = logger;
-            _dietTrackerDbContext = dietTrackerDbContext;
+            _dbContext = dbContext;
             _httpContextAccessor = httpContextAccessor;
             _mediator = mediator;
         }
@@ -37,7 +37,7 @@ namespace diet_tracker_api.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         public IAsyncEnumerable<Plan> Get(CancellationToken cancellationToken)
         {
-            var data = _dietTrackerDbContext.Plans
+            var data = _dbContext.Plans
                 .AsNoTracking()
                 .AsAsyncEnumerable();
 
@@ -69,10 +69,10 @@ namespace diet_tracker_api.Controllers
                 return new BadRequestResult();
             }
 
-            var result = _dietTrackerDbContext.Plans
+            var result = _dbContext.Plans
                 .Add(plan);
 
-            await _dietTrackerDbContext.SaveChangesAsync(cancellationToken);
+            await _dbContext.SaveChangesAsync(cancellationToken);
 
             return result.Entity.PlanId;
         }
@@ -89,7 +89,7 @@ namespace diet_tracker_api.Controllers
                 return new BadRequestResult();
             }
 
-            var results = await _dietTrackerDbContext.Plans.FindAsync(id);
+            var results = await _dbContext.Plans.FindAsync(id);
 
             if (results != null)
             {
@@ -100,9 +100,9 @@ namespace diet_tracker_api.Controllers
                     MealCount = plan.MealCount,
 
                 };
-                _dietTrackerDbContext.Plans.Update(data);
+                _dbContext.Plans.Update(data);
 
-                await _dietTrackerDbContext.SaveChangesAsync(cancellationToken);
+                await _dbContext.SaveChangesAsync(cancellationToken);
                 return new OkResult();
             }
 
@@ -115,15 +115,15 @@ namespace diet_tracker_api.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Remove(int id, CancellationToken cancellationToken)
         {
-            var plan = await _dietTrackerDbContext
+            var plan = await _dbContext
                 .Plans
                 .FindAsync(id);
 
             if (plan != null)
             {
-                _dietTrackerDbContext.Remove(plan);
+                _dbContext.Remove(plan);
 
-                await _dietTrackerDbContext.SaveChangesAsync();
+                await _dbContext.SaveChangesAsync();
                 return new OkResult();
             }
 
@@ -137,7 +137,7 @@ namespace diet_tracker_api.Controllers
         {
             var userId = _httpContextAccessor.HttpContext.User.Identity.Name;
 
-            var user = await _dietTrackerDbContext.Users
+            var user = await _dbContext.Users
                 .FindAsync(userId);
 
             if (user == null)

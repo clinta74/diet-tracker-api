@@ -26,10 +26,10 @@ namespace diet_tracker_api.Controllers
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IMediator _mediator;
 
-        public FuelingController(ILogger<FuelingController> logger, DietTrackerDbContext dietTrackerDbContext, IHttpContextAccessor httpContextAccessor, IMediator mediator)
+        public FuelingController(ILogger<FuelingController> logger, DietTrackerDbContext dbContext, IHttpContextAccessor httpContextAccessor, IMediator mediator)
         {
             _logger = logger;
-            _context = dietTrackerDbContext;
+            _context = dbContext;
             _httpContextAccessor = httpContextAccessor;
             _mediator = mediator;
         }

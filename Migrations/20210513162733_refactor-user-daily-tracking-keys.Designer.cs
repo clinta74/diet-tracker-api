@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using diet_tracker_api.DataLayer;
 
 namespace diet_tracker_api.Migrations
 {
     [DbContext(typeof(DietTrackerDbContext))]
-    partial class DietTrackerDbContextModelSnapshot : ModelSnapshot
+    [Migration("20210513162733_refactor-user-daily-tracking-keys")]
+    partial class refactoruserdailytrackingkeys
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -98,16 +100,13 @@ namespace diet_tracker_api.Migrations
                     b.Property<int>("UserTrackingId")
                         .HasColumnType("int");
 
-                    b.Property<int>("Occurance")
-                        .HasColumnType("int");
-
                     b.Property<int>("Value")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("When")
                         .HasColumnType("datetime2");
 
-                    b.HasKey("UserId", "Day", "UserTrackingId", "Occurance");
+                    b.HasKey("UserId", "Day", "UserTrackingId");
 
                     b.HasIndex("UserTrackingId");
 
@@ -222,7 +221,7 @@ namespace diet_tracker_api.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("Occurances")
+                    b.Property<int>("Occurance")
                         .HasColumnType("int");
 
                     b.Property<bool>("Removed")

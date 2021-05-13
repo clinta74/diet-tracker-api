@@ -58,6 +58,9 @@ namespace diet_tracker_api.DataLayer
                 .Property(p => p.WaterTarget)
                 .HasDefaultValue(64);
 
+            modelBuilder.Entity<UserDailyTracking>()
+                .HasKey(userDailyTracking => new { userDailyTracking.UserId, userDailyTracking.Day, userDailyTracking.UserTrackingId, userDailyTracking.Occurance });
+
             modelBuilder.Entity<UserDay>()
                 .HasKey(userDay => new { userDay.UserId, userDay.Day });
 

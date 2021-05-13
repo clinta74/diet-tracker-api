@@ -11,7 +11,7 @@ namespace diet_tracker_api.DataLayer.Models
         public bool Removed { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
-        public int Occurance { get; set; }
+        public int Occurances { get; set; }
         public UserTrackingType Type { get; set; }
         public virtual User User { get; set; }
         public virtual ICollection<UserDailyTracking> Trackings { get; set; }

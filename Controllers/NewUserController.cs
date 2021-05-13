@@ -20,14 +20,14 @@ namespace diet_tracker_api.Controllers
     {
         private readonly IAuth0ManagementApiClient _managementApiClient;
         private readonly ILogger<NewUserController> _logger;
-        private readonly DietTrackerDbContext _dietTrackerDbContext;
+        private readonly DietTrackerDbContext _dbContext;
         private readonly IHttpContextAccessor _httpContextAccessor;
         
-        public NewUserController(ILogger<NewUserController> logger, IAuth0ManagementApiClient managementApiClient, DietTrackerDbContext dietTrackerDbContext, IHttpContextAccessor httpContextAccessor)
+        public NewUserController(ILogger<NewUserController> logger, IAuth0ManagementApiClient managementApiClient, DietTrackerDbContext dbContext, IHttpContextAccessor httpContextAccessor)
         {
             _logger = logger;
             _managementApiClient = managementApiClient;
-            _dietTrackerDbContext = dietTrackerDbContext;
+            _dbContext = dbContext;
             _httpContextAccessor = httpContextAccessor;
         }
 
@@ -37,7 +37,7 @@ namespace diet_tracker_api.Controllers
             var userId = _httpContextAccessor.HttpContext.User.Identity.Name;
             var userData = await _managementApiClient.Client.Users.GetAsync(userId);
 
-            var result = _dietTrackerDbContext.Users.Add(new User
+            var result = _dbContext.Users.Add(new User
             {
                 UserId = userId,
                 FirstName = userData.FirstName,
@@ -46,7 +46,7 @@ namespace diet_tracker_api.Controllers
                 Created = DateTime.Now
             });
 
-            await _dietTrackerDbContext.SaveChangesAsync(cancellationToken);
+            await _dbContext.SaveChangesAsync(cancellationToken);
 
             return result.Entity;
         }
@@ -58,7 +58,7 @@ namespace diet_tracker_api.Controllers
 
             var userPlans = new UserPlan[] { new UserPlan { PlanId = userData.PlanId, Start = DateTime.Now }};
 
-            var result = _dietTrackerDbContext.Users.Add(new User
+            var result = _dbContext.Users.Add(new User
             {
                 UserId = userId,
                 FirstName = userData.FirstName,
@@ -68,7 +68,7 @@ namespace diet_tracker_api.Controllers
                 UserPlans = userPlans,
             });
 
-            await _dietTrackerDbContext.SaveChangesAsync(cancellationToken);
+            await _dbContext.SaveChangesAsync(cancellationToken);
 
             return result.Entity.UserId;
         }
