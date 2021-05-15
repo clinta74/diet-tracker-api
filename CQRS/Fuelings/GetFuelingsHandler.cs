@@ -1,19 +1,13 @@
 using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
-using diet_tracker_api.CQRS.Fuelings;
 using diet_tracker_api.DataLayer;
 using diet_tracker_api.DataLayer.Models;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
-namespace diet_tracker_api.CQRS
+namespace diet_tracker_api.CQRS.Fuelings
 {
-    namespace Fuelings
-    {
-        public record GetFuelings() : IRequest<IAsyncEnumerable<Fueling>>;
-    }
-
+    public record GetFuelings() : IRequest<IAsyncEnumerable<Fueling>>;
+    
     public class GetFuelingsHandler : RequestHandler<GetFuelings, IAsyncEnumerable<Fueling>>
     {
         private readonly DietTrackerDbContext _dbContext;

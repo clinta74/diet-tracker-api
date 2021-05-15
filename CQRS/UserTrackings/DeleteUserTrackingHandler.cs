@@ -16,21 +16,22 @@ namespace diet_tracker_api.CQRS.UserTrackings
         {
             _dbContext = dbContext;
         }
-
         public async Task<bool> Handle(DeleteUserTracking request, CancellationToken cancellationToken)
         {
             var data = await _dbContext.UserTrackings
-                .AsNoTracking()
-                .Where(u => u.UserTrackingId.Equals(request.UserTrackingId))
-                .SingleOrDefaultAsync();
+                        .AsNoTracking()
+                        .Where(u => u.UserTrackingId.Equals(request.UserTrackingId))
+                        .SingleOrDefaultAsync(cancellationToken);
 
             if (data == null) return false;
 
-            _dbContext.Remove(data);
+            _dbContext.UserTrackings
+                .Update(data with
+                {
+                    Removed = true,
+                });
 
-            await _dbContext.SaveChangesAsync(cancellationToken);
-
-            return true;
+            return await _dbContext.SaveChangesAsync(cancellationToken) == 1;
         }
     }
 }
