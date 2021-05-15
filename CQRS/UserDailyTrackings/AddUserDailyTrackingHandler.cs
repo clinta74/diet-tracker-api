@@ -26,7 +26,7 @@ namespace diet_tracker_api.CQRS.UserDailyTrackings
                     Day = request.Day,
                     UserId = request.UserId,
                     UserTrackingId = request.UserTrackingId,
-                    Occurance = request.Occurance,
+                    Occurrence = request.Occurance,
                     Value = request.Value,
                     When = request.When
                 });

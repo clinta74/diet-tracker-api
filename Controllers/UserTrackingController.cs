@@ -12,6 +12,9 @@ using Microsoft.Extensions.Logging;
 
 namespace diet_tracker_api.Controllers
 {
+
+    public record UserTrackingRequest(string Name, string Description, int Occurrences, UserTrackingType Type);
+
     [Authorize]
     [ApiController]
     [Route("api/[controller]")]
@@ -40,7 +43,7 @@ namespace diet_tracker_api.Controllers
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<UserTracking> Add(UserTracking userTracking)
+        public async Task<UserTracking> Add(UserTrackingRequest userTracking)
         {
             var userId = _httpContextAccessor.HttpContext.User.Identity.Name;            
             return await _mediator.Send(new AddUserTracking
@@ -48,7 +51,7 @@ namespace diet_tracker_api.Controllers
                 userId, 
                 userTracking.Name, 
                 userTracking.Description, 
-                userTracking.Occurances, 
+                userTracking.Occurrences, 
                 userTracking.Type
             ));
         }
@@ -57,17 +60,16 @@ namespace diet_tracker_api.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<Victory>> Update(int id, UserTracking userTracking)
+        public async Task<ActionResult> Update(int id, UserTrackingRequest userTracking)
         {
             if (userTracking == null) return new BadRequestResult();
             var userId = _httpContextAccessor.HttpContext.User.Identity.Name;
             var data = await _mediator.Send(new UpdateUserTracking
             (
                 id, 
-                userTracking.Removed, 
                 userTracking.Name, 
                 userTracking.Description, 
-                userTracking.Occurances, 
+                userTracking.Occurrences, 
                 userTracking.Type
             ));
 

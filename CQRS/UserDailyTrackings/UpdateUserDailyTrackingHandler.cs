@@ -26,7 +26,7 @@ namespace diet_tracker_api.CQRS.UserDailyTrackings
                         .Where(u => u.Day.Equals(request.Day))
                         .Where(u => u.UserId.Equals(request.UserId))
                         .Where(u => u.UserTrackingId.Equals(request.UserTrackingId))
-                        .Where(u => u.Occurance.Equals(request.Occurance))
+                        .Where(u => u.Occurrence.Equals(request.Occurance))
                         .SingleOrDefaultAsync(cancellationToken);
 
             if (data == null) return null;

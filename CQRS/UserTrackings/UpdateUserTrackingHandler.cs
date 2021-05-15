@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace diet_tracker_api.CQRS.UserTrackings
 {
-    public record UpdateUserTracking(int UserTrackingId, bool Removed, string Name, string Description, int Occurance, UserTrackingType Type) : IRequest<bool>;
+    public record UpdateUserTracking(int UserTrackingId, string Name, string Description, int Occurance, UserTrackingType Type) : IRequest<bool>;
     public class UpdateUserTrackingHandler : IRequestHandler<UpdateUserTracking, bool>
     {
         private readonly DietTrackerDbContext _dbContext;
@@ -32,9 +32,9 @@ namespace diet_tracker_api.CQRS.UserTrackings
                 {
                     Name = request.Name,
                     Description = request.Description,
-                    Removed = request.Removed,
-                    Occurances = request.Occurance,
-                    Type = request.Type
+                    Occurrences = request.Occurance,
+                    Type = request.Type,
+                    Removed = false
                 });
 
             return await _dbContext.SaveChangesAsync(cancellationToken) == 1;

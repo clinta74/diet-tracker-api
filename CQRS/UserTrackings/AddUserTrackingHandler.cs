@@ -25,7 +25,7 @@ namespace diet_tracker_api.CQRS.UserTrackings
                    Name = request.Name,
                    Description = request.Description,
                    Removed = false,
-                   Occurances = request.Occurance,
+                   Occurrences = request.Occurance,
                    Type = request.Type
                });
 

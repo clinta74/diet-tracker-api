@@ -33,7 +33,7 @@ namespace diet_tracker_api.CQRS.UserDailyTrackings
                     Day = u.Day,
                     Value = u.Value,
                     When = u.When,
-                    Occurance = u.Occurance,
+                    Occurance = u.Occurrence,
                     UserTrackingId = u.UserTrackingId,
                     Name = u.Tracking.Name,
                     Description = u.Tracking.Description,

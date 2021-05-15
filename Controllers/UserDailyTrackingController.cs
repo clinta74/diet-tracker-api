@@ -50,7 +50,7 @@ namespace diet_tracker_api.Controllers
 
             foreach (var activeUserTracking in activeUserTrackings)
             {
-                var remaining = activeUserTracking.Occurances - currentUserDailyTrackings.Count(c => c.UserTrackingId == activeUserTracking.UserTrackingId);
+                var remaining = activeUserTracking.Occurrences - currentUserDailyTrackings.Count(c => c.UserTrackingId == activeUserTracking.UserTrackingId);
                 var newCurrentUserDailyTrackings = new List<CurrentUserDailyTracking>();
 
                 for (int idx = 0; idx < remaining; idx++)
@@ -63,7 +63,7 @@ namespace diet_tracker_api.Controllers
                         UserId = userId,
                         Name = activeUserTracking.Name,
                         Description = activeUserTracking.Description,
-                        Occurance = idx + remaining + 1,
+                        Occurance = idx + remaining,
                     });
                 }
 
@@ -85,7 +85,7 @@ namespace diet_tracker_api.Controllers
                     userDailyTracking.Day,
                     userDailyTracking.UserId,
                     userDailyTracking.UserTrackingId,
-                    userDailyTracking.Occurance,
+                    userDailyTracking.Occurrence,
                     userDailyTracking.Value,
                     userDailyTracking.When
                 )

@@ -59,7 +59,7 @@ namespace diet_tracker_api.DataLayer
                 .HasDefaultValue(64);
 
             modelBuilder.Entity<UserDailyTracking>()
-                .HasKey(userDailyTracking => new { userDailyTracking.UserId, userDailyTracking.Day, userDailyTracking.UserTrackingId, userDailyTracking.Occurance });
+                .HasKey(userDailyTracking => new { userDailyTracking.UserId, userDailyTracking.Day, userDailyTracking.UserTrackingId, userDailyTracking.Occurrence });
 
             modelBuilder.Entity<UserDay>()
                 .HasKey(userDay => new { userDay.UserId, userDay.Day });
