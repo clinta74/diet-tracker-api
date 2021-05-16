@@ -11,6 +11,8 @@ namespace diet_tracker_api.Models
         public string LastName { get; set; }
         public string EmailAddress { get; set; }
         public DateTime Created { get; set; }
+        public int WaterTarget { get; set; }
+        public int WaterSize { get; set; }
         public Plan CurrentPlan { get; set; }
         public DateTime? Started { get; set; }
     }

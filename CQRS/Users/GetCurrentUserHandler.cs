@@ -29,6 +29,8 @@ namespace diet_tracker_api.CQRS.Users
                     LastName = user.LastName,
                     EmailAddress = user.EmailAddress,
                     Created = user.Created,
+                    WaterSize = user.WaterSize,
+                    WaterTarget = user.WaterTarget,                
                     CurrentPlan = user.UserPlans.OrderByDescending(up => up.Start).Select(up => up.Plan).FirstOrDefault(),
                     Started = user.UserPlans.OrderBy(up => up.Start).First().Start,
                 })
