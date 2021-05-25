@@ -20,7 +20,9 @@ namespace diet_tracker_api.DataLayer
         public DbSet<UserMeal> UserMeals { get; set; }
         public DbSet<UserPlan> UserPlans { get; set; }
         public DbSet<UserDailyTracking> UserDailyTrackings { get; set; }
+        public DbSet<UserDailyTrackingValue> UserDailyTrackingValues { get; set; }
         public DbSet<UserTracking> UserTrackings { get; set; }
+        public DbSet<UserTrackingValue> UserTrackingValues { get; set; }
         public DbSet<Victory> Victories { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -61,6 +63,14 @@ namespace diet_tracker_api.DataLayer
             modelBuilder.Entity<UserDailyTracking>()
                 .HasKey(userDailyTracking => new { userDailyTracking.UserId, userDailyTracking.Day, userDailyTracking.UserTrackingId, userDailyTracking.Occurrence });
 
+            modelBuilder.Entity<UserDailyTracking>()
+                .HasMany(userDailyTracking => userDailyTracking.Values)
+                .WithOne(userDailyTrackingValue => userDailyTrackingValue.DailyTracking)
+                .HasForeignKey(userDailyTrackingValue => new { userDailyTrackingValue.UserId, userDailyTrackingValue.Day, userDailyTrackingValue.UserTrackingId, userDailyTrackingValue.Occurrence});
+
+            modelBuilder.Entity<UserDailyTrackingValue>()
+                .HasKey(userDailyTracking => new { userDailyTracking.UserId, userDailyTracking.Day, userDailyTracking.UserTrackingId, userDailyTracking.Occurrence, userDailyTracking.UserTrackingValueId });
+
             modelBuilder.Entity<UserDay>()
                 .HasKey(userDay => new { userDay.UserId, userDay.Day });
 
@@ -88,8 +98,19 @@ namespace diet_tracker_api.DataLayer
                 .HasForeignKey(userDailyTracking => userDailyTracking.UserTrackingId);
 
             modelBuilder.Entity<UserTracking>()
+                .HasMany(userTracking => userTracking.Values)
+                .WithOne(userTrackingValue => userTrackingValue.Tracking)
+                .HasForeignKey(userTrackingValue => userTrackingValue.UserTrackingId);
+
+            modelBuilder.Entity<UserTrackingValue>()
                 .Property(v => v.Type)
                 .HasConversion<string>();
+
+            modelBuilder.Entity<UserTrackingValue>()
+                .HasMany(v => v.DailyTrackingValues)
+                .WithOne(v => v.TrackingValue)
+                .HasForeignKey(v => v.UserTrackingValueId)
+                .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<Victory>()
                 .Property(v => v.Type)

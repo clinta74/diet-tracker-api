@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -24,7 +23,8 @@ namespace diet_tracker_api.CQRS.UserTrackings
         {
             return await _dbContext.UserTrackings
                 .Where(userTracking => userTracking.UserId == request.UserId)
-                .Where(UserTracking => !UserTracking.Removed)
+                .Where(userTracking => !userTracking.Removed)
+                .Include(userTracking => userTracking.Values.Where(values => !values.Removed))
                 .ToListAsync();
         }
     }

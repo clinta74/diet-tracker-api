@@ -1,15 +1,18 @@
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using diet_tracker_api.DataLayer;
 using diet_tracker_api.DataLayer.Models;
+using diet_tracker_api.Models;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 namespace diet_tracker_api.CQRS.UserDailyTrackings
 {
-    public record UpdateUserDailyTracking(DateTime Day, string UserId, int UserTrackingId, int Occurance, int Value, DateTime When) : IRequest<UserDailyTracking>;
+    public record UpdateUserDailyTracking(DateTime Day, string UserId, int UserTrackingId, int Occurance, IEnumerable<CurrentUserDailyTrackingValueRequest> values) : IRequest<UserDailyTracking>;
     public class UpdateUserDailyTrackingHandler : IRequestHandler<UpdateUserDailyTracking, UserDailyTracking>
     {
         private readonly DietTrackerDbContext _dbContext;
@@ -31,11 +34,20 @@ namespace diet_tracker_api.CQRS.UserDailyTrackings
 
             if (data == null) return null;
 
+            var values = request.values.Select(v => new UserDailyTrackingValue
+            {
+                Day = request.Day,
+                UserId = request.UserId,
+                UserTrackingId = request.UserTrackingId,
+                Occurrence = request.UserTrackingId,
+                Value = v.Value,
+                When = v.When,
+            }).ToList();
+
             var result = _dbContext.UserDailyTrackings
                 .Update(data with
                 {
-                    Value = request.Value,
-                    When = request.When
+                    Values = values
                 });
 
             await _dbContext.SaveChangesAsync(cancellationToken);

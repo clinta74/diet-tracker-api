@@ -31,12 +31,19 @@ namespace diet_tracker_api.CQRS.UserDailyTrackings
                 {
                     UserId = u.UserId,
                     Day = u.Day,
-                    Value = u.Value,
-                    When = u.When,
-                    Occurance = u.Occurrence,
+                    Occurrence = u.Occurrence,
                     UserTrackingId = u.UserTrackingId,
-                    Name = u.Tracking.Name,
+                    Title = u.Tracking.Title,
                     Description = u.Tracking.Description,
+                    Values = u.Values
+                        .Where(v => !v.TrackingValue.Removed)
+                        .Select(v => new CurrentUserDailyTrackingValue
+                        {
+                            Name = v.TrackingValue.Name,
+                            Order = v.TrackingValue.Order,
+                            Value = v.Value,
+                            When = v.When,
+                        })
                 })
                 .ToListAsync(cancellationToken);
 

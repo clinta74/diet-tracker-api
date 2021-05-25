@@ -57,13 +57,18 @@ namespace diet_tracker_api.Controllers
                 {
                     newCurrentUserDailyTrackings.Add(new CurrentUserDailyTracking
                     {
-                        Value = 0,
+                        Values = activeUserTracking.Values.Select(v => new CurrentUserDailyTrackingValue
+                        {
+                            Value = 0,
+                            Name = v.Name,
+                            Order = v.Order,
+                        }),
                         Day = day,
                         UserTrackingId = activeUserTracking.UserTrackingId,
                         UserId = userId,
-                        Name = activeUserTracking.Name,
+                        Title = activeUserTracking.Title,
                         Description = activeUserTracking.Description,
-                        Occurance = idx + remaining,
+                        Occurrence = idx + remaining,
                     });
                 }
 
@@ -73,23 +78,22 @@ namespace diet_tracker_api.Controllers
             return new OkObjectResult(currentUserDailyTrackings);
         }
 
-        [HttpPut]
+        [HttpPut("{day}/{userTrackingId}/{occurrence}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<UserDailyTracking> UpdateCurrentUserDailyTracking(UserDailyTracking userDailyTracking)
+        public async Task<UserDailyTracking> UpdateCurrentUserDailyTracking(DateTime day, int userTrackingId, int occurrence, IEnumerable<CurrentUserDailyTrackingValueRequest> values, CancellationToken cancellationToken)
         {
             var userId = _httpContextAccessor.HttpContext.User.Identity.Name;
 
             return await _mediator.Send(new UpsertUserDailyTracking
                 (
-                    userDailyTracking.Day,
-                    userDailyTracking.UserId,
-                    userDailyTracking.UserTrackingId,
-                    userDailyTracking.Occurrence,
-                    userDailyTracking.Value,
-                    userDailyTracking.When
+                    day,
+                    userId,
+                    userTrackingId,
+                    occurrence,
+                    values
                 )
-            );
+            , cancellationToken);
         }
     }
 }

@@ -6,7 +6,7 @@ using MediatR;
 
 namespace diet_tracker_api.CQRS.UserTrackings
 {
-    public record AddUserTracking(string UserId, string Name, string Description, int Occurance, UserTrackingType Type) : IRequest<UserTracking>;
+    public record AddUserTracking(string UserId, string Name, string Description, int Occurrences) : IRequest<UserTracking>;
     public class AddUserTrackingHandler : IRequestHandler<AddUserTracking, UserTracking>
     {
         private readonly DietTrackerDbContext _dbContext;
@@ -22,11 +22,10 @@ namespace diet_tracker_api.CQRS.UserTrackings
                .Add(new UserTracking
                {
                    UserId = request.UserId,
-                   Name = request.Name,
+                   Title = request.Name,
                    Description = request.Description,
                    Removed = false,
-                   Occurrences = request.Occurance,
-                   Type = request.Type
+                   Occurrences = request.Occurrences
                });
 
             await _dbContext.SaveChangesAsync();

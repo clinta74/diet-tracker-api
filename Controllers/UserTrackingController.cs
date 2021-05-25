@@ -51,8 +51,7 @@ namespace diet_tracker_api.Controllers
                 userId, 
                 userTracking.Name, 
                 userTracking.Description, 
-                userTracking.Occurrences, 
-                userTracking.Type
+                userTracking.Occurrences
             ));
         }
 
@@ -69,8 +68,7 @@ namespace diet_tracker_api.Controllers
                 id, 
                 userTracking.Name, 
                 userTracking.Description, 
-                userTracking.Occurrences, 
-                userTracking.Type
+                userTracking.Occurrences
             ));
 
             if (data == false) return new NotFoundResult();
