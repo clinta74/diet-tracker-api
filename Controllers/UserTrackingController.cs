@@ -30,12 +30,20 @@ namespace diet_tracker_api.Controllers
             _mediator = mediator;
         }
 
-        [HttpGet("/api/user-trackings")]
+        [HttpGet("/api/user-trackings/active")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IEnumerable<UserTracking>> GetAllActive(CancellationToken cancellationToken)
         {
             var userId = _httpContextAccessor.HttpContext.User.Identity.Name;
             return await _mediator.Send(new GetActiveUserTrackings(userId));
+        }
+
+        [HttpGet("/api/user-trackings")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<IEnumerable<UserTracking>> GetAll(CancellationToken cancellationToken)
+        {
+            var userId = _httpContextAccessor.HttpContext.User.Identity.Name;
+            return await _mediator.Send(new GetUserTrackings(userId));
         }
 
         [HttpPost]
@@ -50,8 +58,7 @@ namespace diet_tracker_api.Controllers
                 userTracking.Title, 
                 userTracking.Description, 
                 userTracking.Occurrences,
-                userTracking.Order,
-                userTracking.Values
+                userTracking.Order
             ));
         }
 
@@ -69,7 +76,7 @@ namespace diet_tracker_api.Controllers
                 userTracking.Title, 
                 userTracking.Description, 
                 userTracking.Occurrences,
-                userTracking.Values
+                userTracking.Disabled
             ));
 
             if (data == false) return new NotFoundResult();

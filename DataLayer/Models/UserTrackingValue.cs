@@ -12,7 +12,7 @@ namespace diet_tracker_api.DataLayer.Models
         public string Description { get; set; }
         public UserTrackingType Type { get; set; }
         public int Order { get; set; }
-        public bool Removed { get; set; }
+        public bool Disabled { get; set; }
         public virtual UserTracking Tracking { get; set; }
         public virtual ICollection<UserDailyTrackingValue> DailyTrackingValues { get; set; }
     }

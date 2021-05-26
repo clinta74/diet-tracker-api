@@ -36,7 +36,7 @@ namespace diet_tracker_api.CQRS.UserDailyTrackings
                     Title = u.Tracking.Title,
                     Description = u.Tracking.Description,
                     Values = u.Values
-                        .Where(v => !v.TrackingValue.Removed)
+                        .Where(v => !v.TrackingValue.Disabled)
                         .Select(v => new CurrentUserDailyTrackingValue
                         {
                             Name = v.TrackingValue.Name,

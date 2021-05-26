@@ -23,8 +23,7 @@ namespace diet_tracker_api.CQRS.UserTrackings
         {
             return await _dbContext.UserTrackings
                 .Where(userTracking => userTracking.UserId == request.UserId)
-                .Where(userTracking => !userTracking.Removed)
-                .Include(userTracking => userTracking.Values.Where(values => !values.Removed))
+                .Where(userTracking => !userTracking.Disabled)
                 .Select(userTracking => new UserTracking
                 {
                     UserTrackingId = userTracking.UserTrackingId,
@@ -33,16 +32,18 @@ namespace diet_tracker_api.CQRS.UserTrackings
                     Description = userTracking.Description,
                     Occurrences = userTracking.Occurrences,
                     Order = userTracking.Order,
-                    Removed = userTracking.Removed,
-                    Values = userTracking.Values.Select(v => new UserTrackingValue
-                    {
-                        UserTrackingValueId = v.UserTrackingId,
-                        UserTrackingId = v.UserTrackingId,
-                        Name = v.Name,
-                        Description = v.Description,
-                        Order = v.Order,
-                        Removed = v.Removed
-                    })
+                    Disabled = userTracking.Disabled,
+                    Values = userTracking.Values
+                        .Where(values => !values.Disabled)
+                        .Select(v => new UserTrackingValue
+                        {
+                            UserTrackingValueId = v.UserTrackingId,
+                            UserTrackingId = v.UserTrackingId,
+                            Name = v.Name,
+                            Description = v.Description,
+                            Order = v.Order,
+                            Disabled = v.Disabled
+                        })
                 })
                 .ToListAsync();
         }

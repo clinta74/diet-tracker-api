@@ -26,10 +26,7 @@ namespace diet_tracker_api.CQRS.UserTrackings
             if (data == null) return false;
 
             _dbContext.UserTrackings
-                .Update(data with
-                {
-                    Removed = true,
-                });
+                .Remove(data);
 
             return await _dbContext.SaveChangesAsync(cancellationToken) == 1;
         }
