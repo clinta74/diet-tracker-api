@@ -14,7 +14,7 @@ namespace diet_tracker_api.DataLayer.Models
         public int Occurrences { get; set; }
         public int Order { get; set; }
         public virtual User User { get; set; }
-        public virtual ICollection<UserDailyTracking> Trackings { get; set; }
-        public virtual ICollection<UserTrackingValue> Values { get; set; }
+        public virtual IEnumerable<UserDailyTracking> Trackings { get; set; }
+        public virtual IEnumerable<UserTrackingValue> Values { get; set; }
     }
 }

@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using diet_tracker_api.CQRS.UserTrackings;
 using diet_tracker_api.DataLayer.Models;
+using diet_tracker_api.Models;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -12,9 +13,6 @@ using Microsoft.Extensions.Logging;
 
 namespace diet_tracker_api.Controllers
 {
-
-    public record UserTrackingRequest(string Name, string Description, int Occurrences, UserTrackingType Type);
-
     [Authorize]
     [ApiController]
     [Route("api/[controller]")]
@@ -43,15 +41,17 @@ namespace diet_tracker_api.Controllers
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<UserTracking> Add(UserTrackingRequest userTracking)
+        public async Task<int> Add(UserTrackingRequest userTracking)
         {
             var userId = _httpContextAccessor.HttpContext.User.Identity.Name;            
             return await _mediator.Send(new AddUserTracking
             (
                 userId, 
-                userTracking.Name, 
+                userTracking.Title, 
                 userTracking.Description, 
-                userTracking.Occurrences
+                userTracking.Occurrences,
+                userTracking.Order,
+                userTracking.Values
             ));
         }
 
@@ -66,9 +66,10 @@ namespace diet_tracker_api.Controllers
             var data = await _mediator.Send(new UpdateUserTracking
             (
                 id, 
-                userTracking.Name, 
+                userTracking.Title, 
                 userTracking.Description, 
-                userTracking.Occurrences
+                userTracking.Occurrences,
+                userTracking.Values
             ));
 
             if (data == false) return new NotFoundResult();

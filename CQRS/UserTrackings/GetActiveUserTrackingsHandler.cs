@@ -25,6 +25,25 @@ namespace diet_tracker_api.CQRS.UserTrackings
                 .Where(userTracking => userTracking.UserId == request.UserId)
                 .Where(userTracking => !userTracking.Removed)
                 .Include(userTracking => userTracking.Values.Where(values => !values.Removed))
+                .Select(userTracking => new UserTracking
+                {
+                    UserTrackingId = userTracking.UserTrackingId,
+                    UserId = userTracking.UserId,
+                    Title = userTracking.Title,
+                    Description = userTracking.Description,
+                    Occurrences = userTracking.Occurrences,
+                    Order = userTracking.Order,
+                    Removed = userTracking.Removed,
+                    Values = userTracking.Values.Select(v => new UserTrackingValue
+                    {
+                        UserTrackingValueId = v.UserTrackingId,
+                        UserTrackingId = v.UserTrackingId,
+                        Name = v.Name,
+                        Description = v.Description,
+                        Order = v.Order,
+                        Removed = v.Removed
+                    })
+                })
                 .ToListAsync();
         }
     }

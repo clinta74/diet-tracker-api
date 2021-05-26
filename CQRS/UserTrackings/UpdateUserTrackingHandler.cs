@@ -1,13 +1,15 @@
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using diet_tracker_api.DataLayer;
+using diet_tracker_api.Models;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 namespace diet_tracker_api.CQRS.UserTrackings
 {
-    public record UpdateUserTracking(int UserTrackingId, string Name, string Description, int Occurrences) : IRequest<bool>;
+    public record UpdateUserTracking(int UserTrackingId, string Title, string Description, int Occurrences, IEnumerable<UserTrackingValueRequest> Values) : IRequest<bool>;
     public class UpdateUserTrackingHandler : IRequestHandler<UpdateUserTracking, bool>
     {
         private readonly DietTrackerDbContext _dbContext;
@@ -29,7 +31,7 @@ namespace diet_tracker_api.CQRS.UserTrackings
             _dbContext.UserTrackings
                 .Update(data with
                 {
-                    Title = request.Name,
+                    Title = request.Title,
                     Description = request.Description,
                     Occurrences = request.Occurrences,
                     Removed = false
