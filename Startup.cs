@@ -144,8 +144,6 @@ namespace diet_tracker_api
                 });
             }
 
-            app.UseHttpsRedirection();
-
             app.UseCors(config => config
                 .WithExposedHeaders("x-total-count")
                 .WithOrigins(new string[]
