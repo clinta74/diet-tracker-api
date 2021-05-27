@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using diet_tracker_api.CQRS.Victories;
 using diet_tracker_api.DataLayer.Models;
+using diet_tracker_api.Extensions;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -31,7 +32,7 @@ namespace diet_tracker_api.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IEnumerable<Victory>> GetAll([FromQuery]VictoryType type)
         {
-            var userId = _httpContextAccessor.HttpContext.User.Identity.Name;
+            var userId = _httpContextAccessor.HttpContext.GetUserId();
             return await _mediator.Send(new GetVictories(userId, type));
         }
 
@@ -40,7 +41,7 @@ namespace diet_tracker_api.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<Victory> Add(Victory victory)
         {
-            var userId = _httpContextAccessor.HttpContext.User.Identity.Name;            
+            var userId = _httpContextAccessor.HttpContext.GetUserId();            
             return await _mediator.Send(new AddVictory(userId, victory.Name, victory.When, victory.Type));
         }
 
@@ -51,7 +52,7 @@ namespace diet_tracker_api.Controllers
         public async Task<ActionResult<Victory>> Update(int id, Victory victory)
         {
             if (victory == null) return new BadRequestResult();
-            var userId = _httpContextAccessor.HttpContext.User.Identity.Name;
+            var userId = _httpContextAccessor.HttpContext.GetUserId();
             var data = await _mediator.Send(new UpdateVictory(id, userId, victory.Name, victory.When, victory.Type));
 
             if (data == false) return new NotFoundResult();

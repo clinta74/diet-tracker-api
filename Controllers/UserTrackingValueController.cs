@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using diet_tracker_api.CQRS.UserTrackings;
+using diet_tracker_api.CQRS.UserTrackingValues;
 using diet_tracker_api.DataLayer.Models;
 using diet_tracker_api.Extensions;
 using diet_tracker_api.Models;
@@ -18,70 +19,64 @@ namespace diet_tracker_api.Controllers
     [ApiController]
     [Route("api/[controller]")]
     [Produces("application/json")]
-    public class UserTrackingController
+    public class UserTrackingValueController
     {
-        private readonly ILogger<UserTrackingController> _logger;
+        private readonly ILogger<UserTrackingValueController> _logger;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IMediator _mediator;
 
-        public UserTrackingController(ILogger<UserTrackingController> logger, IHttpContextAccessor httpContextAccessor, IMediator mediator)
+        public UserTrackingValueController(ILogger<UserTrackingValueController> logger, IHttpContextAccessor httpContextAccessor, IMediator mediator)
         {
             _logger = logger;
             _httpContextAccessor = httpContextAccessor;
             _mediator = mediator;
         }
 
-        [HttpGet("/api/user-trackings/active")]
+        [HttpGet("/api/user-tracking-values/user-tracking/{userTrackingId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<IEnumerable<UserTracking>> GetAllActive(CancellationToken cancellationToken)
+        public async Task<IEnumerable<UserTrackingValue>> GetAll(int userTrackingId, CancellationToken cancellationToken)
         {
             var userId = _httpContextAccessor.HttpContext.GetUserId();
-            return await _mediator.Send(new GetActiveUserTrackings(userId));
-        }
-
-        [HttpGet("/api/user-trackings")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<IEnumerable<UserTracking>> GetAll(CancellationToken cancellationToken)
-        {
-            var userId = _httpContextAccessor.HttpContext.GetUserId();
-            return await _mediator.Send(new GetUserTrackings(userId));
+            return await _mediator.Send(new GetUserTrackingValues(userId, userTrackingId));
         }
 
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<int>> Add(UserTrackingRequest userTracking)
+        public async Task<ActionResult<int>> Add(UserTrackingValueRequest userTrackingValue)
         {
-            if (userTracking == null) return new BadRequestResult();
+            if (userTrackingValue == null) return new BadRequestResult();
 
             var userId = _httpContextAccessor.HttpContext.GetUserId();            
-            return await _mediator.Send(new AddUserTracking
+            return await _mediator.Send(new AddUserTrackingValue
             (
-                userId, 
-                userTracking.Title, 
-                userTracking.Description, 
-                userTracking.Occurrences,
-                userTracking.Order
+                userTrackingValue.UserTrackingId,
+                userTrackingValue.Name, 
+                userTrackingValue.Description,
+                userTrackingValue.Order,
+                userTrackingValue.Type,
+                userTrackingValue.Disabled
             ));
         }
 
-        [HttpPut("{userTrackingId}")]
+        [HttpPut("{userTrackingValueId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult> Update(int userTrackingId, UserTrackingRequest userTracking)
+        public async Task<ActionResult> Update(int userTrackingValueId, UserTrackingValueRequest userTrackingValue)
         {
-            if (userTracking == null) return new BadRequestResult();
+            if (userTrackingValue == null) return new BadRequestResult();
 
             var userId = _httpContextAccessor.HttpContext.GetUserId();
-            var data = await _mediator.Send(new UpdateUserTracking
+            var data = await _mediator.Send(new UpdateUserTrackingValue
             (
-                userId,
-                userTrackingId, 
-                userTracking.Title, 
-                userTracking.Description, 
-                userTracking.Occurrences,
-                userTracking.Disabled
+                userTrackingValueId,
+                userId, 
+                userTrackingValue.Name, 
+                userTrackingValue.Description,
+                userTrackingValue.Order,
+                userTrackingValue.Type,
+                userTrackingValue.Disabled
             ));
 
             if (data == false) return new NotFoundResult();
@@ -89,13 +84,13 @@ namespace diet_tracker_api.Controllers
             return new OkResult();
         }
 
-        [HttpDelete("{userTrackingId}")]
+        [HttpDelete("{userTrackingValueId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult> Delete(int userTrackingId)
+        public async Task<ActionResult> Delete(int userTrackingValueId)
         {
             var userId = _httpContextAccessor.HttpContext.GetUserId();
-            var data = await _mediator.Send(new DeleteUserTracking(userTrackingId, userId));
+            var data = await _mediator.Send(new DeleteUserTrackingValue(userId, userTrackingValueId));
 
             if (data == false) return new NotFoundResult();
 

@@ -7,6 +7,7 @@ using diet_tracker_api.CQRS.Days;
 using diet_tracker_api.CQRS.Users;
 using diet_tracker_api.DataLayer;
 using diet_tracker_api.DataLayer.Models;
+using diet_tracker_api.Extensions;
 using diet_tracker_api.Models;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -39,7 +40,7 @@ namespace diet_tracker_api.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<CurrentUserDay>> GetCurrentUserDay(DateTime day, CancellationToken cancellationToken)
         {
-            var userId = _httpContextAccessor.HttpContext.User.Identity.Name;
+            var userId = _httpContextAccessor.HttpContext.GetUserId();
 
             if (!await _mediator.Send(new UserExists(userId)))
             {
@@ -56,7 +57,7 @@ namespace diet_tracker_api.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<CurrentUserDay>> UpdateCurrentUserDay(DateTime day, UserDay userDay, CancellationToken cancellationToken)
         {
-            var userId = _httpContextAccessor.HttpContext.User.Identity.Name;
+            var userId = _httpContextAccessor.HttpContext.GetUserId();
 
             if (!await _mediator.Send(new UserExists(userId)))
             {

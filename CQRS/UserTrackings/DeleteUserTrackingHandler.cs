@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace diet_tracker_api.CQRS.UserTrackings
 {
-    public record DeleteUserTracking(int UserTrackingId) : IRequest<bool>;
+    public record DeleteUserTracking(int UserTrackingId, string UserId) : IRequest<bool>;
     public class DeleteUserTrackingHandler : IRequestHandler<DeleteUserTracking, bool>
     {
         private readonly DietTrackerDbContext _dbContext;
@@ -21,6 +21,7 @@ namespace diet_tracker_api.CQRS.UserTrackings
             var data = await _dbContext.UserTrackings
                         .AsNoTracking()
                         .Where(u => u.UserTrackingId.Equals(request.UserTrackingId))
+                        .Where(u => u.UserId.Equals(request.UserId))
                         .SingleOrDefaultAsync(cancellationToken);
 
             if (data == null) return false;

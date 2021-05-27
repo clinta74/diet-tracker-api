@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace diet_tracker_api.CQRS.UserTrackings
 {
-    public record UpdateUserTracking(int UserTrackingId, string Title, string Description, int Occurrences, bool Disabled) : IRequest<bool>;
+    public record UpdateUserTracking(string UserId, int UserTrackingId, string Title, string Description, int Occurrences, bool Disabled) : IRequest<bool>;
     public class UpdateUserTrackingHandler : IRequestHandler<UpdateUserTracking, bool>
     {
         private readonly DietTrackerDbContext _dbContext;
@@ -22,6 +22,7 @@ namespace diet_tracker_api.CQRS.UserTrackings
             var data = await _dbContext.UserTrackings
                         .AsNoTracking()
                         .Where(u => u.UserTrackingId.Equals(request.UserTrackingId))
+                        .Where(u => u.UserId.Equals(request.UserId))
                         .SingleOrDefaultAsync(cancellationToken);
 
             if (data == null) return false;

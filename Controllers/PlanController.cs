@@ -5,6 +5,7 @@ using diet_tracker_api.CQRS;
 using diet_tracker_api.CQRS.Plans;
 using diet_tracker_api.DataLayer;
 using diet_tracker_api.DataLayer.Models;
+using diet_tracker_api.Extensions;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -135,7 +136,7 @@ namespace diet_tracker_api.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<int>> Change([FromBody]int planId, CancellationToken cancellationToken)
         {
-            var userId = _httpContextAccessor.HttpContext.User.Identity.Name;
+            var userId = _httpContextAccessor.HttpContext.GetUserId();
 
             var user = await _dbContext.Users
                 .FindAsync(userId);

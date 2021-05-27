@@ -19,7 +19,6 @@ namespace diet_tracker_api.DataLayer
         public DbSet<UserFueling> UserFuelings { get; set; }
         public DbSet<UserMeal> UserMeals { get; set; }
         public DbSet<UserPlan> UserPlans { get; set; }
-        public DbSet<UserDailyTracking> UserDailyTrackings { get; set; }
         public DbSet<UserDailyTrackingValue> UserDailyTrackingValues { get; set; }
         public DbSet<UserTracking> UserTrackings { get; set; }
         public DbSet<UserTrackingValue> UserTrackingValues { get; set; }
@@ -60,16 +59,14 @@ namespace diet_tracker_api.DataLayer
                 .Property(p => p.WaterTarget)
                 .HasDefaultValue(64);
 
-            modelBuilder.Entity<UserDailyTracking>()
-                .HasKey(userDailyTracking => new { userDailyTracking.UserId, userDailyTracking.Day, userDailyTracking.UserTrackingId, userDailyTracking.Occurrence });
-
-            modelBuilder.Entity<UserDailyTracking>()
-                .HasMany(userDailyTracking => userDailyTracking.Values)
-                .WithOne(userDailyTrackingValue => userDailyTrackingValue.DailyTracking)
-                .HasForeignKey(userDailyTrackingValue => new { userDailyTrackingValue.UserId, userDailyTrackingValue.Day, userDailyTrackingValue.UserTrackingId, userDailyTrackingValue.Occurrence});
-
             modelBuilder.Entity<UserDailyTrackingValue>()
-                .HasKey(userDailyTracking => new { userDailyTracking.UserId, userDailyTracking.Day, userDailyTracking.UserTrackingId, userDailyTracking.Occurrence, userDailyTracking.UserTrackingValueId });
+                .HasKey(userDailyTracking => new
+                {
+                    userDailyTracking.UserId,
+                    userDailyTracking.Day,
+                    userDailyTracking.UserTrackingValueId,
+                    userDailyTracking.Occurrence
+                });
 
             modelBuilder.Entity<UserDay>()
                 .HasKey(userDay => new { userDay.UserId, userDay.Day });
@@ -85,17 +82,12 @@ namespace diet_tracker_api.DataLayer
                 .HasForeignKey(userMeal => new { userMeal.UserId, userMeal.Day });
 
             modelBuilder.Entity<UserDay>()
-                .HasMany(user => user.Trackings)
-                .WithOne(userTracking => userTracking.UserDay)
-                .HasForeignKey(userTracking => new { userTracking.UserId, userTracking.Day });
+                .HasMany(user => user.TrackingValues)
+                .WithOne(userTrackingValue => userTrackingValue.UserDay)
+                .HasForeignKey(userTrackingValue => new { userTrackingValue.UserId, userTrackingValue.Day });
 
             modelBuilder.Entity<UserPlan>()
                 .HasKey(userPlan => new { userPlan.UserId, userPlan.PlanId, userPlan.Start });
-
-            modelBuilder.Entity<UserTracking>()
-                .HasMany(userTracking => userTracking.Trackings)
-                .WithOne(userDailyTracking => userDailyTracking.Tracking)
-                .HasForeignKey(userDailyTracking => userDailyTracking.UserTrackingId);
 
             modelBuilder.Entity<UserTracking>()
                 .HasMany(userTracking => userTracking.Values)
@@ -109,8 +101,7 @@ namespace diet_tracker_api.DataLayer
             modelBuilder.Entity<UserTrackingValue>()
                 .HasMany(v => v.DailyTrackingValues)
                 .WithOne(v => v.TrackingValue)
-                .HasForeignKey(v => v.UserTrackingValueId)
-                .OnDelete(DeleteBehavior.NoAction);
+                .HasForeignKey(v => v.UserTrackingValueId);
 
             modelBuilder.Entity<Victory>()
                 .Property(v => v.Type)

@@ -2,6 +2,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using diet_tracker_api.CQRS.Users;
 using diet_tracker_api.DataLayer.Models;
+using diet_tracker_api.Extensions;
 using diet_tracker_api.Models;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -47,7 +48,7 @@ namespace diet_tracker_api.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<CurrentUser>> GetCurrentUser(CancellationToken cancellationToken)
         {
-            var userId = _httpContextAccessor.HttpContext.User.Identity.Name;
+            var userId = _httpContextAccessor.HttpContext.GetUserId();
             var data = await _mediator.Send(new GetCurrentUser(userId));
 
             if (data == null) return new NotFoundResult();
@@ -60,7 +61,7 @@ namespace diet_tracker_api.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<bool>> GetCurrentUserExists(CancellationToken cancellationToken)
         {
-            var userId = _httpContextAccessor.HttpContext.User.Identity.Name;
+            var userId = _httpContextAccessor.HttpContext.GetUserId();
 
             return await _mediator.Send(new UserExists(userId));
         }

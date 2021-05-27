@@ -9,21 +9,21 @@ using Microsoft.EntityFrameworkCore;
 
 namespace diet_tracker_api.CQRS.UserTrackingValues
 {
-    public record GetUserTrackingValues(string UserId, int UserTrackingId) : IRequest<IEnumerable<UserTrackingValue>>;
-    public class GetUserTrackingValuesHandler : IRequestHandler<GetUserTrackingValues, IEnumerable<UserTrackingValue>>
+    public record GetUserTrackingValue(int UserTrackingValueId, string UserId) : IRequest<UserTrackingValue>;
+    public class GetUserTrackingValueHandler : IRequestHandler<GetUserTrackingValue, UserTrackingValue>
     {
         private readonly DietTrackerDbContext _dbContext;
 
-        public GetUserTrackingValuesHandler(DietTrackerDbContext dbContext)
+        public GetUserTrackingValueHandler(DietTrackerDbContext dbContext)
         {
             _dbContext = dbContext;
         }
 
-        public async Task<IEnumerable<UserTrackingValue>> Handle(GetUserTrackingValues request, CancellationToken cancellationToken)
+        public async Task<UserTrackingValue> Handle(GetUserTrackingValue request, CancellationToken cancellationToken)
         {
             var data = await _dbContext.UserTrackingValues
                 .AsNoTracking()
-                .Where(p => p.UserTrackingId == request.UserTrackingId)
+                .Where(p => p.UserTrackingValueId == request.UserTrackingValueId)
                 .Where(p => p.Tracking.UserId == request.UserId)
                 .Select(p => new UserTrackingValue
                 {
@@ -33,9 +33,9 @@ namespace diet_tracker_api.CQRS.UserTrackingValues
                     Description = p.Description,
                     Order = p.Order,
                     Type = p.Type,
-                    Disabled = p.Disabled           
+                    Disabled = p.Disabled                    
                 })
-                .ToListAsync();
+                .FirstOrDefaultAsync();
 
             return data;
         }
