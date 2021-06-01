@@ -38,7 +38,8 @@ public class GetDayHandler : IRequestHandler<Days.GetDay, CurrentUserDay>
                     Notes = userDay.Notes,
                 })
                 .AsNoTracking()
-                .FirstOrDefaultAsync(cancellationToken);
+                .AsSplitQuery()
+                .SingleOrDefaultAsync(cancellationToken);
 
             if (data == null)
             {
@@ -47,7 +48,7 @@ public class GetDayHandler : IRequestHandler<Days.GetDay, CurrentUserDay>
                     .Where(up => up.UserId == request.UserId)
                     .Select(up => up.Plan)
                     .AsNoTracking()
-                    .FirstOrDefaultAsync(cancellationToken);
+                    .SingleOrDefaultAsync(cancellationToken);
 
                 var meals = new UserMeal[plan.MealCount];
                 Array.Fill(meals, new UserMeal { Name = "", Day = request.Date, UserId = request.UserId });

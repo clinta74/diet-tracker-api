@@ -37,7 +37,7 @@ namespace diet_tracker_api.CQRS.UserTrackings
                         .Where(values => !values.Disabled)
                         .Select(v => new UserTrackingValue
                         {
-                            UserTrackingValueId = v.UserTrackingId,
+                            UserTrackingValueId = v.UserTrackingValueId,
                             UserTrackingId = v.UserTrackingId,
                             Name = v.Name,
                             Description = v.Description,

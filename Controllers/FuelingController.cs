@@ -3,13 +3,11 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using diet_tracker_api.CQRS.Fuelings;
-using diet_tracker_api.DataLayer;
 using diet_tracker_api.DataLayer.Models;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace diet_tracker_api.Controllers
@@ -22,23 +20,21 @@ namespace diet_tracker_api.Controllers
     public class FuelingController
     {
         private readonly ILogger<FuelingController> _logger;
-        private readonly DietTrackerDbContext _context;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IMediator _mediator;
 
-        public FuelingController(ILogger<FuelingController> logger, DietTrackerDbContext dbContext, IHttpContextAccessor httpContextAccessor, IMediator mediator)
+        public FuelingController(ILogger<FuelingController> logger, IHttpContextAccessor httpContextAccessor, IMediator mediator)
         {
             _logger = logger;
-            _context = dbContext;
             _httpContextAccessor = httpContextAccessor;
             _mediator = mediator;
         }
 
         [HttpGet("/api/fuelings")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public IAsyncEnumerable<Fueling> Get()
+        public IAsyncEnumerable<Fueling> Get(CancellationToken cancellationToken)
         {
-            return _mediator.Send(new GetFuelings()).Result;
+            return _mediator.Send(new GetFuelings(), cancellationToken).Result;
         }
 
         [Authorize("write:fuelings")]
@@ -52,12 +48,7 @@ namespace diet_tracker_api.Controllers
                 return new BadRequestResult();
             }
 
-            var result = _context.Fuelings
-                .Add(fueling);
-
-            await _context.SaveChangesAsync(cancellationToken);
-
-            return result.Entity;
+            return await _mediator.Send(new AddFueling(fueling.Name), cancellationToken);
         }
 
         [Authorize("write:fuelings")]
@@ -65,30 +56,22 @@ namespace diet_tracker_api.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<int>> Update(int id, Fueling fueling, CancellationToken cancellationToken)
+        public async Task<ActionResult> Update(int id, Fueling fueling, CancellationToken cancellationToken)
         {
             if (fueling == null)
             {
                 return new BadRequestResult();
             }
 
-            var results = await _context.Fuelings
-                .AsNoTracking()
-                .FirstOrDefaultAsync(fueling => fueling.FuelingId == id);
-
-            if (results != null)
+            try
             {
-                var data = results with
-                {
-                    Name = fueling.Name,
-                };
-                _context.Fuelings.Update(data);
-
-                await _context.SaveChangesAsync(cancellationToken);
+                await _mediator.Send(new UpdateFueling(id, fueling.Name), cancellationToken);
                 return new OkResult();
             }
-
-            return new NotFoundResult();
+            catch (ArgumentException ex)
+            {
+                return new NotFoundObjectResult(ex.Message);
+            }
         }
 
         [Authorize("write:fuelings")]
@@ -97,19 +80,15 @@ namespace diet_tracker_api.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult> Remove(int id, CancellationToken cancellationToken)
         {
-            var fueling = await _context
-                .Fuelings
-                .FindAsync(id);
-
-            if (fueling != null)
+            try
             {
-                _context.Remove(fueling);
-
-                await _context.SaveChangesAsync(cancellationToken);
+                var result = await _mediator.Send(new DeleteFueling(id), cancellationToken);
                 return new OkResult();
             }
-
-            return new NotFoundResult();
+            catch (ArgumentException ex)
+            {
+                return new NotFoundObjectResult(ex.Message);
+            }
         }
     }
 }

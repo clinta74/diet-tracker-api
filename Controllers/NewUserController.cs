@@ -1,11 +1,11 @@
-using System;
 using System.Threading;
 using System.Threading.Tasks;
-using diet_tracker_api.DataLayer;
+using diet_tracker_api.CQRS.Users;
 using diet_tracker_api.DataLayer.Models;
 using diet_tracker_api.Extensions;
 using diet_tracker_api.Models;
 using diet_tracker_api.Services;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -21,15 +21,15 @@ namespace diet_tracker_api.Controllers
     {
         private readonly IAuth0ManagementApiClient _managementApiClient;
         private readonly ILogger<NewUserController> _logger;
-        private readonly DietTrackerDbContext _dbContext;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IMediator _mediator;
         
-        public NewUserController(ILogger<NewUserController> logger, IAuth0ManagementApiClient managementApiClient, DietTrackerDbContext dbContext, IHttpContextAccessor httpContextAccessor)
+        public NewUserController(ILogger<NewUserController> logger, IAuth0ManagementApiClient managementApiClient, IHttpContextAccessor httpContextAccessor, IMediator mediator)
         {
             _logger = logger;
             _managementApiClient = managementApiClient;
-            _dbContext = dbContext;
             _httpContextAccessor = httpContextAccessor;
+            _mediator = mediator;
         }
 
         [HttpPost("create")]
@@ -38,18 +38,9 @@ namespace diet_tracker_api.Controllers
             var userId = _httpContextAccessor.HttpContext.GetUserId();
             var userData = await _managementApiClient.Client.Users.GetAsync(userId);
 
-            var result = _dbContext.Users.Add(new User
-            {
-                UserId = userId,
-                FirstName = userData.FirstName,
-                LastName = userData.LastName,
-                EmailAddress = userData.Email,
-                Created = DateTime.Now
-            });
+            var data = await _mediator.Send(new CreateNewUser(userId, userData.FirstName, userData.LastName, userData.Email));
 
-            await _dbContext.SaveChangesAsync(cancellationToken);
-
-            return result.Entity;
+            return data;
         }
 
         [HttpPost]
@@ -57,21 +48,7 @@ namespace diet_tracker_api.Controllers
         {
             var userId = _httpContextAccessor.HttpContext.GetUserId();
 
-            var userPlans = new UserPlan[] { new UserPlan { PlanId = userData.PlanId, Start = DateTime.Now }};
-
-            var result = _dbContext.Users.Add(new User
-            {
-                UserId = userId,
-                FirstName = userData.FirstName,
-                LastName = userData.LastName,
-                EmailAddress = userData.EmailAddress,
-                Created = DateTime.Now,
-                UserPlans = userPlans,
-            });
-
-            await _dbContext.SaveChangesAsync(cancellationToken);
-
-            return result.Entity.UserId;
+            return  await _mediator.Send(new AddNewUser(userId, userData.FirstName, userData.LastName, userData.EmailAddress, userData.PlanId));
         }
 
         [HttpGet]
@@ -85,8 +62,7 @@ namespace diet_tracker_api.Controllers
                 UserId = userId,
                 FirstName = userData.FirstName,
                 LastName = userData.LastName,
-                EmailAddress = userData.Email,
-                LastLogin = DateTime.Now
+                EmailAddress = userData.Email
             };
         }
     }

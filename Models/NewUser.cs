@@ -11,6 +11,5 @@ namespace diet_tracker_api.Models
         public string LastName { get; set; }
         public string EmailAddress { get; set; }
         public int PlanId { get; set; }
-        public DateTime LastLogin { get; set; }
     }
 }

@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using diet_tracker_api.DataLayer;
@@ -17,11 +18,10 @@ namespace diet_tracker_api.CQRS.Users
 
         public async Task<bool> Handle(UserExists request, CancellationToken cancellationToken)
         {
-            var user = await _dbContext.Users
+            return await _dbContext
+                .Users
                 .AsNoTracking()
-                .FirstOrDefaultAsync(user => user.UserId == request.UserId);
-
-            return user != null;
+                .AnyAsync(user => user.UserId == request.UserId);
         }
     }
 }

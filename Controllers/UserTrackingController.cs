@@ -54,12 +54,12 @@ namespace diet_tracker_api.Controllers
         {
             if (userTracking == null) return new BadRequestResult();
 
-            var userId = _httpContextAccessor.HttpContext.GetUserId();            
+            var userId = _httpContextAccessor.HttpContext.GetUserId();
             return await _mediator.Send(new AddUserTracking
             (
-                userId, 
-                userTracking.Title, 
-                userTracking.Description, 
+                userId,
+                userTracking.Title,
+                userTracking.Description,
                 userTracking.Occurrences,
                 userTracking.Order
             ));
@@ -73,20 +73,25 @@ namespace diet_tracker_api.Controllers
         {
             if (userTracking == null) return new BadRequestResult();
 
-            var userId = _httpContextAccessor.HttpContext.GetUserId();
-            var data = await _mediator.Send(new UpdateUserTracking
-            (
-                userId,
-                userTrackingId, 
-                userTracking.Title, 
-                userTracking.Description, 
-                userTracking.Occurrences,
-                userTracking.Disabled
-            ));
+            try
+            {
+                var userId = _httpContextAccessor.HttpContext.GetUserId();
+                var data = await _mediator.Send(new UpdateUserTracking
+                (
+                    userId,
+                    userTrackingId,
+                    userTracking.Title,
+                    userTracking.Description,
+                    userTracking.Occurrences,
+                    userTracking.Disabled
+                ));
 
-            if (data == false) return new NotFoundResult();
-
-            return new OkResult();
+                return new OkResult();
+            }
+            catch (ArgumentException ex)
+            {
+                return new NotFoundObjectResult(ex.Message);
+            }
         }
 
         [HttpDelete("{userTrackingId}")]

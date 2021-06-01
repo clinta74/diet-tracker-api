@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -25,7 +26,10 @@ namespace diet_tracker_api.CQRS.UserTrackings
                         .Where(u => u.UserId.Equals(request.UserId))
                         .SingleOrDefaultAsync(cancellationToken);
 
-            if (data == null) return false;
+            if (data == null)
+            {
+                throw new ArgumentException($"UserTrackingId ({request.UserTrackingId}) not found.");
+            }
 
             _dbContext.UserTrackings
                 .Update(data with

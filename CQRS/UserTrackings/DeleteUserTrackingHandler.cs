@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -24,12 +25,26 @@ namespace diet_tracker_api.CQRS.UserTrackings
                         .Where(u => u.UserId.Equals(request.UserId))
                         .SingleOrDefaultAsync(cancellationToken);
 
-            if (data == null) return false;
+            if (data == null)
+            {
+                throw new ArgumentException($"User Tracking Id ({request.UserTrackingId}) for User Id ({request.UserId}) not found.");
+            }
+
+            var values = data.Values.ToList();
+
+            using var transaction = _dbContext.Database.BeginTransaction();
+
+            _dbContext.UserTrackingValues
+                .RemoveRange(values);
 
             _dbContext.UserTrackings
                 .Remove(data);
 
-            return await _dbContext.SaveChangesAsync(cancellationToken) == 1;
+            var result =  await _dbContext.SaveChangesAsync(cancellationToken) == 1;
+            
+            await transaction.CommitAsync();
+
+            return result;
         }
     }
 }
