@@ -31,7 +31,17 @@ namespace diet_tracker_api.CQRS.UserTrackings
                     Description = userTracking.Description,
                     Occurrences = userTracking.Occurrences,
                     Order = userTracking.Order,
-                    Disabled = userTracking.Disabled
+                    Disabled = userTracking.Disabled,
+                    Values = userTracking.Values
+                        .Select(v => new UserTrackingValue
+                        {
+                            UserTrackingValueId = v.UserTrackingValueId,
+                            UserTrackingId = v.UserTrackingId,
+                            Name = v.Name,
+                            Description = v.Description,
+                            Order = v.Order,
+                            Disabled = v.Disabled
+                        })
                 })
                 .ToListAsync();
         }
