@@ -70,12 +70,7 @@ namespace diet_tracker_api.Controllers
                 return new BadRequestResult();
             }
 
-            var result = _dbContext.Plans
-                .Add(plan);
-
-            await _dbContext.SaveChangesAsync(cancellationToken);
-
-            return result.Entity.PlanId;
+            return await _mediator.Send(new AddPlan(plan.Name, plan.FuelingCount, plan.MealCount));
         }
 
         [Authorize("write:plans")]
