@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -25,6 +26,12 @@ namespace diet_tracker_api.CQRS.UserTrackingValues
                 .Where(p => p.UserTrackingValueId == request.UserTrackingValueId)
                 .Where(p => p.Tracking.UserId == request.UserId)
                 .FirstOrDefaultAsync();
+
+            
+            if (data == null)
+            {
+                throw new ArgumentException($"User Tracking Value Id ({request.UserTrackingValueId}) for User Id ({request.UserId}) not found.");
+            }
 
             _dbContext.Update(data with {
                 Name = request.Name,

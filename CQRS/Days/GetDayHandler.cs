@@ -23,7 +23,8 @@ public class GetDayHandler : IRequestHandler<Days.GetDay, CurrentUserDay>
         public async Task<CurrentUserDay> Handle(Days.GetDay request, CancellationToken cancellationToken)
         {
             var data = await _dbContext.UserDays
-                .Where(userDay => userDay.UserId == request.UserId && userDay.Day == request.Date)
+                .Where(userDay => userDay.UserId == request.UserId)
+                .Where(userDay => userDay.Day == request.Date)
                 .Include(userDay => userDay.Fuelings)
                 .Include(userDay => userDay.Meals)
                 .Select(userDay => new CurrentUserDay
@@ -48,7 +49,12 @@ public class GetDayHandler : IRequestHandler<Days.GetDay, CurrentUserDay>
                     .Where(up => up.UserId == request.UserId)
                     .Select(up => up.Plan)
                     .AsNoTracking()
-                    .SingleOrDefaultAsync(cancellationToken);
+                    .FirstOrDefaultAsync(cancellationToken);
+
+                if (plan == null)
+                {
+                    throw ArgumentException($"User ID ({request.UserId}) has no selected plan.");
+                }
 
                 var meals = new UserMeal[plan.MealCount];
                 Array.Fill(meals, new UserMeal { Name = "", Day = request.Date, UserId = request.UserId });
@@ -95,6 +101,11 @@ public class GetDayHandler : IRequestHandler<Days.GetDay, CurrentUserDay>
             }
 
             return data;
+        }
+
+        private Exception ArgumentException(string v)
+        {
+            throw new NotImplementedException();
         }
     }
 }
