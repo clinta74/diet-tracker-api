@@ -47,6 +47,22 @@ namespace diet_tracker_api.Controllers
             return await _mediator.Send(new GetUserTrackings(userId));
         }
 
+        [HttpGet("{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<UserTracking>> GetById(int id, CancellationToken cancellationToken)
+        {
+            var userId = _httpContextAccessor.HttpContext.GetUserId();
+            var data = await _mediator.Send(new GetUserTracking(userId, id));
+
+            if (data == null)
+            {
+                return new NotFoundResult();
+            }
+
+            return data;
+        }
+
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
