@@ -13,7 +13,7 @@ namespace diet_tracker_api.DataLayer.Models
         public DateTime Day { get; set; }
 
         public string Name { get; set; }
-        public DateTime When { get; set; }
+        public DateTime? When { get; set; }
         public virtual UserDay UserDay { get; set; }
     }
 }

@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore;
 namespace diet_tracker_api.CQRS.Days
 {
     public record GetDay(DateTime Date, string UserId) : IRequest<CurrentUserDay>;
-public class GetDayHandler : IRequestHandler<Days.GetDay, CurrentUserDay>
+    public class GetDayHandler : IRequestHandler<Days.GetDay, CurrentUserDay>
     {
         private readonly DietTrackerDbContext _dbContext;
 
@@ -44,35 +44,41 @@ public class GetDayHandler : IRequestHandler<Days.GetDay, CurrentUserDay>
 
             if (data == null)
             {
-                var plan = await _dbContext.UserPlans
-                    .OrderByDescending(up => up.Start)
-                    .Where(up => up.UserId == request.UserId)
-                    .Select(up => up.Plan)
-                    .AsNoTracking()
-                    .FirstOrDefaultAsync(cancellationToken);
-
-                if (plan == null)
-                {
-                    throw ArgumentException($"User ID ({request.UserId}) has no selected plan.");
-                }
-
-                var meals = new UserMeal[plan.MealCount];
-                Array.Fill(meals, new UserMeal { Name = "", Day = request.Date, UserId = request.UserId });
-
-                var fuelings = new UserFueling[plan.FuelingCount];
-                Array.Fill(fuelings, new UserFueling { Name = "", Day = request.Date, UserId = request.UserId });
-
                 data = new CurrentUserDay
                 {
                     Day = request.Date,
                     UserId = request.UserId,
                     Water = 0,
                     Weight = 0,
-                    Meals = meals,
-                    Fuelings = fuelings,
+                    Meals = new UserMeal[0],
+                    Fuelings = new UserFueling[0],
                     Condiments = 0,
                     Notes = "",
                 };
+            }
+
+            var plan = await _dbContext.UserPlans
+                    .OrderByDescending(up => up.Start)
+                    .Where(up => up.UserId == request.UserId)
+                    .Select(up => up.Plan)
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(cancellationToken);
+
+            if (plan == null)
+            {
+                throw ArgumentException($"User ID ({request.UserId}) has no selected plan.");
+            }
+
+            if (data.Meals.Count < plan.MealCount || data.Fuelings.Count < plan.FuelingCount)
+            {
+                var meals = new UserMeal[plan.MealCount - data.Meals.Count];
+                Array.Fill(meals, new UserMeal { Name = "", Day = request.Date, UserId = request.UserId });
+
+                var fuelings = new UserFueling[plan.FuelingCount - data.Fuelings.Count];
+                Array.Fill(fuelings, new UserFueling { Name = "", Day = request.Date, UserId = request.UserId });
+
+                data.Meals = data.Meals.Concat(meals).ToList();
+                data.Fuelings = data.Fuelings.Concat(fuelings).ToList();
             }
 
             var weights = await _dbContext.UserDays

@@ -60,6 +60,7 @@ namespace diet_tracker_api.CQRS.Days
             _dbContext.UserMeals
                 .AddRange(userDay.Meals
                     .Where(m => m.UserMealId == 0)
+                    .Where(m => m.Name.Trim().Length > 0 || m.When != null)
                     .Select(m => m with
                     {
                         UserId = userId,
@@ -70,6 +71,7 @@ namespace diet_tracker_api.CQRS.Days
             _dbContext.UserFuelings
                 .AddRange(userDay.Fuelings
                     .Where(f => f.UserFuelingId == 0)
+                    .Where(f => f.Name.Trim().Length > 0 || f.When != null)
                     .Select(f => f with
                     {
                         UserId = userId,
