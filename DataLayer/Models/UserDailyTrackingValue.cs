@@ -12,7 +12,7 @@ namespace diet_tracker_api.DataLayer.Models
         public int Occurrence { get; set; }
         public int UserTrackingValueId { get; set; }
         public int Value { get; set; }
-        public DateTime When { get; set; }
+        public Nullable<DateTime> When { get; set; }
         public virtual UserDay UserDay { get; set; }
         public virtual UserTrackingValue TrackingValue { get; set; }
     }

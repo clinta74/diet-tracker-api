@@ -10,7 +10,7 @@ namespace diet_tracker_api.Models
         public int UserTrackingValueId { get; set; }
         public string Name { get; set; }
         public int Value { get; set; }
-        public DateTime When { get; set; }
+        public Nullable<DateTime> When { get; set; }
         public int Order { get; set; }
         public int Occurrence { get; set; }
         public string Description { get; set; }
