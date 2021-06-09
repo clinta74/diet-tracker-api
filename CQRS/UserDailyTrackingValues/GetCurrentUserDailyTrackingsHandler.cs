@@ -5,38 +5,37 @@ using System.Threading;
 using System.Threading.Tasks;
 using diet_tracker_api.DataLayer;
 using diet_tracker_api.DataLayer.Models;
-using diet_tracker_api.Models;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 namespace diet_tracker_api.CQRS.UserDailyTrackingValues
 {
-    public record GetCurrentUserDailyTrackings(DateTime day, string userId) : IRequest<IEnumerable<CurrentUserDailyTrackingValue>>;
-    public class GetCurrentUserDailyTrackingsHandler : IRequestHandler<GetCurrentUserDailyTrackings, IEnumerable<CurrentUserDailyTrackingValue>>
+    public record GetCurrentUserDailyTrackingValues(DateTime day, string userId) : IRequest<IEnumerable<UserDailyTrackingValue>>;
+    public class GetCurrentUserDailyTrackingValuesHandler : IRequestHandler<GetCurrentUserDailyTrackingValues, IEnumerable<UserDailyTrackingValue>>
     {
         private readonly DietTrackerDbContext _dbContext;
+        private readonly IMediator _meditor;
 
-        public GetCurrentUserDailyTrackingsHandler(DietTrackerDbContext dbContext)
+        public GetCurrentUserDailyTrackingValuesHandler(DietTrackerDbContext dbContext, IMediator meditor)
         {
             _dbContext = dbContext;
+            _meditor = meditor;
         }
 
-        public async Task<IEnumerable<CurrentUserDailyTrackingValue>> Handle(GetCurrentUserDailyTrackings request, CancellationToken cancellationToken)
+        public async Task<IEnumerable<UserDailyTrackingValue>> Handle(GetCurrentUserDailyTrackingValues request, CancellationToken cancellationToken)
         {
             var data = await _dbContext.UserDailyTrackingValues
                 .AsNoTracking()
                 .Where(u => u.Day.Equals(request.day))
                 .Where(u => u.UserId.Equals(request.userId))
-                .Select(u => new CurrentUserDailyTrackingValue
+                .Select(u => new UserDailyTrackingValue
                 {
                     UserId = u.UserId,
                     Day = u.Day,
-                    Occurrence = u.Occurrence,
                     UserTrackingValueId = u.UserTrackingValueId,
-                    Name = u.TrackingValue.Name,
-                    Description = u.TrackingValue.Description,
+                    Occurrence = u.Occurrence,
                     Value = u.Value,
-                    When = u.When
+                    When = u.When,
                 })
                 .ToListAsync(cancellationToken);
 

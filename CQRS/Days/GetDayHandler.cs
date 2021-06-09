@@ -66,7 +66,7 @@ namespace diet_tracker_api.CQRS.Days
 
             if (plan == null)
             {
-                throw ArgumentException($"User ID ({request.UserId}) has no selected plan.");
+                throw new ArgumentException($"User ID ({request.UserId}) has no selected plan.");
             }
 
             if (data.Meals.Count < plan.MealCount || data.Fuelings.Count < plan.FuelingCount)
@@ -107,11 +107,6 @@ namespace diet_tracker_api.CQRS.Days
             }
 
             return data;
-        }
-
-        private Exception ArgumentException(string v)
-        {
-            throw new NotImplementedException();
         }
     }
 }

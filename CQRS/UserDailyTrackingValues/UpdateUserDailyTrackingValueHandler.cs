@@ -12,8 +12,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace diet_tracker_api.CQRS.UserDailyTrackingValues
 {
-    public record UpdateUserDailyTrackingValue(DateTime Day, string UserId, int UserTrackingValueId, int Occurance, int Value, DateTime When) : IRequest<bool>;
-    public class UpdateUserDailyTrackingValueHandler : IRequestHandler<UpdateUserDailyTrackingValue, bool>
+    public record UpdateUserDailyTrackingValue(int UserTrackingValueId, int Occurance, int Value, Nullable<DateTime> When);
+    public record UpdateUserDailyTrackingValues(DateTime Day, string UserId, UpdateUserDailyTrackingValue[] Values) : IRequest<IEnumerable<UserDailyTrackingValue>>;
+    public class UpdateUserDailyTrackingValueHandler : IRequestHandler<UpdateUserDailyTrackingValues, IEnumerable<UserDailyTrackingValue>>
     {
         private readonly DietTrackerDbContext _dbContext;
 
@@ -22,26 +23,56 @@ namespace diet_tracker_api.CQRS.UserDailyTrackingValues
             _dbContext = dbContext;
         }
 
-        public async Task<bool> Handle(UpdateUserDailyTrackingValue request, CancellationToken cancellationToken)
+        public async Task<IEnumerable<UserDailyTrackingValue>> Handle(UpdateUserDailyTrackingValues request, CancellationToken cancellationToken)
         {
-            var data = await _dbContext.UserDailyTrackingValues
-                        .AsNoTracking()
-                        .Where(u => u.Day.Equals(request.Day))
-                        .Where(u => u.UserId.Equals(request.UserId))
-                        .Where(u => u.UserTrackingValueId.Equals(request.UserTrackingValueId))
-                        .Where(u => u.Occurrence.Equals(request.Occurance))
-                        .SingleOrDefaultAsync(cancellationToken);
 
-            if (data == null) return false;
+            var results = new List<UserDailyTrackingValue>();
+            using var transaction = _dbContext.Database.BeginTransaction();
 
-            var result = _dbContext.UserDailyTrackingValues
-                .Update(data with
+            foreach (var value in request.Values)
+            {
+                var data = await _dbContext.UserDailyTrackingValues
+                            .AsNoTracking()
+                            .Where(u => u.Day.Equals(request.Day))
+                            .Where(u => u.UserId.Equals(request.UserId))
+                            .Where(u => u.UserTrackingValueId.Equals(value.UserTrackingValueId))
+                            .Where(u => u.Occurrence.Equals(value.Occurance))
+                            .SingleOrDefaultAsync(cancellationToken);
+
+                if (data == null)
                 {
-                    Value = request.Value,
-                    When = request.When,
-                });
+                    var result = _dbContext.UserDailyTrackingValues
+                    .Add(new UserDailyTrackingValue
+                    {
+                        Day = request.Day,
+                        UserId = request.UserId,
+                        UserTrackingValueId = value.UserTrackingValueId,
+                        Occurrence = value.Occurance,
+                        Value = value.Value,
+                        When = value.When,
+                    });
 
-            return await _dbContext.SaveChangesAsync(cancellationToken) == 1;
+                    await _dbContext.SaveChangesAsync(cancellationToken);
+
+                    results.Add(result.Entity);
+                }
+                else
+                {
+                    var result = _dbContext.UserDailyTrackingValues
+                        .Update(data with
+                        {
+                            Value = value.Value,
+                            When = value.When,
+                        });
+
+                    await _dbContext.SaveChangesAsync(cancellationToken);
+
+                    results.Add(result.Entity);
+                }
+            }
+            await transaction.CommitAsync(cancellationToken);
+
+            return results;
         }
     }
 }

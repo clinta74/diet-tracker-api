@@ -1,11 +1,12 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using diet_tracker_api.CQRS.Days;
+using diet_tracker_api.CQRS.UserDailyTrackingValues;
 using diet_tracker_api.CQRS.Users;
 using diet_tracker_api.DataLayer.Models;
 using diet_tracker_api.Extensions;
-using diet_tracker_api.Models;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -14,17 +15,20 @@ using Microsoft.Extensions.Logging;
 
 namespace diet_tracker_api.Controllers
 {
+
+    public record UserDailyTrackingValueRequest(int Occurrence, int UserTrackingValueId, int Value, Nullable<DateTime> When);
+
     [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     [Produces("application/json")]
-    public class DayController
+    public class DayTrackingValuesController
     {
-        private readonly ILogger<DayController> _logger;
+        private readonly ILogger<DayTrackingValuesController> _logger;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IMediator _mediator;
 
-        public DayController(ILogger<DayController> logger, IHttpContextAccessor httpContextAccessor, IMediator mediator)
+        public DayTrackingValuesController(ILogger<DayTrackingValuesController> logger, IHttpContextAccessor httpContextAccessor, IMediator mediator)
         {
             _logger = logger;
             _httpContextAccessor = httpContextAccessor;
@@ -34,7 +38,7 @@ namespace diet_tracker_api.Controllers
         [HttpGet("{day}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<CurrentUserDay>> GetCurrentUserDay(DateTime day, CancellationToken cancellationToken)
+        public async Task<ActionResult<IEnumerable<UserDailyTrackingValue>>> GetCurrentUserDayTrackingValues(DateTime day, CancellationToken cancellationToken)
         {
             var userId = _httpContextAccessor.HttpContext.GetUserId();
 
@@ -43,15 +47,15 @@ namespace diet_tracker_api.Controllers
                 return new NotFoundObjectResult($"User not found.");
             }
 
-            var data = await _mediator.Send(new GetDay(day, userId), cancellationToken);
+            var data = await _mediator.Send(new GetCurrentUserDailyTrackingValues(day, userId), cancellationToken);
 
-            return data;
+            return new OkObjectResult(data);
         }
 
         [HttpPut("{day}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<CurrentUserDay>> UpdateCurrentUserDay(DateTime day, UserDay userDay, CancellationToken cancellationToken)
+        public async Task<ActionResult<UserDailyTrackingValue>> UpdateCurrentUserDayTrackingValue(DateTime day, UserDailyTrackingValueRequest[] values, CancellationToken cancellationToken)
         {
             var userId = _httpContextAccessor.HttpContext.GetUserId();
 
@@ -60,9 +64,10 @@ namespace diet_tracker_api.Controllers
                 return new NotFoundObjectResult($"User not found.");
             }
 
-            await _mediator.Send(new UpdateDay(day, userId, userDay), cancellationToken);
+            var data = await _mediator.Send(new UpdateUserDailyTrackingValues(day, userId, values.Select(value => 
+                new UpdateUserDailyTrackingValue(value.UserTrackingValueId, value.Occurrence, value.Value, value.When)).ToArray()));
 
-            return await _mediator.Send(new GetDay(day, userId), cancellationToken);
-        }
+            return new OkObjectResult(data);
+        } 
     }
 }

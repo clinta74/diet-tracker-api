@@ -16,10 +16,5 @@ namespace diet_tracker_api.DataLayer.Models
         public int Order { get; set; }
         public virtual User User { get; set; }
         public virtual IEnumerable<UserTrackingValue> Values { get; set; }
-
-        internal IEnumerable<UserTrackingValue> Select(Func<object, UserTrackingValue> p)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

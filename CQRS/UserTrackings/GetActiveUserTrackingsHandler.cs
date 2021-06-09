@@ -44,6 +44,7 @@ namespace diet_tracker_api.CQRS.UserTrackings
                             Order = v.Order,
                             Disabled = v.Disabled
                         })
+                        .ToList()
                 })
                 .ToListAsync();
         }
