@@ -1,11 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using diet_tracker_api.CQRS.UserTrackings;
 using diet_tracker_api.DataLayer.Models;
 using diet_tracker_api.Extensions;
-using diet_tracker_api.Models;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -14,6 +14,9 @@ using Microsoft.Extensions.Logging;
 
 namespace diet_tracker_api.Controllers
 {
+    public record UserTrackingRequest(string Title, string Description, int Occurrences, int Order, bool Disabled, IEnumerable<UserTrackingValueRequest> Values);
+    public record UserTrackingValueRequest(int UserTrackingId, string Name, string Description, UserTrackingType Type, int Order, bool Disabled);
+
     [Authorize]
     [ApiController]
     [Route("api/[controller]")]
@@ -77,7 +80,15 @@ namespace diet_tracker_api.Controllers
                 userTracking.Title,
                 userTracking.Description,
                 userTracking.Occurrences,
-                userTracking.Order
+                userTracking.Order,
+                userTracking.Values.Select(value => new UserTrackingValue
+                {
+                    Name = value.Name,
+                    Description = value.Description,
+                    Order = value.Order,
+                    Type = value.Type,
+                    Disabled = value.Disabled,
+                })
             ));
         }
 
@@ -99,7 +110,15 @@ namespace diet_tracker_api.Controllers
                     userTracking.Title,
                     userTracking.Description,
                     userTracking.Occurrences,
-                    userTracking.Disabled
+                    userTracking.Disabled,
+                    userTracking.Values.Select(value => new UserTrackingValue
+                    {
+                        Name = value.Name,
+                        Description = value.Description,
+                        Order = value.Order,
+                        Type = value.Type,
+                        Disabled = value.Disabled,
+                    })
                 ));
 
                 return new OkResult();

@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using diet_tracker_api.DataLayer;
@@ -6,7 +8,7 @@ using MediatR;
 
 namespace diet_tracker_api.CQRS.UserTrackings
 {
-    public record AddUserTracking(string UserId, string Title, string Description, int Occurrences, int Order) : IRequest<int>;
+    public record AddUserTracking(string UserId, string Title, string Description, int Occurrences, int Order, IEnumerable<UserTrackingValue> Values) : IRequest<int>;
     public class AddUserTrackingHandler : IRequestHandler<AddUserTracking, int>
     {
         private readonly DietTrackerDbContext _dbContext;
@@ -27,6 +29,7 @@ namespace diet_tracker_api.CQRS.UserTrackings
                    Disabled = false,
                    Occurrences = request.Occurrences,
                    Order = request.Order,
+                   Values = request.Values,
                });
 
             await _dbContext.SaveChangesAsync();

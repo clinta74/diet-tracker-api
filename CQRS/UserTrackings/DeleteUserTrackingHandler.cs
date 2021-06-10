@@ -32,7 +32,15 @@ namespace diet_tracker_api.CQRS.UserTrackings
 
             var values = data.Values.ToList();
 
+            var userValues = await _dbContext.UserDailyTrackingValues
+                .AsNoTracking()
+                .Where(v => v.TrackingValue.UserTrackingId.Equals(request.UserTrackingId))
+                .ToListAsync();
+
             using var transaction = _dbContext.Database.BeginTransaction();
+
+            _dbContext.UserDailyTrackingValues
+                .RemoveRange(userValues);
 
             _dbContext.UserTrackingValues
                 .RemoveRange(values);
