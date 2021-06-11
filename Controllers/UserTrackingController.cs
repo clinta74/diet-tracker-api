@@ -15,7 +15,7 @@ using Microsoft.Extensions.Logging;
 namespace diet_tracker_api.Controllers
 {
     public record UserTrackingRequest(string Title, string Description, int Occurrences, int Order, bool Disabled, IEnumerable<UserTrackingValueRequest> Values);
-    public record UserTrackingValueRequest(int UserTrackingId, string Name, string Description, UserTrackingType Type, int Order, bool Disabled);
+    public record UserTrackingValueRequest(int UserTrackingValueId, int UserTrackingId, string Name, string Description, UserTrackingType Type, int Order, bool Disabled);
 
     [Authorize]
     [ApiController]
@@ -69,12 +69,12 @@ namespace diet_tracker_api.Controllers
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<int>> Add(UserTrackingRequest userTracking)
+        public async Task<ActionResult<UserTracking>> Add(UserTrackingRequest userTracking)
         {
             if (userTracking == null) return new BadRequestResult();
 
             var userId = _httpContextAccessor.HttpContext.GetUserId();
-            return await _mediator.Send(new AddUserTracking
+            var data =  await _mediator.Send(new AddUserTracking
             (
                 userId,
                 userTracking.Title,
@@ -83,6 +83,7 @@ namespace diet_tracker_api.Controllers
                 userTracking.Order,
                 userTracking.Values.Select(value => new UserTrackingValue
                 {
+                    UserTrackingValueId = 0,
                     Name = value.Name,
                     Description = value.Description,
                     Order = value.Order,
@@ -90,6 +91,8 @@ namespace diet_tracker_api.Controllers
                     Disabled = value.Disabled,
                 })
             ));
+
+            return new OkObjectResult(data);
         }
 
         [HttpPut("{userTrackingId}")]
@@ -113,6 +116,7 @@ namespace diet_tracker_api.Controllers
                     userTracking.Disabled,
                     userTracking.Values.Select(value => new UserTrackingValue
                     {
+                        UserTrackingValueId = value.UserTrackingValueId,
                         Name = value.Name,
                         Description = value.Description,
                         Order = value.Order,
@@ -121,7 +125,7 @@ namespace diet_tracker_api.Controllers
                     })
                 ));
 
-                return new OkResult();
+                return new OkObjectResult(data);
             }
             catch (ArgumentException ex)
             {

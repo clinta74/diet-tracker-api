@@ -10,7 +10,14 @@ using Microsoft.EntityFrameworkCore;
 
 namespace diet_tracker_api.CQRS.UserTrackings
 {
-    public record UpdateUserTracking(string UserId, int UserTrackingId, string Title, string Description, int Occurrences, bool Disabled, IEnumerable<UserTrackingValue> Values) : IRequest<UserTracking>;
+    public record UpdateUserTracking(
+        string UserId, 
+        int UserTrackingId, 
+        string Title, 
+        string Description, 
+        int Occurrences, 
+        bool Disabled, 
+        IEnumerable<UserTrackingValue> Values) : IRequest<UserTracking>;
     public class UpdateUserTrackingHandler : IRequestHandler<UpdateUserTracking, UserTracking>
     {
         private readonly DietTrackerDbContext _dbContext;
@@ -34,6 +41,7 @@ namespace diet_tracker_api.CQRS.UserTrackings
             }
 
             using var transaction = _dbContext.Database.BeginTransaction();
+            
             _dbContext.UserTrackings
                 .Update(data with
                 {
@@ -50,20 +58,14 @@ namespace diet_tracker_api.CQRS.UserTrackings
                     .Where(v => v.UserTrackingValueId == 0)
                     .Select(v => new UserTrackingValue
                     {
-
-                    }));
-
-            _dbContext.UserTrackingValues
-                .AddRange(request.Values
-                    .Where(v => v.UserTrackingValueId == 0)
-                    .Select(v => new UserTrackingValue
-                    {
+                        UserTrackingId = data.UserTrackingId,
                         Name = v.Name,
                         Description = v.Description,
                         Disabled = v.Disabled,
                         Order = v.Order,
                         Type = v.Type,
-                    }));
+                    })
+                );
 
             await _dbContext.SaveChangesAsync();
 
@@ -93,13 +95,15 @@ namespace diet_tracker_api.CQRS.UserTrackings
                 await _dbContext.SaveChangesAsync();
             }
 
+            var removeTrackingValueIds = request.Values.Where(value => value.UserTrackingValueId != 0).Select(value => value.UserTrackingValueId);
+            var removeTrackingValues = _dbContext.UserTrackingValues
+                    .Where(userTrackingValue => userTrackingValue.Tracking.UserId == request.UserId)
+                    .Where(userTrackingValue => userTrackingValue.UserTrackingId == request.UserTrackingId)
+                    .Where(userTrackingValue => !removeTrackingValueIds.Contains(userTrackingValue.UserTrackingValueId))
+                    .AsEnumerable();
+
             _dbContext.UserTrackingValues
-                .RemoveRange(request.Values
-                    .Where(v => request.Values
-                        .Select(r => r.UserTrackingValueId)
-                        .Contains(v.UserTrackingValueId))
-                    .ToList()
-                );
+                .RemoveRange(removeTrackingValues);
 
             await _dbContext.SaveChangesAsync();
 
