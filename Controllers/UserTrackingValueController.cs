@@ -1,12 +1,9 @@
-using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using diet_tracker_api.CQRS.UserTrackings;
 using diet_tracker_api.CQRS.UserTrackingValues;
 using diet_tracker_api.DataLayer.Models;
 using diet_tracker_api.Extensions;
-using diet_tracker_api.Models;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
