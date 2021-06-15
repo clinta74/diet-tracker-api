@@ -1,8 +1,9 @@
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using diet_tracker_api.CQRS;
 using diet_tracker_api.CQRS.Plans;
+using diet_tracker_api.CQRS.Users;
 using diet_tracker_api.DataLayer;
 using diet_tracker_api.DataLayer.Models;
 using diet_tracker_api.Extensions;
@@ -10,7 +11,6 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace diet_tracker_api.Controllers
@@ -22,14 +22,12 @@ namespace diet_tracker_api.Controllers
     public class PlanController
     {
         private readonly ILogger<PlanController> _logger;
-        private readonly DietTrackerDbContext _dbContext;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IMediator _mediator;
 
-        public PlanController(ILogger<PlanController> logger, DietTrackerDbContext dbContext, IHttpContextAccessor httpContextAccessor, IMediator mediator)
+        public PlanController(ILogger<PlanController> logger, IHttpContextAccessor httpContextAccessor, IMediator mediator)
         {
             _logger = logger;
-            _dbContext = dbContext;
             _httpContextAccessor = httpContextAccessor;
             _mediator = mediator;
         }
@@ -38,11 +36,7 @@ namespace diet_tracker_api.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         public IAsyncEnumerable<Plan> Get(CancellationToken cancellationToken)
         {
-            var data = _dbContext.Plans
-                .AsNoTracking()
-                .AsAsyncEnumerable();
-
-            return data;
+            return _mediator.Send(new GetPlans(), cancellationToken).Result;
         }
 
         [HttpGet("{id}")]
@@ -85,24 +79,15 @@ namespace diet_tracker_api.Controllers
                 return new BadRequestResult();
             }
 
-            var results = await _dbContext.Plans.FindAsync(id);
-
-            if (results != null)
+            try
             {
-                var data = results with
-                {
-                    Name = plan.Name,
-                    FuelingCount = plan.FuelingCount,
-                    MealCount = plan.MealCount,
-
-                };
-                _dbContext.Plans.Update(data);
-
-                await _dbContext.SaveChangesAsync(cancellationToken);
+                await _mediator.Send(new UpdatePlan(id, plan.Name, plan.FuelingCount, plan.MealCount), cancellationToken);
                 return new OkResult();
             }
-
-            return new NotFoundResult();
+            catch (ArgumentException ex)
+            {
+                return new NotFoundObjectResult(ex.Message);
+            }
         }
 
         [Authorize("write:plans")]
@@ -111,19 +96,15 @@ namespace diet_tracker_api.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Remove(int id, CancellationToken cancellationToken)
         {
-            var plan = await _dbContext
-                .Plans
-                .FindAsync(id);
-
-            if (plan != null)
+            try
             {
-                _dbContext.Remove(plan);
-
-                await _dbContext.SaveChangesAsync();
+                var result = await _mediator.Send(new DeletePlan(id), cancellationToken);
                 return new OkResult();
             }
-
-            return new NotFoundResult();
+            catch (ArgumentException ex)
+            {
+                return new NotFoundObjectResult(ex.Message);
+            }
         }
 
         [HttpPut("change")]
@@ -133,15 +114,14 @@ namespace diet_tracker_api.Controllers
         {
             var userId = _httpContextAccessor.HttpContext.GetUserId();
 
-            var user = await _dbContext.Users
-                .FindAsync(userId);
+            var userExists = await _mediator.Send(new UserExists(userId));
 
-            if (user == null)
+            if (userExists)
             {
-                return new NotFoundObjectResult($"User not found.");
+                return await _mediator.Send(new ChangeUserPlan(userId, planId));
             }
 
-            return await _mediator.Send(new ChangeUserPlan(userId, planId));
+            return new NotFoundObjectResult($"User not found.");
         }
     }
 }

@@ -28,7 +28,9 @@ namespace diet_tracker_api.CQRS.Fuelings
                 throw new ArgumentException($"Fueling Id ({request.FuelingId}) not found.");
             }
 
-            _dbContext.Fuelings.Update(data);
+            _dbContext.Fuelings.Update(data with {
+                Name = request.Name
+            });
 
             return await _dbContext.SaveChangesAsync(cancellationToken) == 1;
         }
