@@ -53,7 +53,7 @@ namespace diet_tracker_api.CQRS.Days
                     Meals = new UserMeal[0],
                     Fuelings = new UserFueling[0],
                     Condiments = 0,
-                    Notes = "",
+                    Notes = null,
                 };
             }
 
