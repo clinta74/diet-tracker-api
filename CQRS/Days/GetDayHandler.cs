@@ -38,7 +38,6 @@ namespace diet_tracker_api.CQRS.Days
                     Weight = userDay.Weight,
                     Meals = userDay.Meals,
                     Fuelings = userDay.Fuelings,
-                    Condiments = userDay.Condiments,
                     Notes = userDay.Notes,
                 })
                 .AsNoTracking()
@@ -55,7 +54,6 @@ namespace diet_tracker_api.CQRS.Days
                     Weight = 0,
                     Meals = new UserMeal[0],
                     Fuelings = new UserFueling[0],
-                    Condiments = 0,
                     Notes = null,
                 };
             }
@@ -72,15 +70,19 @@ namespace diet_tracker_api.CQRS.Days
                 throw new ArgumentException($"User ID ({request.UserId}) has no selected plan.");
             }
 
-            if (data.Meals.Count < plan.MealCount || data.Fuelings.Count < plan.FuelingCount)
+            if (data.Meals.Count < plan.MealCount)
             {
                 var meals = new UserMeal[plan.MealCount - data.Meals.Count];
                 Array.Fill(meals, new UserMeal { Name = "", Day = request.Date, UserId = request.UserId });
 
+                data.Meals = data.Meals.Concat(meals).ToList();
+            }
+
+            if (data.Fuelings.Count < plan.FuelingCount)
+            {
                 var fuelings = new UserFueling[plan.FuelingCount - data.Fuelings.Count];
                 Array.Fill(fuelings, new UserFueling { Name = "", Day = request.Date, UserId = request.UserId });
 
-                data.Meals = data.Meals.Concat(meals).ToList();
                 data.Fuelings = data.Fuelings.Concat(fuelings).ToList();
             }
 

@@ -14,7 +14,6 @@ namespace diet_tracker_api.DataLayer.Models
 
         [Column(TypeName = "decimal(5, 2)")]
         public decimal Weight { get; set; }
-        public int Condiments { get; set; }
         public string Notes { get; set; }
         public virtual User User { get; set; }
         public virtual ICollection<UserFueling> Fuelings { get; set; }

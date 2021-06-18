@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 namespace diet_tracker_api.CQRS.Days
 {
     public record UpdateDay(DateTime Day, string UserId, UserDay UserDay) : IRequest<Unit>;
-    
+
     public class UpdateDayHandler : IRequestHandler<Days.UpdateDay, Unit>
     {
         private readonly DietTrackerDbContext _dbContext;
@@ -40,7 +40,6 @@ namespace diet_tracker_api.CQRS.Days
                         UserId = userId,
                         Water = userDay.Water,
                         Weight = userDay.Weight,
-                        Condiments = userDay.Condiments,
                         Notes = userDay.Notes.Trim().Length == 0 ? null : userDay.Notes.Trim(),
                     });
             }
@@ -50,7 +49,6 @@ namespace diet_tracker_api.CQRS.Days
                 {
                     Water = userDay.Water,
                     Weight = userDay.Weight,
-                    Condiments = userDay.Condiments,
                     Notes = userDay.Notes == null || userDay.Notes.Trim().Length == 0 ? null : userDay.Notes.Trim(),
                 });
             }
@@ -103,20 +101,23 @@ namespace diet_tracker_api.CQRS.Days
                     }));
 
             // Clean up left over entries not being used.
-            var removeMealIds = userDay.Meals.Where(m => m.UserMealId != 0).Select(m => m.UserMealId);
+            var removeMealIds = userDay.Meals.Where(meal => meal.UserMealId == 0 || (meal.Name.Trim().Length == 0 && meal.UserMealId != 0))
+                .Select(meal => meal.UserMealId);
 
             var removeMeals = _dbContext.UserMeals
-                    .Where(userMeal => userMeal.UserId == userId && userMeal.Day == day.Date)
-                    .Where(userMeal => !removeMealIds.Contains(userMeal.UserMealId))
-                    .AsEnumerable();
+                .Where(userMeal => userMeal.UserId == userId && userMeal.Day == day.Date)
+                .Where(userMeal => removeMealIds.Contains(userMeal.UserMealId))
+                .AsEnumerable();
 
             _dbContext.UserMeals.RemoveRange(removeMeals);
 
-            var removeFuelingIds = userDay.Fuelings.Where(fueling => fueling.UserFuelingId != 0).Select(fueling => fueling.UserFuelingId);
+            var removeFuelingIds = userDay.Fuelings.Where(fueling => fueling.UserFuelingId == 0 || (fueling.Name.Trim().Length == 0 && fueling.UserFuelingId != 0))
+                .Select(fueling => fueling.UserFuelingId);
+
             var removeFuelings = _dbContext.UserFuelings
-                    .Where(userFueling => userFueling.UserId == userId && userFueling.Day == day.Date)
-                    .Where(userFueling => !removeFuelingIds.Contains(userFueling.UserFuelingId))
-                    .AsEnumerable();
+                .Where(userFueling => userFueling.UserId == userId && userFueling.Day == day.Date)
+                .Where(userFueling => removeFuelingIds.Contains(userFueling.UserFuelingId))
+                .AsEnumerable();
 
             _dbContext.UserFuelings.RemoveRange(removeFuelings);
 
