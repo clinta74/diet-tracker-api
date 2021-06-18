@@ -9,24 +9,30 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 namespace diet_tracker_api.CQRS.Victories
 {
-    public record GetVictories(string UserId, Nullable<VictoryType> Type) : IRequest<IEnumerable<Victory>>;
+    public record GetVictories(string UserId, Nullable<VictoryType> Type, Nullable<DateTime> Day) : IRequest<IEnumerable<Victory>>;
     
     public class GetVictoriesHandler : IRequestHandler<GetVictories, IEnumerable<Victory>>
     {
-        private readonly DietTrackerDbContext ctx;
-        public GetVictoriesHandler(DietTrackerDbContext context)
+        private readonly DietTrackerDbContext _dbContext;
+        public GetVictoriesHandler(DietTrackerDbContext dbContext)
         {
-            ctx = context;
+            _dbContext = dbContext;
         }
         public async Task<IEnumerable<DataLayer.Models.Victory>> Handle(GetVictories request, CancellationToken cancellationToken)
         {
-            var exp = ctx.Victories
+            var exp = _dbContext.Victories
                 .Where(victory => victory.UserId == request.UserId);
 
             if (request.Type.HasValue)
             {
-                exp.Where(victory => victory.Type == request.Type.Value);
+                exp = exp.Where(victory => victory.Type == request.Type.Value);
             }
+
+            if (request.Day.HasValue)
+            {
+                exp = exp.Where(victory => victory.When == request.Day);
+            }
+
             return await exp
                 .AsNoTracking()
                 .ToListAsync(cancellationToken);

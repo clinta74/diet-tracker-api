@@ -7,5 +7,6 @@ namespace diet_tracker_api.Models
     {
         public decimal CumulativeWeightChange { get; set; } 
         public decimal WeightChange { get; set; }
+        public IEnumerable<Victory> Victories { get; set; }
     }
 }

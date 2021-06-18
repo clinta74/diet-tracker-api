@@ -51,7 +51,7 @@ namespace diet_tracker_api.Controllers
         [HttpPut("{day}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<CurrentUserDay>> UpdateCurrentUserDay(DateTime day, UserDay userDay, CancellationToken cancellationToken)
+        public async Task<ActionResult<CurrentUserDay>> UpdateCurrentUserDay(DateTime day, CurrentUserDay userDay, CancellationToken cancellationToken)
         {
             var userId = _httpContextAccessor.HttpContext.GetUserId();
 

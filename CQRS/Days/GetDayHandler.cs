@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using diet_tracker_api.CQRS.Victories;
 using diet_tracker_api.DataLayer;
 using diet_tracker_api.DataLayer.Models;
 using diet_tracker_api.Models;
@@ -14,10 +15,12 @@ namespace diet_tracker_api.CQRS.Days
     public class GetDayHandler : IRequestHandler<Days.GetDay, CurrentUserDay>
     {
         private readonly DietTrackerDbContext _dbContext;
+        private readonly IMediator _mediator;
 
-        public GetDayHandler(DietTrackerDbContext dbContext)
+        public GetDayHandler(DietTrackerDbContext dbContext, IMediator mediator)
         {
             _dbContext = dbContext;
+            _mediator = mediator;
         }
 
         public async Task<CurrentUserDay> Handle(Days.GetDay request, CancellationToken cancellationToken)
@@ -80,6 +83,8 @@ namespace diet_tracker_api.CQRS.Days
                 data.Meals = data.Meals.Concat(meals).ToList();
                 data.Fuelings = data.Fuelings.Concat(fuelings).ToList();
             }
+
+            data.Victories = await _mediator.Send(new GetVictories(request.UserId, VictoryType.NonScale, request.Date));
 
             var weights = await _dbContext.UserDays
                 .Where(userDay => userDay.UserId == request.UserId && userDay.Weight > 0)

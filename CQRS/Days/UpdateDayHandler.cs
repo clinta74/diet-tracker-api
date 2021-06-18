@@ -51,7 +51,7 @@ namespace diet_tracker_api.CQRS.Days
                     Water = userDay.Water,
                     Weight = userDay.Weight,
                     Condiments = userDay.Condiments,
-                    Notes = userDay.Notes.Trim().Length == 0 ? null : userDay.Notes.Trim(),
+                    Notes = userDay.Notes == null || userDay.Notes.Trim().Length == 0 ? null : userDay.Notes.Trim(),
                 });
             }
 

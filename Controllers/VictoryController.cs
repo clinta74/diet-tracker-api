@@ -33,7 +33,7 @@ namespace diet_tracker_api.Controllers
         public async Task<IEnumerable<Victory>> GetAll([FromQuery]VictoryType type)
         {
             var userId = _httpContextAccessor.HttpContext.GetUserId();
-            return await _mediator.Send(new GetVictories(userId, type));
+            return await _mediator.Send(new GetVictories(userId, type, null));
         }
 
         [HttpPost]
