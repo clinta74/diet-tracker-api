@@ -1,9 +1,9 @@
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using diet_tracker_api.CQRS.Days;
 using diet_tracker_api.CQRS.Users;
-using diet_tracker_api.DataLayer.Models;
 using diet_tracker_api.Extensions;
 using diet_tracker_api.Models;
 using MediatR;
@@ -63,6 +63,21 @@ namespace diet_tracker_api.Controllers
             await _mediator.Send(new UpdateDay(day, userId, userDay), cancellationToken);
 
             return await _mediator.Send(new GetDay(day, userId), cancellationToken);
+        }
+
+        [HttpGet("weight")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<IAsyncEnumerable<GraphValue>>> GetWeight(DateTime startDate, Nullable<DateTime> endDate = null)
+        {
+            var userId = _httpContextAccessor.HttpContext.GetUserId();
+
+            if (!await _mediator.Send(new UserExists(userId)))
+            {
+                return new NotFoundObjectResult($"User not found.");
+            }
+
+            return new OkObjectResult(await _mediator.Send(new GetWeightRange(userId, startDate, endDate)));
         }
     }
 }
