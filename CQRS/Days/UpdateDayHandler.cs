@@ -40,7 +40,7 @@ namespace diet_tracker_api.CQRS.Days
                         UserId = userId,
                         Water = userDay.Water,
                         Weight = userDay.Weight,
-                        Notes = userDay.Notes.Trim().Length == 0 ? null : userDay.Notes.Trim(),
+                        Notes = (userDay.Notes == null || userDay.Notes.Trim().Length == 0) ? null : userDay.Notes.Trim(),
                     });
             }
             else

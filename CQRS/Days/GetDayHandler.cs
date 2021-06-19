@@ -1,16 +1,23 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using diet_tracker_api.CQRS.Victories;
 using diet_tracker_api.DataLayer;
 using diet_tracker_api.DataLayer.Models;
-using diet_tracker_api.Models;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 namespace diet_tracker_api.CQRS.Days
 {
+    public record CurrentUserDay : UserDay
+    {
+        public decimal CumulativeWeightChange { get; set; }
+        public decimal WeightChange { get; set; }
+        public IEnumerable<Victory> Victories { get; set; }
+    }
+
     public record GetDay(DateTime Date, string UserId) : IRequest<CurrentUserDay>;
     public class GetDayHandler : IRequestHandler<Days.GetDay, CurrentUserDay>
     {
