@@ -9,9 +9,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace diet_tracker_api.CQRS.Days
 {
-    public record UpdateDay(DateTime Day, string UserId, UserDay UserDay) : IRequest<Unit>;
+    public record UpdateDay(DateTime Day, string UserId, CurrentUserDay UserDay) : IRequest<Unit>;
 
-    public class UpdateDayHandler : IRequestHandler<Days.UpdateDay, Unit>
+    public class UpdateDayHandler : IRequestHandler<UpdateDay, Unit>
     {
         private readonly DietTrackerDbContext _dbContext;
         public UpdateDayHandler(DietTrackerDbContext dbContext)
@@ -55,22 +55,12 @@ namespace diet_tracker_api.CQRS.Days
 
             await _dbContext.SaveChangesAsync(cancellationToken);
 
+            // Handle Meals
             _dbContext.UserMeals
                 .AddRange(userDay.Meals
                     .Where(m => m.UserMealId == 0)
                     .Where(m => m.Name.Trim().Length > 0 || m.When != null)
                     .Select(m => m with
-                    {
-                        UserId = userId,
-                        Day = day.Date,
-                    }));
-
-
-            _dbContext.UserFuelings
-                .AddRange(userDay.Fuelings
-                    .Where(f => f.UserFuelingId == 0)
-                    .Where(f => f.Name.Trim().Length > 0 || f.When != null)
-                    .Select(f => f with
                     {
                         UserId = userId,
                         Day = day.Date,
@@ -88,20 +78,7 @@ namespace diet_tracker_api.CQRS.Days
                         When = meal.When,
                     }));
 
-            _dbContext.UserFuelings
-                .UpdateRange(userDay.Fuelings
-                    .Where(fueling => fueling.UserFuelingId != 0)
-                    .Select(fueling => _dbContext.UserFuelings
-                        .AsNoTracking()
-                        .First(f => f.UserFuelingId == fueling.UserFuelingId)
-                    with
-                    {
-                        Name = fueling.Name,
-                        When = fueling.When,
-                    }));
-
-            // Clean up left over entries not being used.
-            var removeMealIds = userDay.Meals.Where(meal => meal.UserMealId == 0 || (meal.Name.Trim().Length == 0 && meal.UserMealId != 0))
+            var removeMealIds = userDay.Meals.Where(meal => meal.UserMealId == 0 || (string.IsNullOrWhiteSpace(meal.Name) && meal.UserMealId != 0))
                 .Select(meal => meal.UserMealId);
 
             var removeMeals = _dbContext.UserMeals
@@ -111,7 +88,32 @@ namespace diet_tracker_api.CQRS.Days
 
             _dbContext.UserMeals.RemoveRange(removeMeals);
 
-            var removeFuelingIds = userDay.Fuelings.Where(fueling => fueling.UserFuelingId == 0 || (fueling.Name.Trim().Length == 0 && fueling.UserFuelingId != 0))
+            await _dbContext.SaveChangesAsync(cancellationToken);
+            
+            // Handle Fuelings
+            _dbContext.UserFuelings
+               .AddRange(userDay.Fuelings
+                   .Where(f => f.UserFuelingId == 0)
+                   .Where(f => f.Name.Trim().Length > 0 || f.When != null)
+                   .Select(f => f with
+                   {
+                       UserId = userId,
+                       Day = day.Date,
+                   }));
+
+            _dbContext.UserFuelings
+                 .UpdateRange(userDay.Fuelings
+                     .Where(fueling => fueling.UserFuelingId != 0)
+                     .Select(fueling => _dbContext.UserFuelings
+                         .AsNoTracking()
+                         .First(f => f.UserFuelingId == fueling.UserFuelingId)
+                     with
+                     {
+                         Name = fueling.Name,
+                         When = fueling.When,
+                     }));
+
+            var removeFuelingIds = userDay.Fuelings.Where(fueling => fueling.UserFuelingId == 0 || (string.IsNullOrWhiteSpace(fueling.Name) && fueling.UserFuelingId != 0))
                 .Select(fueling => fueling.UserFuelingId);
 
             var removeFuelings = _dbContext.UserFuelings
@@ -123,6 +125,41 @@ namespace diet_tracker_api.CQRS.Days
 
             await _dbContext.SaveChangesAsync(cancellationToken);
 
+            // Handle Victories
+            _dbContext.Victories
+                .AddRange(userDay.Victories
+                    .Where(victory => victory.VictoryId == 0)
+                    .Where(victory => victory.Name.Trim().Length > 0 || victory.When != null)
+                    .Select(victory => victory with
+                    {
+                        UserId = userId,
+                        When = day.Date,
+                    }));
+
+            _dbContext.Victories
+                .UpdateRange(userDay.Victories
+                    .Where(victory => victory.VictoryId != 0)
+                    .Select(victory => _dbContext.Victories
+                        .AsNoTracking()
+                        .First(v => v.VictoryId == victory.VictoryId)
+                    with
+                    {
+                        Name = victory.Name,
+                    }));
+
+            var removeVictoryIds = userDay.Victories.Where(victory => victory.VictoryId == 0 || (string.IsNullOrWhiteSpace(victory.Name) && victory.VictoryId != 0))
+                .Select(victory => victory.VictoryId);
+
+            var removeVictories = _dbContext.Victories
+                .Where(victory => victory.UserId == userId && victory.When == day.Date)
+                .Where(victory => removeVictoryIds.Contains(victory.VictoryId))
+                .AsEnumerable();
+
+            _dbContext.Victories.RemoveRange(removeVictories);
+
+            await _dbContext.SaveChangesAsync(cancellationToken);
+
+            // All done lets commit it.
             await transaction.CommitAsync(cancellationToken);
 
             return Unit.Value;

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using diet_tracker_api.CQRS.Victories;
@@ -30,7 +31,7 @@ namespace diet_tracker_api.Controllers
 
         [HttpGet("/api/victories")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<IEnumerable<Victory>> GetAll([FromQuery]VictoryType type)
+        public async Task<IEnumerable<Victory>> GetAll([FromQuery]Nullable<VictoryType> type)
         {
             var userId = _httpContextAccessor.HttpContext.GetUserId();
             return await _mediator.Send(new GetVictories(userId, type, null));
