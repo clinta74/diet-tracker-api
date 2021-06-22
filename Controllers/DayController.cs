@@ -76,7 +76,22 @@ namespace diet_tracker_api.Controllers
                 return new NotFoundObjectResult($"User not found.");
             }
 
-            return new OkObjectResult(await _mediator.Send(new GetWeightRange(userId, startDate, endDate)));
+            return new OkObjectResult(await _mediator.Send(new GetWeightGraphData(userId, startDate, endDate)));
+        }
+
+        [HttpGet("water")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<IAsyncEnumerable<GraphValue>>> GetWater(DateTime startDate, Nullable<DateTime> endDate = null)
+        {
+            var userId = _httpContextAccessor.HttpContext.GetUserId();
+
+            if (!await _mediator.Send(new UserExists(userId)))
+            {
+                return new NotFoundObjectResult($"User not found.");
+            }
+
+            return new OkObjectResult(await _mediator.Send(new GetWaterGraphData(userId, startDate, endDate)));
         }
     }
 }

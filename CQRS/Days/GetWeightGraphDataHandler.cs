@@ -7,18 +7,18 @@ using Microsoft.EntityFrameworkCore;
 
 namespace diet_tracker_api.CQRS.Days
 {
-    public record GraphValue(decimal value, DateTime date);
-    public record GetWeightRange(string UserId, DateTime StartDate, Nullable<DateTime> EndDate) : IRequest<IAsyncEnumerable<GraphValue>>;
-    public class GetWeightRangeHandler : RequestHandler<GetWeightRange, IAsyncEnumerable<GraphValue>>
+    public record GetWeightGraphData(string UserId, DateTime StartDate, Nullable<DateTime> EndDate) :  
+        GetGraphData(UserId, StartDate, EndDate), IRequest<IAsyncEnumerable<GraphValue>>;
+    public class GetWeightGraphDataHandler : RequestHandler<GetWeightGraphData, IAsyncEnumerable<GraphValue>>
     {
         private readonly DietTrackerDbContext _dbContext;
 
-        public GetWeightRangeHandler(DietTrackerDbContext dbContext)
+        public GetWeightGraphDataHandler(DietTrackerDbContext dbContext)
         {
             _dbContext = dbContext;
         }
 
-        protected override IAsyncEnumerable<GraphValue> Handle(GetWeightRange request)
+        protected override IAsyncEnumerable<GraphValue> Handle(GetWeightGraphData request)
         {
             var exp = _dbContext.UserDays
                 .Where(userDay => userDay.UserId.Equals(request.UserId))
