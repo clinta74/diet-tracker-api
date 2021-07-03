@@ -74,7 +74,7 @@ namespace diet_tracker_api.Controllers
             if (userTracking == null) return new BadRequestResult();
 
             var userId = _httpContextAccessor.HttpContext.GetUserId();
-            var data =  await _mediator.Send(new AddUserTracking
+            var data = await _mediator.Send(new AddUserTracking
             (
                 userId,
                 userTracking.Title,
@@ -138,12 +138,16 @@ namespace diet_tracker_api.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult> Delete(int userTrackingId)
         {
-            var userId = _httpContextAccessor.HttpContext.GetUserId();
-            var data = await _mediator.Send(new DeleteUserTracking(userTrackingId, userId));
-
-            if (data == false) return new NotFoundResult();
-
-            return new OkResult();
+            try
+            {
+                var userId = _httpContextAccessor.HttpContext.GetUserId();
+                await _mediator.Send(new DeleteUserTracking(userTrackingId, userId));
+                return new OkResult();
+            }
+            catch (ArgumentException ex)
+            {
+                return new NotFoundObjectResult(ex.Message);
+            }
         }
     }
 }

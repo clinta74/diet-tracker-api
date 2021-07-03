@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 using diet_tracker_api.CQRS.Users;
 using diet_tracker_api.DataLayer.Models;
 using diet_tracker_api.Extensions;
-using diet_tracker_api.Models;
 using diet_tracker_api.Services;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -13,6 +12,14 @@ using Microsoft.Extensions.Logging;
 
 namespace diet_tracker_api.Controllers
 {
+    public record NewUser
+    {
+        public string UserId { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public string EmailAddress { get; set; }
+        public int PlanId { get; set; }
+    }
     [Authorize]
     [ApiController]
     [Route("api/[controller]")]
@@ -23,7 +30,7 @@ namespace diet_tracker_api.Controllers
         private readonly ILogger<NewUserController> _logger;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IMediator _mediator;
-        
+
         public NewUserController(ILogger<NewUserController> logger, IAuth0ManagementApiClient managementApiClient, IHttpContextAccessor httpContextAccessor, IMediator mediator)
         {
             _logger = logger;
@@ -48,7 +55,7 @@ namespace diet_tracker_api.Controllers
         {
             var userId = _httpContextAccessor.HttpContext.GetUserId();
 
-            return  await _mediator.Send(new AddNewUser(userId, userData.FirstName, userData.LastName, userData.EmailAddress, userData.PlanId));
+            return await _mediator.Send(new AddNewUser(userId, userData.FirstName, userData.LastName, userData.EmailAddress, userData.PlanId));
         }
 
         [HttpGet]

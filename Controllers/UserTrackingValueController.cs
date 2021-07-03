@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -44,11 +45,11 @@ namespace diet_tracker_api.Controllers
         {
             if (userTrackingValue == null) return new BadRequestResult();
 
-            var userId = _httpContextAccessor.HttpContext.GetUserId();            
+            var userId = _httpContextAccessor.HttpContext.GetUserId();
             return await _mediator.Send(new AddUserTrackingValue
             (
                 userTrackingValue.UserTrackingId,
-                userTrackingValue.Name, 
+                userTrackingValue.Name,
                 userTrackingValue.Description,
                 userTrackingValue.Order,
                 userTrackingValue.Type,
@@ -68,8 +69,8 @@ namespace diet_tracker_api.Controllers
             var data = await _mediator.Send(new UpdateUserTrackingValue
             (
                 userTrackingValueId,
-                userId, 
-                userTrackingValue.Name, 
+                userId,
+                userTrackingValue.Name,
                 userTrackingValue.Description,
                 userTrackingValue.Order,
                 userTrackingValue.Type,
@@ -86,12 +87,16 @@ namespace diet_tracker_api.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult> Delete(int userTrackingValueId)
         {
-            var userId = _httpContextAccessor.HttpContext.GetUserId();
-            var data = await _mediator.Send(new DeleteUserTrackingValue(userId, userTrackingValueId));
-
-            if (data == false) return new NotFoundResult();
-
-            return new OkResult();
+            try
+            {
+                var userId = _httpContextAccessor.HttpContext.GetUserId();
+                var data = await _mediator.Send(new DeleteUserTrackingValue(userId, userTrackingValueId));
+                return new OkResult();
+            }
+            catch (ArgumentException ex)
+            {
+                return new NotFoundObjectResult(ex.Message);
+            }
         }
     }
 }

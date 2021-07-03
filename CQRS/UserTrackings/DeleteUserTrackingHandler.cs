@@ -21,6 +21,7 @@ namespace diet_tracker_api.CQRS.UserTrackings
         {
             var data = await _dbContext.UserTrackings
                         .AsNoTracking()
+                        .Include(u => u.Values)
                         .Where(u => u.UserTrackingId.Equals(request.UserTrackingId))
                         .Where(u => u.UserId.Equals(request.UserId))
                         .SingleOrDefaultAsync(cancellationToken);
@@ -48,7 +49,7 @@ namespace diet_tracker_api.CQRS.UserTrackings
             _dbContext.UserTrackings
                 .Remove(data);
 
-            var result =  await _dbContext.SaveChangesAsync(cancellationToken) == 1;
+            var result =  await _dbContext.SaveChangesAsync(cancellationToken) > 0;
             
             await transaction.CommitAsync();
 

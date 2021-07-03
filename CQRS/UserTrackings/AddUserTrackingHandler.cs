@@ -13,10 +13,12 @@ namespace diet_tracker_api.CQRS.UserTrackings
     public class AddUserTrackingHandler : IRequestHandler<AddUserTracking, UserTracking>
     {
         private readonly DietTrackerDbContext _dbContext;
+        private readonly IMediator _mediator;
 
-        public AddUserTrackingHandler(DietTrackerDbContext dbContext)
+        public AddUserTrackingHandler(DietTrackerDbContext dbContext, IMediator mediator)
         {
             _dbContext = dbContext;
+            _mediator = mediator;
         }
 
         public async Task<UserTracking> Handle(AddUserTracking request, CancellationToken cancellationToken)
@@ -41,7 +43,7 @@ namespace diet_tracker_api.CQRS.UserTrackings
 
             await _dbContext.SaveChangesAsync(cancellationToken);
 
-            return result.Entity;
+            return await _mediator.Send(new GetUserTracking(request.UserId, result.Entity.UserTrackingId));
         }
     }
 }
