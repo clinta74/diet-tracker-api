@@ -20,6 +20,7 @@ namespace diet_tracker_api.DataLayer.Models
     public enum UserTrackingType
     {
         Number,
+        WholeNumber,
         Boolean,
     }
 }

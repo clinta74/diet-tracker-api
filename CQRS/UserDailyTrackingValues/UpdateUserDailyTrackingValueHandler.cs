@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace diet_tracker_api.CQRS.UserDailyTrackingValues
 {
-    public record UpdateUserDailyTrackingValue(int UserTrackingValueId, int Occurance, int Value, Nullable<DateTime> When);
+    public record UpdateUserDailyTrackingValue(int UserTrackingValueId, int Occurance, decimal Value, Nullable<DateTime> When);
     public record UpdateUserDailyTrackingValues(DateTime Day, string UserId, UpdateUserDailyTrackingValue[] Values) : IRequest<IEnumerable<UserDailyTrackingValue>>;
     public class UpdateUserDailyTrackingValueHandler : IRequestHandler<UpdateUserDailyTrackingValues, IEnumerable<UserDailyTrackingValue>>
     {

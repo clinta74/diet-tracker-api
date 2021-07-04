@@ -16,7 +16,7 @@ using Microsoft.Extensions.Logging;
 namespace diet_tracker_api.Controllers
 {
 
-    public record UserDailyTrackingValueRequest(int Occurrence, int UserTrackingValueId, int Value, Nullable<DateTime> When);
+    public record UserDailyTrackingValueRequest(int Occurrence, int UserTrackingValueId, decimal Value, Nullable<DateTime> When);
 
     [Authorize]
     [ApiController]
