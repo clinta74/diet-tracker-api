@@ -42,6 +42,7 @@ namespace diet_tracker_api.CQRS.UserTrackings
                             Name = v.Name,
                             Description = v.Description,
                             Order = v.Order,
+                            Type = v.Type,
                             Disabled = v.Disabled
                         })
                         .ToList()

@@ -40,6 +40,7 @@ namespace diet_tracker_api.CQRS.UserTrackings
                             UserTrackingId = v.UserTrackingId,
                             Name = v.Name,
                             Description = v.Description,
+                            Type = v.Type,
                             Order = v.Order,
                             Disabled = v.Disabled
                         })
