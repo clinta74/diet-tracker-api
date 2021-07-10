@@ -41,6 +41,8 @@ namespace diet_tracker_api.CQRS.UserTrackings
                             Name = v.Name,
                             Description = v.Description,
                             Type = v.Type,
+                            Min = v.Min,
+                            Max = v.Max,
                             Order = v.Order,
                             Disabled = v.Disabled
                         })

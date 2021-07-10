@@ -89,6 +89,8 @@ namespace diet_tracker_api.CQRS.UserTrackings
                     Description = userTrackingValue.Description,
                     Order = userTrackingValue.Order,
                     Type = userTrackingValue.Type,
+                    Min = userTrackingValue.Min,
+                    Max = userTrackingValue.Max,
                     Disabled = userTrackingValue.Disabled
                 });
 

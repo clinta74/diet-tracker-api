@@ -15,7 +15,7 @@ using Microsoft.Extensions.Logging;
 namespace diet_tracker_api.Controllers
 {
     public record UserTrackingRequest(string Title, string Description, int Occurrences, int Order, bool Disabled, IEnumerable<UserTrackingValueRequest> Values);
-    public record UserTrackingValueRequest(int UserTrackingValueId, int UserTrackingId, string Name, string Description, UserTrackingType Type, int Order, bool Disabled);
+    public record UserTrackingValueRequest(int UserTrackingValueId, int UserTrackingId, string Name, string Description, UserTrackingType Type, int Order, int Min, int? Max, bool Disabled);
 
     [Authorize]
     [ApiController]
@@ -88,6 +88,8 @@ namespace diet_tracker_api.Controllers
                     Description = value.Description,
                     Order = value.Order,
                     Type = value.Type,
+                    Min = value.Min,
+                    Max = value.Max,
                     Disabled = value.Disabled,
                 })
             ));
@@ -121,6 +123,8 @@ namespace diet_tracker_api.Controllers
                         Description = value.Description,
                         Order = value.Order,
                         Type = value.Type,
+                        Min = value.Min,
+                        Max = value.Max,
                         Disabled = value.Disabled,
                     })
                 ));
