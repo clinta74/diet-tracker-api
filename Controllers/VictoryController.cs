@@ -50,7 +50,7 @@ namespace diet_tracker_api.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<Victory>> Update(int id, Victory victory)
+        public async Task<ActionResult> Update(int id, Victory victory)
         {
             if (victory == null) return new BadRequestResult();
             var userId = _httpContextAccessor.HttpContext.GetUserId();

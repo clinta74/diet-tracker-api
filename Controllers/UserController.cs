@@ -65,5 +65,27 @@ namespace diet_tracker_api.Controllers
             return await _mediator.Send(new UserExists(userId));
         }
 
+        [HttpPatch]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult> Update(User user, CancellationToken cancellationToken)
+        {
+            if (user == null) return new BadRequestResult();
+
+            var userId = _httpContextAccessor.HttpContext.GetUserId();
+            var userExists = await _mediator.Send(new UserExists(userId));
+
+            if (userExists)
+            {
+                await _mediator.Send(new UpdateUser(userId, user.FirstName, user.LastName, user.WaterSize, user.WaterTarget, user.Autosave));
+                return new OkResult();
+            }
+            else
+            {
+                return new NotFoundObjectResult($"User not found.");
+            }
+        }
+
     }
 }

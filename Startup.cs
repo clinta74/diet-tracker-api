@@ -60,7 +60,7 @@ namespace diet_tracker_api
             var dbPassword = Configuration["DB_PASSWORD"];
             var userID = Configuration["DB_USERNAME"];
 
-            var builder = new SqlConnectionStringBuilder(Configuration.GetConnectionString("TempTrackerDatabase"))
+            var builder = new SqlConnectionStringBuilder(Configuration.GetConnectionString("DietTrackerDatabase"))
             {
                 Password = dbPassword,
                 UserID = userID,
