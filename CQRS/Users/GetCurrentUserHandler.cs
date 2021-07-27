@@ -12,15 +12,15 @@ namespace diet_tracker_api.CQRS.Users
     public record GetCurrentUser(string UserId) : IRequest<CurrentUser>;
     public record CurrentUser
     {
-        public string UserId { get; set; }
-        public string FirstName { get; set; }
-        public string LastName { get; set; }
-        public string EmailAddress { get; set; }
-        public DateTime Created { get; set; }
-        public int WaterTarget { get; set; }
-        public int WaterSize { get; set; }
-        public Plan CurrentPlan { get; set; }
-        public DateTime? Started { get; set; }
+        public string UserId { get; init; }
+        public string FirstName { get; init; }
+        public string LastName { get; init; }
+        public string EmailAddress { get; init; }
+        public DateTime Created { get; init; }
+        public int WaterTarget { get; init; }
+        public int WaterSize { get; init; }
+        public Plan CurrentPlan { get; init; }
+        public DateTime? Started { get; init; }
     }
 
     public class GetCurrentUserHandler : IRequestHandler<Users.GetCurrentUser, CurrentUser>

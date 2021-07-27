@@ -6,15 +6,15 @@ namespace diet_tracker_api.DataLayer.Models
 {
     public record UserDailyTrackingValue
     {
-        public string UserId { get; set; }
+        public string UserId { get; init; }
         [Column(TypeName = "date")]
-        public DateTime Day { get; set; }
-        public int Occurrence { get; set; }
-        public int UserTrackingValueId { get; set; }
+        public DateTime Day { get; init; }
+        public int Occurrence { get; init; }
+        public int UserTrackingValueId { get; init; }
         [Column(TypeName = "decimal(5, 2)")]
-        public decimal Value { get; set; }
-        public Nullable<DateTime> When { get; set; }
-        public virtual UserDay UserDay { get; set; }
-        public virtual UserTrackingValue TrackingValue { get; set; }
+        public decimal Value { get; init; }
+        public Nullable<DateTime> When { get; init; }
+        public virtual UserDay UserDay { get; init; }
+        public virtual UserTrackingValue TrackingValue { get; init; }
     }
 }

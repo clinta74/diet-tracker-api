@@ -7,17 +7,17 @@ namespace diet_tracker_api.DataLayer.Models
     public record UserTrackingValue
     {
         [Key]
-        public int UserTrackingValueId { get; set; }
-        public int UserTrackingId { get; set; }
-        public string Name { get; set; }
-        public string Description { get; set; }
-        public UserTrackingType Type { get; set; } = UserTrackingType.Number;
-        public int Order { get; set; }
-        public int Min { get; set; } = 0;
-        public Nullable<int> Max { get; set; } = null;
-        public bool Disabled { get; set; }
-        public virtual UserTracking Tracking { get; set; }
-        public virtual ICollection<UserDailyTrackingValue> DailyTrackingValues { get; set; }
+        public int UserTrackingValueId { get; init; }
+        public int UserTrackingId { get; init; }
+        public string Name { get; init; }
+        public string Description { get; init; }
+        public UserTrackingType Type { get; init; } = UserTrackingType.Number;
+        public int Order { get; init; }
+        public int Min { get; init; } = 0;
+        public Nullable<int> Max { get; init; } = null;
+        public bool Disabled { get; init; }
+        public virtual UserTracking Tracking { get; init; }
+        public virtual ICollection<UserDailyTrackingValue> DailyTrackingValues { get; init; }
     }
 
     public enum UserTrackingType

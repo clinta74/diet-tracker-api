@@ -7,12 +7,12 @@ namespace diet_tracker_api.DataLayer.Models
     public record UserMeal
     {
         [Key]
-        public int UserMealId { get; set; }
-        public string UserId { get; set; }
+        public int UserMealId { get; init; }
+        public string UserId { get; init; }
         [Column(TypeName = "date")]
-        public DateTime Day { get; set; }
-        public string Name { get; set; }
-        public Nullable<DateTime> When { get; set; }
-        public virtual UserDay UserDay { get; set; }     
+        public DateTime Day { get; init; }
+        public string Name { get; init; }
+        public Nullable<DateTime> When { get; init; }
+        public virtual UserDay UserDay { get; init; }     
     }
 }

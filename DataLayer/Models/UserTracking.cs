@@ -7,15 +7,15 @@ namespace diet_tracker_api.DataLayer.Models
     public record UserTracking
     {
         [Key]
-        public int UserTrackingId { get; set; }
-        public string UserId { get; set; }
-        public bool Disabled { get; set; }
-        public string Title { get; set; }
-        public string Description { get; set; }
-        public int Occurrences { get; set; }
-        public int Order { get; set; }
-        public bool UseTime { get; set; }
-        public virtual User User { get; set; }
-        public virtual IEnumerable<UserTrackingValue> Values { get; set; }
+        public int UserTrackingId { get; init; }
+        public string UserId { get; init; }
+        public bool Disabled { get; init; }
+        public string Title { get; init; }
+        public string Description { get; init; }
+        public int Occurrences { get; init; }
+        public int Order { get; init; }
+        public bool UseTime { get; init; }
+        public virtual User User { get; init; }
+        public virtual IEnumerable<UserTrackingValue> Values { get; init; }
     }
 }

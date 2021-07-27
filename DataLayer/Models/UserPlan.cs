@@ -4,10 +4,10 @@ namespace diet_tracker_api.DataLayer.Models
 {
     public record UserPlan
     {
-        public string UserId { get; set; }
-        public int PlanId { get; set; }
-        public DateTime Start { get; set; }
-        public virtual Plan Plan { get; set; }
-        public virtual User User { get; set; }
+        public string UserId { get; init; }
+        public int PlanId { get; init; }
+        public DateTime Start { get; init; }
+        public virtual Plan Plan { get; init; }
+        public virtual User User { get; init; }
     }
 }

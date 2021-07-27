@@ -13,9 +13,9 @@ namespace diet_tracker_api.CQRS.Days
 {
     public record CurrentUserDay : UserDay
     {
-        public decimal CumulativeWeightChange { get; set; }
-        public decimal WeightChange { get; set; }
-        public IEnumerable<Victory> Victories { get; set; }
+        public decimal CumulativeWeightChange { get; init; }
+        public decimal WeightChange { get; init; }
+        public IEnumerable<Victory> Victories { get; init; }
     }
 
     public record GetDay(DateTime Date, string UserId) : IRequest<CurrentUserDay>;
@@ -77,23 +77,25 @@ namespace diet_tracker_api.CQRS.Days
                 throw new ArgumentException($"User ID ({request.UserId}) has no selected plan.");
             }
 
+            var meals = new List<UserMeal>(data.Meals);
             if (data.Meals.Count < plan.MealCount)
             {
-                var meals = new UserMeal[plan.MealCount - data.Meals.Count];
-                Array.Fill(meals, new UserMeal { Name = "", Day = request.Date, UserId = request.UserId });
+                var _meals = new UserMeal[plan.MealCount - data.Meals.Count];
+                Array.Fill(_meals, new UserMeal { Name = "", Day = request.Date, UserId = request.UserId });
 
-                data.Meals = data.Meals.Concat(meals).ToList();
+                meals.AddRange(_meals);
             }
 
+            var fuelings = new List<UserFueling>(data.Fuelings);
             if (data.Fuelings.Count < plan.FuelingCount)
             {
-                var fuelings = new UserFueling[plan.FuelingCount - data.Fuelings.Count];
-                Array.Fill(fuelings, new UserFueling { Name = "", Day = request.Date, UserId = request.UserId });
+                var _fuelings = new UserFueling[plan.FuelingCount - data.Fuelings.Count];
+                Array.Fill(_fuelings, new UserFueling { Name = "", Day = request.Date, UserId = request.UserId });
 
-                data.Fuelings = data.Fuelings.Concat(fuelings).ToList();
+                fuelings.AddRange(_fuelings);
             }
 
-            data.Victories = await _mediator.Send(new GetVictories(request.UserId, VictoryType.NonScale, request.Date));
+            var victories = await _mediator.Send(new GetVictories(request.UserId, VictoryType.NonScale, request.Date));
 
             var weights = await _dbContext.UserDays
                 .Where(userDay => userDay.UserId == request.UserId && userDay.Weight > 0)
@@ -107,6 +109,9 @@ namespace diet_tracker_api.CQRS.Days
             {
                 return data with
                 {
+                    Meals = meals,
+                    Fuelings = fuelings,
+                    Victories = victories,
                     CumulativeWeightChange = weights.First() - weights.Last(),
                     WeightChange = weights[weights.Count - 2] - weights.Last(),
                 };
@@ -116,6 +121,9 @@ namespace diet_tracker_api.CQRS.Days
             {
                 return data with
                 {
+                    Meals = meals,
+                    Fuelings = fuelings,
+                    Victories = victories,
                     CumulativeWeightChange = weights.First() - weights.Last(),
                 };
             }

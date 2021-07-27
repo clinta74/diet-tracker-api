@@ -7,12 +7,12 @@ namespace diet_tracker_api.DataLayer.Models
     public record Victory
     {
         [Key]
-        public int VictoryId { get; set; }
-        public string UserId { get; set; }
-        public string Name { get; set; }
-        public Nullable<DateTime> When { get; set; }
-        public VictoryType Type { get; set; }
-        public User User { get; set; }
+        public int VictoryId { get; init; }
+        public string UserId { get; init; }
+        public string Name { get; init; }
+        public Nullable<DateTime> When { get; init; }
+        public VictoryType Type { get; init; }
+        public User User { get; init; }
     }
 
     public enum VictoryType
