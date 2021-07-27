@@ -64,10 +64,10 @@ namespace diet_tracker_api.CQRS.UserTrackings
                         Disabled = v.Disabled,
                         Order = v.Order,
                         Type = v.Type,
+                        Min = v.Min,
+                        Max = v.Max,
                     })
                 );
-
-            await _dbContext.SaveChangesAsync();
 
             var values = await _dbContext.UserTrackingValues
                 .AsNoTracking()
@@ -93,8 +93,6 @@ namespace diet_tracker_api.CQRS.UserTrackings
                     Max = userTrackingValue.Max,
                     Disabled = userTrackingValue.Disabled
                 });
-
-                await _dbContext.SaveChangesAsync();
             }
 
             var removeTrackingValueIds = request.Values.Where(value => value.UserTrackingValueId != 0).Select(value => value.UserTrackingValueId);
