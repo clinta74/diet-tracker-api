@@ -51,7 +51,7 @@ namespace diet_tracker_api.CQRS.UserTrackings
 
             var result =  await _dbContext.SaveChangesAsync(cancellationToken) > 0;
             
-            await transaction.CommitAsync();
+            await transaction.CommitAsync(cancellationToken);
 
             return result;
         }

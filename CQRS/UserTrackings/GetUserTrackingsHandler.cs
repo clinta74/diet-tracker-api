@@ -45,7 +45,7 @@ namespace diet_tracker_api.CQRS.UserTrackings
                             Disabled = v.Disabled
                         })
                 })
-                .ToListAsync();
+                .ToListAsync(cancellationToken);
         }
     }
 }

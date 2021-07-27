@@ -31,7 +31,7 @@ namespace diet_tracker_api.CQRS.UserTrackingValues
                     Disabled = request.Disabled
                 });
 
-            await _dbContext.SaveChangesAsync();
+            await _dbContext.SaveChangesAsync(cancellationToken);
 
             return data.Entity.UserTrackingValueId;
         }

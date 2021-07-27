@@ -35,7 +35,7 @@ namespace diet_tracker_api.CQRS.Users
                     Autosave = request.Autosave,
                 });
 
-                return await _dbContext.SaveChangesAsync() == 1;
+                return await _dbContext.SaveChangesAsync(cancellationToken) == 1;
             }
 
             return false;

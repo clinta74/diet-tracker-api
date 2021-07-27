@@ -25,7 +25,7 @@ namespace diet_tracker_api.CQRS.UserTrackingValues
                 .AsNoTracking()
                 .Where(p => p.UserTrackingValueId == request.UserTrackingValueId)
                 .Where(p => p.Tracking.UserId == request.UserId)
-                .FirstOrDefaultAsync();
+                .FirstOrDefaultAsync(cancellationToken);
 
             
             if (data == null)
@@ -41,7 +41,7 @@ namespace diet_tracker_api.CQRS.UserTrackingValues
                 Disabled = request.Disabled
             });
 
-            return await _dbContext.SaveChangesAsync() == 1;
+            return await _dbContext.SaveChangesAsync(cancellationToken) == 1;
         }
     }
 }

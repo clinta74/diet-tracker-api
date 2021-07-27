@@ -51,7 +51,7 @@ namespace diet_tracker_api.CQRS.UserTrackings
                     Disabled = request.Disabled
                 });
 
-            await _dbContext.SaveChangesAsync();
+            await _dbContext.SaveChangesAsync(cancellationToken);
 
             _dbContext.UserTrackingValues
                 .AddRange(request.Values
@@ -81,7 +81,7 @@ namespace diet_tracker_api.CQRS.UserTrackings
                     .AsNoTracking()
                     .Where(p => p.UserTrackingValueId == userTrackingValue.UserTrackingValueId)
                     .Where(p => p.Tracking.UserId == request.UserId)
-                    .FirstOrDefaultAsync();
+                    .FirstOrDefaultAsync(cancellationToken);
 
                 _dbContext.Update(value with
                 {
@@ -105,9 +105,9 @@ namespace diet_tracker_api.CQRS.UserTrackings
             _dbContext.UserTrackingValues
                 .RemoveRange(removeTrackingValues);
 
-            await _dbContext.SaveChangesAsync();
+            await _dbContext.SaveChangesAsync(cancellationToken);
 
-            await transaction.CommitAsync();
+            await transaction.CommitAsync(cancellationToken);
 
             return data;
         }

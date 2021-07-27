@@ -26,7 +26,7 @@ namespace diet_tracker_api.CQRS.Plans
                 Start = DateTime.Now,
             });
 
-            await ctx.SaveChangesAsync();
+            await ctx.SaveChangesAsync(cancellationToken);
 
             return request.PlanId;
         }

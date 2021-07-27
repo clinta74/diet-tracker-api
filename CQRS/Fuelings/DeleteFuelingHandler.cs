@@ -21,7 +21,7 @@ namespace diet_tracker_api.CQRS.Fuelings
         {
             var data = await _dbContext.Fuelings
                 .AsNoTracking()
-                .SingleOrDefaultAsync(fueling => fueling.FuelingId == request.FuelingId);
+                .SingleOrDefaultAsync(fueling => fueling.FuelingId == request.FuelingId, cancellationToken);
 
             if (data == null)
             {

@@ -49,7 +49,7 @@ namespace diet_tracker_api.CQRS.UserTrackings
                         })
                         .ToList()
                 })
-                .ToListAsync();
+                .ToListAsync(cancellationToken);
         }
     }
 }
