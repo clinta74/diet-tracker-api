@@ -35,7 +35,8 @@ namespace diet_tracker_api.CQRS.UserTrackingValues
                     Type = p.Type,
                     Min = p.Min,
                     Max = p.Max,
-                    Disabled = p.Disabled           
+                    Disabled = p.Disabled,
+                    Metadata = p.Metadata,          
                 })
                 .ToListAsync(cancellationToken);
 

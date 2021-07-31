@@ -55,7 +55,8 @@ namespace diet_tracker_api.Controllers
                 userTrackingValue.Type,
                 userTrackingValue.Min,
                 userTrackingValue.Max,
-                userTrackingValue.Disabled
+                userTrackingValue.Disabled,
+                userTrackingValue.Metadata
             ));
         }
 
@@ -78,7 +79,8 @@ namespace diet_tracker_api.Controllers
                 userTrackingValue.Type,
                 userTrackingValue.Min,
                 userTrackingValue.Max,
-                userTrackingValue.Disabled
+                userTrackingValue.Disabled,
+                userTrackingValue.Metadata
             ));
 
             if (data == false) return new NotFoundResult();

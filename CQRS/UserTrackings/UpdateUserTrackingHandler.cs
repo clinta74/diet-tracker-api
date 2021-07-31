@@ -16,7 +16,7 @@ namespace diet_tracker_api.CQRS.UserTrackings
         string Title, 
         string Description, 
         int Occurrences, 
-        bool Disabled, 
+        bool Disabled,
         IEnumerable<UserTrackingValue> Values) : IRequest<UserTracking>;
     public class UpdateUserTrackingHandler : IRequestHandler<UpdateUserTracking, UserTracking>
     {
@@ -55,17 +55,18 @@ namespace diet_tracker_api.CQRS.UserTrackings
 
             _dbContext.UserTrackingValues
                 .AddRange(request.Values
-                    .Where(v => v.UserTrackingValueId == 0)
-                    .Select(v => new UserTrackingValue
+                    .Where(userTrackingValue => userTrackingValue.UserTrackingValueId == 0)
+                    .Select(userTrackingValue => new UserTrackingValue
                     {
                         UserTrackingId = data.UserTrackingId,
-                        Name = v.Name,
-                        Description = v.Description,
-                        Disabled = v.Disabled,
-                        Order = v.Order,
-                        Type = v.Type,
-                        Min = v.Min,
-                        Max = v.Max,
+                        Name = userTrackingValue.Name,
+                        Description = userTrackingValue.Description,
+                        Disabled = userTrackingValue.Disabled,
+                        Order = userTrackingValue.Order,
+                        Type = userTrackingValue.Type,
+                        Min = userTrackingValue.Min,
+                        Max = userTrackingValue.Max,
+                        Metadata = userTrackingValue.Metadata,
                     })
                 );
 
@@ -91,7 +92,8 @@ namespace diet_tracker_api.CQRS.UserTrackings
                     Type = userTrackingValue.Type,
                     Min = userTrackingValue.Min,
                     Max = userTrackingValue.Max,
-                    Disabled = userTrackingValue.Disabled
+                    Disabled = userTrackingValue.Disabled,
+                    Metadata = userTrackingValue.Metadata,
                 });
             }
 

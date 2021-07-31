@@ -16,6 +16,7 @@ namespace diet_tracker_api.DataLayer.Models
         public int Min { get; init; } = 0;
         public Nullable<int> Max { get; init; } = null;
         public bool Disabled { get; init; }
+        public string Metadata { get; init; }
         public virtual UserTracking Tracking { get; init; }
         public virtual ICollection<UserDailyTrackingValue> DailyTrackingValues { get; init; }
     }

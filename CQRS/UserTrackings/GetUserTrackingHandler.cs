@@ -44,7 +44,8 @@ namespace diet_tracker_api.CQRS.UserTrackings
                             Min = v.Min,
                             Max = v.Max,
                             Order = v.Order,
-                            Disabled = v.Disabled
+                            Disabled = v.Disabled,
+                            Metadata = v.Metadata,
                         })
                 })
                 .FirstOrDefaultAsync(cancellationToken);
