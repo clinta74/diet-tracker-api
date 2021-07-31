@@ -53,8 +53,6 @@ namespace diet_tracker_api.Controllers
                 userTrackingValue.Description,
                 userTrackingValue.Order,
                 userTrackingValue.Type,
-                userTrackingValue.Min,
-                userTrackingValue.Max,
                 userTrackingValue.Disabled,
                 userTrackingValue.Metadata
             ));
@@ -77,8 +75,6 @@ namespace diet_tracker_api.Controllers
                 userTrackingValue.Description,
                 userTrackingValue.Order,
                 userTrackingValue.Type,
-                userTrackingValue.Min,
-                userTrackingValue.Max,
                 userTrackingValue.Disabled,
                 userTrackingValue.Metadata
             ));

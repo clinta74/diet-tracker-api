@@ -64,8 +64,6 @@ namespace diet_tracker_api.CQRS.UserTrackings
                         Disabled = userTrackingValue.Disabled,
                         Order = userTrackingValue.Order,
                         Type = userTrackingValue.Type,
-                        Min = userTrackingValue.Min,
-                        Max = userTrackingValue.Max,
                         Metadata = userTrackingValue.Metadata,
                     })
                 );
@@ -90,8 +88,6 @@ namespace diet_tracker_api.CQRS.UserTrackings
                     Description = userTrackingValue.Description,
                     Order = userTrackingValue.Order,
                     Type = userTrackingValue.Type,
-                    Min = userTrackingValue.Min,
-                    Max = userTrackingValue.Max,
                     Disabled = userTrackingValue.Disabled,
                     Metadata = userTrackingValue.Metadata,
                 });

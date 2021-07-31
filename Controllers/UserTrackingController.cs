@@ -98,8 +98,6 @@ namespace diet_tracker_api.Controllers
                     Description = value.Description,
                     Order = value.Order,
                     Type = value.Type,
-                    Min = value.Min,
-                    Max = value.Max,
                     Disabled = value.Disabled,
                     Metadata = value.Metadata,
                 })
@@ -134,8 +132,6 @@ namespace diet_tracker_api.Controllers
                         Description = value.Description,
                         Order = value.Order,
                         Type = value.Type,
-                        Min = value.Min,
-                        Max = value.Max,
                         Disabled = value.Disabled,
                         Metadata = value.Metadata,
                     })

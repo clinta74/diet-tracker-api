@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace diet_tracker_api.CQRS.UserTrackingValues
 {
-    public record UpdateUserTrackingValue(int UserTrackingValueId, string UserId, string Name, string Description, int Order, UserTrackingType Type, int Min, int? Max, bool Disabled, string Metadata) : IRequest<bool>;
+    public record UpdateUserTrackingValue(int UserTrackingValueId, string UserId, string Name, string Description, int Order, UserTrackingType Type, bool Disabled, string Metadata) : IRequest<bool>;
     public class UpdateUserTrackingValueHandler : IRequestHandler<UpdateUserTrackingValue, bool>
     {
         private readonly DietTrackerDbContext _dbContext;
@@ -38,8 +38,6 @@ namespace diet_tracker_api.CQRS.UserTrackingValues
                 Description = request.Description,
                 Order = request.Order,
                 Type = request.Type,
-                Min = request.Min,
-                Max = request.Max,
                 Disabled = request.Disabled,
                 Metadata = request.Metadata,
             });
