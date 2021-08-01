@@ -1,6 +1,6 @@
 using System.Threading;
 using System.Threading.Tasks;
-using diet_tracker_api.CQRS.Users;
+using diet_tracker_api.BusinessLayer.Users;
 using diet_tracker_api.DataLayer.Models;
 using diet_tracker_api.Extensions;
 using diet_tracker_api.Services;

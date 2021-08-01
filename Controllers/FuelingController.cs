@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using diet_tracker_api.CQRS.Fuelings;
+using diet_tracker_api.BusinessLayer.Fuelings;
 using diet_tracker_api.DataLayer.Models;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;

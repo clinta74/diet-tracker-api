@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using diet_tracker_api.CQRS.Victories;
+using diet_tracker_api.BusinessLayer.Victories;
 using diet_tracker_api.DataLayer.Models;
 using diet_tracker_api.Extensions;
 using MediatR;

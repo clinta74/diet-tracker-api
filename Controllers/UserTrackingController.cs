@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using diet_tracker_api.CQRS.UserTrackings;
+using diet_tracker_api.BusinessLayer.UserTrackings;
+using diet_tracker_api.Controllers.Models;
 using diet_tracker_api.DataLayer.Models;
 using diet_tracker_api.Extensions;
 using MediatR;
@@ -14,19 +15,6 @@ using Microsoft.Extensions.Logging;
 
 namespace diet_tracker_api.Controllers
 {
-    public record UserTrackingRequest(string Title, string Description, int Occurrences, int Order, bool Disabled, IEnumerable<UserTrackingValueRequest> Values);
-    public record UserTrackingValueRequest(
-        int UserTrackingValueId, 
-        int UserTrackingId, 
-        string Name, 
-        string Description, 
-        UserTrackingType Type, 
-        int Order, 
-        int Min, 
-        int? Max, 
-        bool Disabled, 
-        string Metadata);
-
     [Authorize]
     [ApiController]
     [Route("api/[controller]")]
@@ -99,7 +87,12 @@ namespace diet_tracker_api.Controllers
                     Order = value.Order,
                     Type = value.Type,
                     Disabled = value.Disabled,
-                    Metadata = value.Metadata,
+                    Metadata = value.Metadata.Select(metadata => new UserTrackingValueMetadata
+                    {
+                        Key = metadata.Key,
+                        UserTrackingValueId = value.UserTrackingValueId,
+                        Value = metadata.Value,
+                    }).ToArray()
                 })
             ));
 
@@ -133,7 +126,12 @@ namespace diet_tracker_api.Controllers
                         Order = value.Order,
                         Type = value.Type,
                         Disabled = value.Disabled,
-                        Metadata = value.Metadata,
+                        Metadata = value.Metadata.Select(metadata => new UserTrackingValueMetadata
+                        {
+                            Key = metadata.Key,
+                            UserTrackingValueId = value.UserTrackingValueId,
+                            Value = metadata.Value,
+                        }).ToArray()
                     })
                 ));
 

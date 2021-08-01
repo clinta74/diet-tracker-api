@@ -22,6 +22,7 @@ namespace diet_tracker_api.DataLayer
         public DbSet<UserDailyTrackingValue> UserDailyTrackingValues { get; set; }
         public DbSet<UserTracking> UserTrackings { get; set; }
         public DbSet<UserTrackingValue> UserTrackingValues { get; set; }
+        public DbSet<UserTrackingValueMetadata> UserTrackingValueMetadata {get; set;}
         public DbSet<Victory> Victories { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -102,6 +103,14 @@ namespace diet_tracker_api.DataLayer
                 .HasMany(v => v.DailyTrackingValues)
                 .WithOne(v => v.TrackingValue)
                 .HasForeignKey(v => v.UserTrackingValueId);
+
+            modelBuilder.Entity<UserTrackingValue>()
+                .HasMany(userTrackingValue => userTrackingValue.Metadata)
+                .WithOne(userTrackingValueMetadata => userTrackingValueMetadata.UserTrackingValue)
+                .HasForeignKey(userTrackingValue => userTrackingValue.UserTrackingValueId);
+
+            modelBuilder.Entity<UserTrackingValueMetadata>()
+                .HasKey(userTrackingValueMetadata => new { userTrackingValueMetadata.UserTrackingValueId, userTrackingValueMetadata.Key });
 
             modelBuilder.Entity<Victory>()
                 .Property(v => v.Type)
