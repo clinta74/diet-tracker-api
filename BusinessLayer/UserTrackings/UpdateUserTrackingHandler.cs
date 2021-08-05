@@ -89,8 +89,24 @@ namespace diet_tracker_api.BusinessLayer.UserTrackings
                     Order = userTrackingValue.Order,
                     Type = userTrackingValue.Type,
                     Disabled = userTrackingValue.Disabled,
-                    Metadata = userTrackingValue.Metadata,
                 });
+
+                var metadata = await _dbContext.UserTrackingValueMetadata
+                    .AsNoTracking()
+                    .Where(p => p.UserTrackingValueId == userTrackingValue.UserTrackingValueId)
+                    .ToListAsync(cancellationToken);
+
+                _dbContext.UserTrackingValueMetadata
+                    .RemoveRange(metadata);
+                
+                _dbContext.UserTrackingValueMetadata
+                    .AddRange(userTrackingValue.Metadata
+                        .Select(m => new UserTrackingValueMetadata
+                        {
+                            Key = m.Key,
+                            Value = m.Value,
+                            UserTrackingValueId = userTrackingValue.UserTrackingValueId
+                        }));
             }
 
             var removeTrackingValueIds = request.Values.Where(value => value.UserTrackingValueId != 0).Select(value => value.UserTrackingValueId);
