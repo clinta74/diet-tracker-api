@@ -41,6 +41,7 @@ namespace diet_tracker_api.BusinessLayer.UserTrackings
                             Description = v.Description,
                             Order = v.Order,
                             Disabled = v.Disabled,
+                            Type = v.Type,
                             Metadata = v.Metadata,
                         })
                 })
