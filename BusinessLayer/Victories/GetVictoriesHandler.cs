@@ -35,6 +35,7 @@ namespace diet_tracker_api.BusinessLayer.Victories
 
             return await exp
                 .AsNoTracking()
+                .OrderBy(victory => victory.When)
                 .ToListAsync(cancellationToken);
 
         }
