@@ -11,7 +11,7 @@ namespace diet_tracker_api.DataLayer.Models
         public DateTime Day { get; init; }
         public int Occurrence { get; init; }
         public int UserTrackingValueId { get; init; }
-        [Column(TypeName = "decimal(5, 2)")]
+        [Column(TypeName = "decimal(10, 2)")]
         public decimal Value { get; init; }
         public Nullable<DateTime> When { get; init; }
         public virtual UserDay UserDay { get; init; }

@@ -14,12 +14,10 @@ namespace diet_tracker_api.BusinessLayer.UserDailyTrackingValues
     public class GetCurrentUserDailyTrackingValuesHandler : IRequestHandler<GetCurrentUserDailyTrackingValues, IEnumerable<UserDailyTrackingValue>>
     {
         private readonly DietTrackerDbContext _dbContext;
-        private readonly IMediator _meditor;
 
-        public GetCurrentUserDailyTrackingValuesHandler(DietTrackerDbContext dbContext, IMediator meditor)
+        public GetCurrentUserDailyTrackingValuesHandler(DietTrackerDbContext dbContext)
         {
             _dbContext = dbContext;
-            _meditor = meditor;
         }
 
         public async Task<IEnumerable<UserDailyTrackingValue>> Handle(GetCurrentUserDailyTrackingValues request, CancellationToken cancellationToken)

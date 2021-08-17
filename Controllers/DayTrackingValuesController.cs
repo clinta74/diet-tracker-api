@@ -68,6 +68,21 @@ namespace diet_tracker_api.Controllers
                 new UpdateUserDailyTrackingValue(value.UserTrackingValueId, value.Occurrence, value.Value, value.When)).ToArray()));
 
             return new OkObjectResult(data);
+        }
+
+        [HttpGet("{userTrackingId}/history")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<IAsyncEnumerable<UserDailyTrackingValue>>> GetHistory(int userTrackingId, DateTime startDate, Nullable<DateTime> endDate = null)
+        {
+            var userId = _httpContextAccessor.HttpContext.GetUserId();
+
+            if (!await _mediator.Send(new UserExists(userId)))
+            {
+                return new NotFoundObjectResult($"User not found.");
+            }
+
+            return new OkObjectResult(await _mediator.Send(new GetCurrentUserDailyTrackingValuesHistory(userId, userTrackingId, startDate, endDate)));
         } 
     }
 }
