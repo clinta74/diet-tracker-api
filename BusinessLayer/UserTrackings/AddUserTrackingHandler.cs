@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace diet_tracker_api.BusinessLayer.UserTrackings
 {
-    public record AddUserTracking(string UserId, string Title, string Description, int Occurrences, int Order, IEnumerable<UserTrackingValue> Values) : IRequest<UserTracking>;
+    public record AddUserTracking(string UserId, string Title, string Description, int Occurrences, int Order, bool UseTime, IEnumerable<UserTrackingValue> Values) : IRequest<UserTracking>;
     public class AddUserTrackingHandler : IRequestHandler<AddUserTracking, UserTracking>
     {
         private readonly DietTrackerDbContext _dbContext;
@@ -38,6 +38,7 @@ namespace diet_tracker_api.BusinessLayer.UserTrackings
                    Disabled = false,
                    Occurrences = request.Occurrences,
                    Order = order + 1,
+                   UseTime = request.UseTime,
                    Values = request.Values.ToList(),
                });
 

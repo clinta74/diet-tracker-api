@@ -17,6 +17,7 @@ namespace diet_tracker_api.BusinessLayer.UserTrackings
         string Description, 
         int Occurrences, 
         bool Disabled,
+        bool UseTime,
         IEnumerable<UserTrackingValue> Values) : IRequest<UserTracking>;
     public class UpdateUserTrackingHandler : IRequestHandler<UpdateUserTracking, UserTracking>
     {
@@ -48,7 +49,8 @@ namespace diet_tracker_api.BusinessLayer.UserTrackings
                     Title = request.Title,
                     Description = request.Description,
                     Occurrences = request.Occurrences,
-                    Disabled = request.Disabled
+                    Disabled = request.Disabled,
+                    UseTime = request.UseTime,
                 });
 
             await _dbContext.SaveChangesAsync(cancellationToken);

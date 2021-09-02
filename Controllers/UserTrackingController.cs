@@ -79,6 +79,7 @@ namespace diet_tracker_api.Controllers
                 userTracking.Description,
                 userTracking.Occurrences,
                 userTracking.Order,
+                userTracking.UseTime,
                 userTracking.Values.Select(value => new UserTrackingValue
                 {
                     UserTrackingValueId = 0,
@@ -118,6 +119,7 @@ namespace diet_tracker_api.Controllers
                     userTracking.Description,
                     userTracking.Occurrences,
                     userTracking.Disabled,
+                    userTracking.UseTime,
                     userTracking.Values.Select(value => new UserTrackingValue
                     {
                         UserTrackingValueId = value.UserTrackingValueId,

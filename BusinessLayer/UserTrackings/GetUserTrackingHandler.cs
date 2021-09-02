@@ -33,6 +33,7 @@ namespace diet_tracker_api.BusinessLayer.UserTrackings
                     Occurrences = userTracking.Occurrences,
                     Order = userTracking.Order,
                     Disabled = userTracking.Disabled,
+                    UseTime = userTracking.UseTime,
                     Values = userTracking.Values
                         .Select(v => new UserTrackingValue
                         {
