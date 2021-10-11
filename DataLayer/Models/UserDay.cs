@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace diet_tracker_api.DataLayer.Models
@@ -13,6 +14,7 @@ namespace diet_tracker_api.DataLayer.Models
         public int Water { get; init; }
 
         [Column(TypeName = "decimal(5, 2)")]
+        [Range(0, 999.99)]
         public decimal Weight { get; init; }
         public string Notes { get; init; }
         public virtual User User { get; init; }
