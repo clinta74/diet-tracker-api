@@ -11,10 +11,17 @@ using Microsoft.EntityFrameworkCore;
 
 namespace diet_tracker_api.BusinessLayer.Days
 {
-    public record CurrentUserDay : UserDay
+    public record CurrentUserDay
     {
+        public string UserId { get; init; }
+        public DateTime Day { get; init; }
+        public int Water { get; init; }
+        public decimal Weight { get; init; }
         public decimal CumulativeWeightChange { get; init; }
         public decimal WeightChange { get; init; }
+        public string Notes { get; init; }
+        public ICollection<UserFueling> Fuelings { get; init; }
+        public ICollection<UserMeal> Meals { get; init; }
         public IEnumerable<Victory> Victories { get; init; }
     }
 
