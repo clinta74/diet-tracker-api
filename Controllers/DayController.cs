@@ -33,7 +33,7 @@ namespace diet_tracker_api.Controllers
         [HttpGet("{day}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<CurrentUserDay>> GetCurrentUserDay(DateTime day, CancellationToken cancellationToken)
+        public async Task<ActionResult<CurrentUserDay>> GetCurrentUserDay([FromRoute] DateTime day, CancellationToken cancellationToken)
         {
             var userId = _httpContextAccessor.HttpContext.GetUserId();
 
@@ -42,7 +42,7 @@ namespace diet_tracker_api.Controllers
                 return new NotFoundObjectResult($"User not found.");
             }
 
-            var data = await _mediator.Send(new GetDay(day, userId), cancellationToken);
+            var data = await _mediator.Send(new GetDay(day.ToDateOnly(), userId), cancellationToken);
 
             return data;
         }
@@ -50,7 +50,7 @@ namespace diet_tracker_api.Controllers
         [HttpPut("{day}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<CurrentUserDay>> UpdateCurrentUserDay(DateTime day, CurrentUserDay userDay, CancellationToken cancellationToken)
+        public async Task<ActionResult<CurrentUserDay>> UpdateCurrentUserDay([FromRoute] DateTime day, [FromBody] CurrentUserDay userDay, CancellationToken cancellationToken)
         {
             var userId = _httpContextAccessor.HttpContext.GetUserId();
 
@@ -59,15 +59,15 @@ namespace diet_tracker_api.Controllers
                 return new NotFoundObjectResult($"User not found.");
             }
 
-            await _mediator.Send(new UpdateDay(day, userId, userDay), cancellationToken);
+            await _mediator.Send(new UpdateDay(day.ToDateOnly(), userId, userDay), cancellationToken);
 
-            return await _mediator.Send(new GetDay(day, userId), cancellationToken);
+            return await _mediator.Send(new GetDay(day.ToDateOnly(), userId), cancellationToken);
         }
 
         [HttpGet("weight")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<IAsyncEnumerable<GraphValue>>> GetWeight(DateTime startDate, Nullable<DateTime> endDate = null)
+        public async Task<ActionResult<IAsyncEnumerable<GraphValue>>> GetWeight([FromQuery] DateOnly startDate, [FromQuery] Nullable<DateOnly> endDate = null)
         {
             var userId = _httpContextAccessor.HttpContext.GetUserId();
 
@@ -82,7 +82,7 @@ namespace diet_tracker_api.Controllers
         [HttpGet("water")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<IAsyncEnumerable<GraphValue>>> GetWater(DateTime startDate, Nullable<DateTime> endDate = null)
+        public async Task<ActionResult<IAsyncEnumerable<GraphValue>>> GetWater([FromQuery] DateOnly startDate, [FromQuery] Nullable<DateOnly> endDate = null)
         {
             var userId = _httpContextAccessor.HttpContext.GetUserId();
 

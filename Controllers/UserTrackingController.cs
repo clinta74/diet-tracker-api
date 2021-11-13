@@ -51,7 +51,7 @@ namespace diet_tracker_api.Controllers
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<UserTracking>> GetById(int id, CancellationToken cancellationToken)
+        public async Task<ActionResult<UserTracking>> GetById([FromRoute] int id, CancellationToken cancellationToken)
         {
             var userId = _httpContextAccessor.HttpContext.GetUserId();
             var data = await _mediator.Send(new GetUserTracking(userId, id));
@@ -67,7 +67,7 @@ namespace diet_tracker_api.Controllers
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<UserTracking>> Add(UserTrackingRequest userTracking)
+        public async Task<ActionResult<UserTracking>> Add(UserTrackingRequest userTracking, CancellationToken cancellationToken)
         {
             if (userTracking == null) return new BadRequestResult();
 
@@ -95,7 +95,7 @@ namespace diet_tracker_api.Controllers
                         Value = metadata.Value,
                     }).ToArray()
                 })
-            ));
+            ), cancellationToken);
 
             return new OkObjectResult(data);
         }
@@ -104,7 +104,7 @@ namespace diet_tracker_api.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult> Update(int userTrackingId, UserTrackingRequest userTracking)
+        public async Task<ActionResult> Update([FromRoute] int userTrackingId, UserTrackingRequest userTracking, CancellationToken cancellationToken)
         {
             if (userTracking == null) return new BadRequestResult();
 
@@ -135,7 +135,7 @@ namespace diet_tracker_api.Controllers
                             Value = metadata.Value,
                         }).ToArray()
                     })
-                ));
+                ), cancellationToken);
 
                 return new OkObjectResult(data);
             }
@@ -148,12 +148,12 @@ namespace diet_tracker_api.Controllers
         [HttpDelete("{userTrackingId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult> Delete(int userTrackingId)
+        public async Task<ActionResult> Delete([FromRoute] int userTrackingId, CancellationToken cancellationToken)
         {
             try
             {
                 var userId = _httpContextAccessor.HttpContext.GetUserId();
-                await _mediator.Send(new DeleteUserTracking(userTrackingId, userId));
+                await _mediator.Send(new DeleteUserTracking(userTrackingId, userId), cancellationToken);
                 return new OkResult();
             }
             catch (ArgumentException ex)

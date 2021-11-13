@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace diet_tracker_api.BusinessLayer.Days
 {
-    public record GetWeightGraphData(string UserId, DateTime StartDate, Nullable<DateTime> EndDate) :  
+    public record GetWeightGraphData(string UserId, DateOnly StartDate, Nullable<DateOnly> EndDate) :  
         GetGraphData(UserId, StartDate, EndDate), IRequest<IAsyncEnumerable<GraphValue>>;
     public class GetWeightGraphDataHandler : RequestHandler<GetWeightGraphData, IAsyncEnumerable<GraphValue>>
     {
