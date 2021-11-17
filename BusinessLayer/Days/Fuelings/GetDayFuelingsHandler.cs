@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using diet_tracker_api.DataLayer;
+using diet_tracker_api.DataLayer.Models;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -38,17 +39,7 @@ namespace diet_tracker_api.BusinessLayer.Days.Fuelings
                 .AsNoTracking()
                 .ToListAsync(cancellationToken);
 
-            var plan = await _dbContext.UserPlans
-                    .OrderByDescending(up => up.Start)
-                    .Where(up => up.UserId == request.UserId)
-                    .Select(up => up.Plan)
-                    .AsNoTracking()
-                    .FirstOrDefaultAsync(cancellationToken);
-
-            if (plan == null)
-            {
-                throw new ArgumentException($"User ID ({request.UserId}) has no selected plan.");
-            }
+            var plan = await _mediator.Send(new GetCurrentUserPlan(request.UserId));
 
             var fuelings = new List<UserDayFueling>(data);
             if (data.Count < plan.FuelingCount)
