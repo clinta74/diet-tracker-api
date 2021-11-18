@@ -7,8 +7,6 @@ using diet_tracker_api.BusinessLayer.Days.Fuelings;
 using diet_tracker_api.BusinessLayer.Days.Meals;
 using diet_tracker_api.BusinessLayer.Days.Victories;
 using diet_tracker_api.BusinessLayer.Users;
-using diet_tracker_api.BusinessLayer.Victories;
-using diet_tracker_api.DataLayer.Models;
 using diet_tracker_api.Extensions;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;

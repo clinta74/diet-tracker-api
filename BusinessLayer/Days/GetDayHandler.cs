@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using diet_tracker_api.BusinessLayer.Victories;
 using diet_tracker_api.DataLayer;
 using diet_tracker_api.DataLayer.Models;
 using MediatR;
@@ -20,9 +19,6 @@ namespace diet_tracker_api.BusinessLayer.Days
         public decimal CumulativeWeightChange { get; init; }
         public decimal WeightChange { get; init; }
         public string Notes { get; init; }
-        public ICollection<UserFueling> Fuelings { get; init; }
-        public ICollection<UserMeal> Meals { get; init; }
-        public IEnumerable<Victory> Victories { get; init; }
     }
 
     public record GetDay(DateTime Date, string UserId) : IRequest<CurrentUserDay>;
