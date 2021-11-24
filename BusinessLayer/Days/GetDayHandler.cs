@@ -18,7 +18,7 @@ namespace diet_tracker_api.BusinessLayer.Days
         public IEnumerable<Victory> Victories { get; init; }
     }
 
-    public record GetDay(DateTime Date, string UserId) : IRequest<CurrentUserDay>;
+    public record GetDay(DateOnly Day, string UserId) : IRequest<CurrentUserDay>;
     public class GetDayHandler : IRequestHandler<Days.GetDay, CurrentUserDay>
     {
         private readonly DietTrackerDbContext _dbContext;
@@ -34,7 +34,7 @@ namespace diet_tracker_api.BusinessLayer.Days
         {
             var data = await _dbContext.UserDays
                 .Where(userDay => userDay.UserId == request.UserId)
-                .Where(userDay => userDay.Day == request.Date)
+                .Where(userDay => userDay.Day == request.Day)
                 .Include(userDay => userDay.Fuelings)
                 .Include(userDay => userDay.Meals)
                 .Select(userDay => new CurrentUserDay
@@ -55,7 +55,7 @@ namespace diet_tracker_api.BusinessLayer.Days
             {
                 data = new CurrentUserDay
                 {
-                    Day = request.Date,
+                    Day = request.Day,
                     UserId = request.UserId,
                     Water = 0,
                     Weight = 0,
@@ -81,7 +81,7 @@ namespace diet_tracker_api.BusinessLayer.Days
             if (data.Meals.Count < plan.MealCount)
             {
                 var _meals = new UserMeal[plan.MealCount - data.Meals.Count];
-                Array.Fill(_meals, new UserMeal { Name = "", Day = request.Date, UserId = request.UserId });
+                Array.Fill(_meals, new UserMeal { Name = "", Day = request.Day, UserId = request.UserId });
 
                 meals.AddRange(_meals);
             }
@@ -90,17 +90,17 @@ namespace diet_tracker_api.BusinessLayer.Days
             if (data.Fuelings.Count < plan.FuelingCount)
             {
                 var _fuelings = new UserFueling[plan.FuelingCount - data.Fuelings.Count];
-                Array.Fill(_fuelings, new UserFueling { Name = "", Day = request.Date, UserId = request.UserId });
+                Array.Fill(_fuelings, new UserFueling { Name = "", Day = request.Day, UserId = request.UserId });
 
                 fuelings.AddRange(_fuelings);
             }
 
-            var victories = await _mediator.Send(new GetVictories(request.UserId, VictoryType.NonScale, request.Date));
+            var victories = await _mediator.Send(new GetVictories(request.UserId, VictoryType.NonScale, request.Day.ToDateTime(TimeOnly.MinValue)));
 
             var weights = await _dbContext.UserDays
                 .Where(userDay => userDay.UserId == request.UserId && userDay.Weight > 0)
                 .OrderBy(userDay => userDay.Day)
-                .Where(userDay => userDay.Day <= request.Date)
+                .Where(userDay => userDay.Day <= request.Day)
                 .AsNoTracking()
                 .Select(userDay => userDay.Weight)
                 .ToListAsync(cancellationToken);

@@ -42,7 +42,7 @@ namespace diet_tracker_api.Controllers
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<Plan>> GetById(int id, CancellationToken cancellationToken)
+        public async Task<ActionResult<Plan>> GetById([FromRoute] int id, CancellationToken cancellationToken)
         {
             var data = await _mediator.Send(new GetPlanById(id));
             if (data == null)
@@ -72,7 +72,7 @@ namespace diet_tracker_api.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> Update(int id, Plan plan, CancellationToken cancellationToken)
+        public async Task<IActionResult> Update([FromRoute] int id, [FromBody] Plan plan, CancellationToken cancellationToken)
         {
             if (plan == null)
             {
@@ -94,7 +94,7 @@ namespace diet_tracker_api.Controllers
         [HttpDelete("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> Remove(int id, CancellationToken cancellationToken)
+        public async Task<IActionResult> Remove([FromRoute] int id, CancellationToken cancellationToken)
         {
             try
             {
@@ -110,7 +110,7 @@ namespace diet_tracker_api.Controllers
         [HttpPut("change")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<int>> Change([FromBody]int planId, CancellationToken cancellationToken)
+        public async Task<ActionResult<int>> Change([FromBody] int planId, CancellationToken cancellationToken)
         {
             var userId = _httpContextAccessor.HttpContext.GetUserId();
 

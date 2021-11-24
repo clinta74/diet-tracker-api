@@ -31,7 +31,7 @@ namespace diet_tracker_api.Controllers
         [Authorize("read:user")]
         [HttpGet("{userid}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<User>> GetUserById(string userId, CancellationToken cancellationToken)
+        public async Task<ActionResult<User>> GetUserById([FromRoute] string userId, CancellationToken cancellationToken)
         {
             var data = await _mediator.Send(new GetUserById(userId));
             if (data == null) return new NotFoundResult();
