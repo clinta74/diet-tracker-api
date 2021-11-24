@@ -51,7 +51,7 @@ namespace diet_tracker_api.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<string>> AddNewUser([FromBody] NewUser userData, CancellationToken cancellationToken)
+        public async Task<ActionResult<string>> AddNewUser(NewUser userData, CancellationToken cancellationToken)
         {
             var userId = _httpContextAccessor.HttpContext.GetUserId();
 

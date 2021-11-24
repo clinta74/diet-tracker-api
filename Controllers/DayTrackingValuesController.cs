@@ -38,7 +38,7 @@ namespace diet_tracker_api.Controllers
         [HttpGet("{day}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<IEnumerable<UserDailyTrackingValue>>> GetCurrentUserDayTrackingValues([FromRoute] DateTime day, CancellationToken cancellationToken)
+        public async Task<ActionResult<IEnumerable<UserDailyTrackingValue>>> GetCurrentUserDayTrackingValues(DateTime day, CancellationToken cancellationToken)
         {
             var userId = _httpContextAccessor.HttpContext.GetUserId();
 
@@ -47,7 +47,7 @@ namespace diet_tracker_api.Controllers
                 return new NotFoundObjectResult($"User not found.");
             }
 
-            var data = await _mediator.Send(new GetCurrentUserDailyTrackingValues(day.ToDateOnly(), userId), cancellationToken);
+            var data = await _mediator.Send(new GetCurrentUserDailyTrackingValues(day, userId), cancellationToken);
 
             return new OkObjectResult(data);
         }
@@ -55,7 +55,7 @@ namespace diet_tracker_api.Controllers
         [HttpPut("{day}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<UserDailyTrackingValue>> UpdateCurrentUserDayTrackingValue([FromRoute] DateTime day, UserDailyTrackingValueRequest[] values, CancellationToken cancellationToken)
+        public async Task<ActionResult<UserDailyTrackingValue>> UpdateCurrentUserDayTrackingValue(DateTime day, UserDailyTrackingValueRequest[] values, CancellationToken cancellationToken)
         {
             var userId = _httpContextAccessor.HttpContext.GetUserId();
 
@@ -64,7 +64,7 @@ namespace diet_tracker_api.Controllers
                 return new NotFoundObjectResult($"User not found.");
             }
 
-            var data = await _mediator.Send(new UpdateUserDailyTrackingValues(day.ToDateOnly(), userId, values.Select(value => 
+            var data = await _mediator.Send(new UpdateUserDailyTrackingValues(day, userId, values.Select(value => 
                 new UpdateUserDailyTrackingValue(value.UserTrackingValueId, value.Occurrence, value.Value, value.When)).ToArray()));
 
             return new OkObjectResult(data);
@@ -73,7 +73,7 @@ namespace diet_tracker_api.Controllers
         [HttpGet("{userTrackingId}/history")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<IAsyncEnumerable<UserDailyTrackingValue>>> GetHistory([FromRoute] int userTrackingId, [FromQuery] DateOnly startDate, [FromQuery] Nullable<DateOnly> endDate = null)
+        public async Task<ActionResult<IAsyncEnumerable<UserDailyTrackingValue>>> GetHistory(int userTrackingId, DateTime startDate, Nullable<DateTime> endDate = null)
         {
             var userId = _httpContextAccessor.HttpContext.GetUserId();
 

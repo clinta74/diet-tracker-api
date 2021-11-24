@@ -56,7 +56,7 @@ namespace diet_tracker_api.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult> Update([FromRoute] int id, Fueling fueling, CancellationToken cancellationToken)
+        public async Task<ActionResult> Update(int id, Fueling fueling, CancellationToken cancellationToken)
         {
             if (fueling == null)
             {
@@ -78,7 +78,7 @@ namespace diet_tracker_api.Controllers
         [HttpDelete("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult> Remove([FromRoute] int id, CancellationToken cancellationToken)
+        public async Task<ActionResult> Remove(int id, CancellationToken cancellationToken)
         {
             try
             {

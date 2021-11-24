@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace diet_tracker_api.BusinessLayer.Days
 {
-    public record UpdateDay(DateOnly Day, string UserId, CurrentUserDay UserDay) : IRequest<Unit>;
+    public record UpdateDay(DateTime Day, string UserId, CurrentUserDay UserDay) : IRequest<Unit>;
 
     public class UpdateDayHandler : IRequestHandler<UpdateDay, Unit>
     {
@@ -27,7 +27,7 @@ namespace diet_tracker_api.BusinessLayer.Days
             var userDay = request.UserDay;
 
             var data = await _dbContext.UserDays
-                .Where(userDay => userDay.UserId == userId && userDay.Day == day)
+                .Where(userDay => userDay.UserId == userId && userDay.Day == day.Date)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(cancellationToken);
 
@@ -36,7 +36,7 @@ namespace diet_tracker_api.BusinessLayer.Days
                 _dbContext.UserDays
                     .Add(new UserDay
                     {
-                        Day = day,
+                        Day = day.Date,
                         UserId = userId,
                         Water = userDay.Water,
                         Weight = userDay.Weight,
@@ -63,7 +63,7 @@ namespace diet_tracker_api.BusinessLayer.Days
                     .Select(m => m with
                     {
                         UserId = userId,
-                        Day = day,
+                        Day = day.Date,
                     }));
 
             _dbContext.UserMeals
@@ -82,7 +82,7 @@ namespace diet_tracker_api.BusinessLayer.Days
                 .Select(meal => meal.UserMealId);
 
             var removeMeals = _dbContext.UserMeals
-                .Where(userMeal => userMeal.UserId == userId && userMeal.Day == day)
+                .Where(userMeal => userMeal.UserId == userId && userMeal.Day == day.Date)
                 .Where(userMeal => removeMealIds.Contains(userMeal.UserMealId))
                 .AsEnumerable();
 
@@ -98,7 +98,7 @@ namespace diet_tracker_api.BusinessLayer.Days
                    .Select(f => f with
                    {
                        UserId = userId,
-                       Day = day,
+                       Day = day.Date,
                    }));
 
             _dbContext.UserFuelings
@@ -117,7 +117,7 @@ namespace diet_tracker_api.BusinessLayer.Days
                 .Select(fueling => fueling.UserFuelingId);
 
             var removeFuelings = _dbContext.UserFuelings
-                .Where(userFueling => userFueling.UserId == userId && userFueling.Day == day)
+                .Where(userFueling => userFueling.UserId == userId && userFueling.Day == day.Date)
                 .Where(userFueling => removeFuelingIds.Contains(userFueling.UserFuelingId))
                 .AsEnumerable();
 
@@ -133,7 +133,7 @@ namespace diet_tracker_api.BusinessLayer.Days
                     .Select(victory => victory with
                     {
                         UserId = userId,
-                        When = day.ToDateTime(TimeOnly.MinValue),
+                        When = day.Date,
                     }));
 
             _dbContext.Victories
@@ -151,7 +151,7 @@ namespace diet_tracker_api.BusinessLayer.Days
                 .Select(victory => victory.VictoryId);
 
             var removeVictories = _dbContext.Victories
-                .Where(victory => victory.UserId == userId && victory.When == day.ToDateTime(TimeOnly.MinValue))
+                .Where(victory => victory.UserId == userId && victory.When == day.Date)
                 .Where(victory => removeVictoryIds.Contains(victory.VictoryId))
                 .AsEnumerable();
 

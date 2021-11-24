@@ -10,7 +10,7 @@ namespace diet_tracker_api.DataLayer.Models
         public string UserId { get; init; }
 
         [Column(TypeName = "date")]
-        public DateOnly Day { get; init; }
+        public DateTime Day { get; init; }
         public int Water { get; init; }
 
         [Column(TypeName = "decimal(5, 2)")]

@@ -7,7 +7,7 @@ using MediatR;
 
 namespace diet_tracker_api.BusinessLayer.UserDailyTrackingValues
 {
-    public record AddUserDailyTracking(DateOnly Day, string UserId, int UserTrackingValueId, int Occurance, decimal Value, DateTime When) : IRequest<bool>;
+    public record AddUserDailyTracking(DateTime Day, string UserId, int UserTrackingValueId, int Occurance, decimal Value, DateTime When) : IRequest<bool>;
 
     public class AddUserDailyTrackingHandler: IRequestHandler<AddUserDailyTracking, bool>
     {

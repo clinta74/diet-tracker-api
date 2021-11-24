@@ -63,7 +63,7 @@ namespace diet_tracker_api.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult> Update([FromRoute] int userTrackingValueId, [FromBody] UserTrackingValueRequest userTrackingValue)
+        public async Task<ActionResult> Update(int userTrackingValueId, UserTrackingValueRequest userTrackingValue)
         {
             if (userTrackingValue == null) return new BadRequestResult();
 
@@ -88,7 +88,7 @@ namespace diet_tracker_api.Controllers
         [HttpDelete("{userTrackingValueId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult> Delete([FromRoute] int userTrackingValueId)
+        public async Task<ActionResult> Delete(int userTrackingValueId)
         {
             try
             {

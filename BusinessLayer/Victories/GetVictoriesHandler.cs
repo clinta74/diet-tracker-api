@@ -9,7 +9,7 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 namespace diet_tracker_api.BusinessLayer.Victories
 {
-    public record GetVictories(string UserId, Nullable<VictoryType> Type, Nullable<DateTime> When) : IRequest<IEnumerable<Victory>>;
+    public record GetVictories(string UserId, Nullable<VictoryType> Type, Nullable<DateTime> Day) : IRequest<IEnumerable<Victory>>;
     
     public class GetVictoriesHandler : IRequestHandler<GetVictories, IEnumerable<Victory>>
     {
@@ -28,9 +28,9 @@ namespace diet_tracker_api.BusinessLayer.Victories
                 exp = exp.Where(victory => victory.Type == request.Type.Value);
             }
 
-            if (request.When.HasValue)
+            if (request.Day.HasValue)
             {
-                exp = exp.Where(victory => victory.When == request.When.Value);
+                exp = exp.Where(victory => victory.When == request.Day);
             }
 
             return await exp

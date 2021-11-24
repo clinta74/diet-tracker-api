@@ -1,10 +1,8 @@
 
-using System;
 using System.Diagnostics.CodeAnalysis;
 using diet_tracker_api.DataLayer.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace diet_tracker_api.DataLayer
 {
@@ -12,17 +10,6 @@ namespace diet_tracker_api.DataLayer
     {
         public DietTrackerDbContext([NotNullAttribute] DbContextOptions options) : base(options)
         {
-        }
-
-        protected override void ConfigureConventions(ModelConfigurationBuilder builder)
-        {
-            builder.Properties<DateOnly>()
-                .HaveConversion<DateOnlyConverter>()
-                .HaveColumnType("date");
-
-            builder.Properties<DateOnly?>()
-                .HaveConversion<NullableDateOnlyConverter>()
-                .HaveColumnType("date");
         }
 
         public DbSet<Fueling> Fuelings { get; set; }
@@ -35,7 +22,7 @@ namespace diet_tracker_api.DataLayer
         public DbSet<UserDailyTrackingValue> UserDailyTrackingValues { get; set; }
         public DbSet<UserTracking> UserTrackings { get; set; }
         public DbSet<UserTrackingValue> UserTrackingValues { get; set; }
-        public DbSet<UserTrackingValueMetadata> UserTrackingValueMetadata { get; set; }
+        public DbSet<UserTrackingValueMetadata> UserTrackingValueMetadata {get; set;}
         public DbSet<Victory> Victories { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -132,8 +119,6 @@ namespace diet_tracker_api.DataLayer
             // Configure Code First to ignore PluralizingTableName convention
             // If you keep this convention then the generated tables will have pluralized names.
             modelBuilder.RemovePluralizingTableNameConvention();
-
-
         }
     }
 
@@ -146,37 +131,5 @@ namespace diet_tracker_api.DataLayer
                 entity.SetTableName(entity.DisplayName());
             }
         }
-    }
-
-    /// <summary>
-    /// Converts <see cref="DateOnly" /> to <see cref="DateTime"/> and vice versa.
-    /// </summary>
-    public class DateOnlyConverter : ValueConverter<DateOnly, DateTime>
-    {
-        /// <summary>
-        /// Creates a new instance of this converter.
-        /// </summary>
-        public DateOnlyConverter() : base(
-                d => d.ToDateTime(TimeOnly.MinValue),
-                d => DateOnly.FromDateTime(d))
-        { }
-    }
-
-    /// <summary>
-    /// Converts <see cref="DateOnly?" /> to <see cref="DateTime?"/> and vice versa.
-    /// </summary>
-    public class NullableDateOnlyConverter : ValueConverter<DateOnly?, DateTime?>
-    {
-        /// <summary>
-        /// Creates a new instance of this converter.
-        /// </summary>
-        public NullableDateOnlyConverter() : base(
-            d => d == null
-                ? null
-                : new DateTime?(d.Value.ToDateTime(TimeOnly.MinValue)),
-            d => d == null
-                ? null
-                : new DateOnly?(DateOnly.FromDateTime(d.Value)))
-        { }
     }
 }

@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace diet_tracker_api.BusinessLayer.UserDailyTrackingValues
 {
-    public record GetCurrentUserDailyTrackingValuesHistory(string userId, int UserTrackingId, Nullable<DateOnly> StartDate, Nullable<DateOnly> EndDate) :
+    public record GetCurrentUserDailyTrackingValuesHistory(string userId, int UserTrackingId, Nullable<DateTime> StartDate, Nullable<DateTime> EndDate) :
         IRequest<IAsyncEnumerable<UserDailyTrackingValue>>;
     public class GetCurrentUserDailyTrackingValuesHistoryHandler : RequestHandler<GetCurrentUserDailyTrackingValuesHistory, IAsyncEnumerable<UserDailyTrackingValue>>
     {

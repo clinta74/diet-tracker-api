@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore;
 namespace diet_tracker_api.BusinessLayer.UserDailyTrackingValues
 {
     public record UpdateUserDailyTrackingValue(int UserTrackingValueId, int Occurance, decimal Value, Nullable<DateTime> When);
-    public record UpdateUserDailyTrackingValues(DateOnly Day, string UserId, UpdateUserDailyTrackingValue[] Values) : IRequest<IEnumerable<UserDailyTrackingValue>>;
+    public record UpdateUserDailyTrackingValues(DateTime Day, string UserId, UpdateUserDailyTrackingValue[] Values) : IRequest<IEnumerable<UserDailyTrackingValue>>;
     public class UpdateUserDailyTrackingValueHandler : IRequestHandler<UpdateUserDailyTrackingValues, IEnumerable<UserDailyTrackingValue>>
     {
         private readonly DietTrackerDbContext _dbContext;

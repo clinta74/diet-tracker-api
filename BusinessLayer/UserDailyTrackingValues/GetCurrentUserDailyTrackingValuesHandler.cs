@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace diet_tracker_api.BusinessLayer.UserDailyTrackingValues
 {
-    public record GetCurrentUserDailyTrackingValues(DateOnly day, string userId) : IRequest<IEnumerable<UserDailyTrackingValue>>;
+    public record GetCurrentUserDailyTrackingValues(DateTime day, string userId) : IRequest<IEnumerable<UserDailyTrackingValue>>;
     public class GetCurrentUserDailyTrackingValuesHandler : IRequestHandler<GetCurrentUserDailyTrackingValues, IEnumerable<UserDailyTrackingValue>>
     {
         private readonly DietTrackerDbContext _dbContext;
