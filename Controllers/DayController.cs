@@ -7,6 +7,7 @@ using diet_tracker_api.BusinessLayer.Days.Fuelings;
 using diet_tracker_api.BusinessLayer.Days.Meals;
 using diet_tracker_api.BusinessLayer.Days.Victories;
 using diet_tracker_api.BusinessLayer.Users;
+using diet_tracker_api.DataLayer.Models;
 using diet_tracker_api.Extensions;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -108,6 +109,57 @@ namespace diet_tracker_api.Controllers
             await _mediator.Send(new UpdateDay(day, userId, userDay), cancellationToken);
 
             return await _mediator.Send(new GetDay(day, userId), cancellationToken);
+        }
+
+        [HttpPut("{day}/fuelings")]
+        [ProducesResponseType(StatusCodes.Status202Accepted)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult> UpdateDayFuelings(DateTime day, IEnumerable<UserFueling> fuelings, CancellationToken cancellationToken)
+        {
+            var userId = _httpContextAccessor.HttpContext.GetUserId();
+
+            if (!await _mediator.Send(new UserExists(userId)))
+            {
+                return new NotFoundObjectResult($"User not found.");
+            }
+
+            await _mediator.Send(new UpdateDayFuelings(day, userId, fuelings), cancellationToken);
+
+            return new AcceptedResult();
+        }
+
+        [HttpPut("{day}/meals")]
+        [ProducesResponseType(StatusCodes.Status202Accepted)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult> UpdateDayMeals(DateTime day, IEnumerable<UserMeal> meals, CancellationToken cancellationToken)
+        {
+            var userId = _httpContextAccessor.HttpContext.GetUserId();
+
+            if (!await _mediator.Send(new UserExists(userId)))
+            {
+                return new NotFoundObjectResult($"User not found.");
+            }
+
+            await _mediator.Send(new UpdateDayMeals(day, userId, meals), cancellationToken);
+
+            return new AcceptedResult();
+        }
+
+        [HttpPut("{day}/victories")]
+        [ProducesResponseType(StatusCodes.Status202Accepted)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult> UpdateDayVictories(DateTime day, IEnumerable<Victory> victories, CancellationToken cancellationToken)
+        {
+            var userId = _httpContextAccessor.HttpContext.GetUserId();
+
+            if (!await _mediator.Send(new UserExists(userId)))
+            {
+                return new NotFoundObjectResult($"User not found.");
+            }
+
+            await _mediator.Send(new UpdateDayVictories(day, userId, victories), cancellationToken);
+
+            return new AcceptedResult();
         }
 
         [HttpGet("weight")]

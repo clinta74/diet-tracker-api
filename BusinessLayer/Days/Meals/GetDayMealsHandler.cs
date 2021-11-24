@@ -41,12 +41,12 @@ namespace diet_tracker_api.BusinessLayer.Days.Meals
             var plan = await _mediator.Send(new GetCurrentUserPlan(request.UserId));
 
             var meals = new List<UserDayMeal>(data);
-            if (data.Count < plan.FuelingCount)
+            if (data.Count < plan.MealCount)
             {
-                var _fuelings = new UserDayMeal[plan.FuelingCount - data.Count];
-                Array.Fill(_fuelings, new UserDayMeal(0, request.UserId, request.Date, "", null));
+                var _meals = new UserDayMeal[plan.MealCount - data.Count];
+                Array.Fill(_meals, new UserDayMeal(0, request.UserId, request.Date, "", null));
 
-                meals.AddRange(_fuelings);
+                meals.AddRange(_meals);
             }
 
             return meals;
