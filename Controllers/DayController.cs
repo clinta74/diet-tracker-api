@@ -112,9 +112,9 @@ namespace diet_tracker_api.Controllers
         }
 
         [HttpPut("{day}/fuelings")]
-        [ProducesResponseType(StatusCodes.Status202Accepted)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult> UpdateDayFuelings(DateTime day, IEnumerable<UserFueling> fuelings, CancellationToken cancellationToken)
+        public async Task<ActionResult<IEnumerable<UserDayFueling>>> UpdateDayFuelings(DateTime day, IEnumerable<UserFueling> fuelings, CancellationToken cancellationToken)
         {
             var userId = _httpContextAccessor.HttpContext.GetUserId();
 
@@ -125,13 +125,13 @@ namespace diet_tracker_api.Controllers
 
             await _mediator.Send(new UpdateDayFuelings(day, userId, fuelings), cancellationToken);
 
-            return new AcceptedResult();
+            return new OkObjectResult(await _mediator.Send(new GetDayFuelings(day, userId), cancellationToken));
         }
 
         [HttpPut("{day}/meals")]
-        [ProducesResponseType(StatusCodes.Status202Accepted)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult> UpdateDayMeals(DateTime day, IEnumerable<UserMeal> meals, CancellationToken cancellationToken)
+        public async Task<ActionResult<IEnumerable<UserDayMeal>>> UpdateDayMeals(DateTime day, IEnumerable<UserMeal> meals, CancellationToken cancellationToken)
         {
             var userId = _httpContextAccessor.HttpContext.GetUserId();
 
@@ -142,13 +142,13 @@ namespace diet_tracker_api.Controllers
 
             await _mediator.Send(new UpdateDayMeals(day, userId, meals), cancellationToken);
 
-            return new AcceptedResult();
+            return new OkObjectResult(await _mediator.Send(new GetDayMeals(day, userId), cancellationToken));
         }
 
         [HttpPut("{day}/victories")]
-        [ProducesResponseType(StatusCodes.Status202Accepted)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult> UpdateDayVictories(DateTime day, IEnumerable<Victory> victories, CancellationToken cancellationToken)
+        public async Task<ActionResult<IEnumerable<UserDayVictory>>> UpdateDayVictories(DateTime day, IEnumerable<Victory> victories, CancellationToken cancellationToken)
         {
             var userId = _httpContextAccessor.HttpContext.GetUserId();
 
@@ -159,7 +159,7 @@ namespace diet_tracker_api.Controllers
 
             await _mediator.Send(new UpdateDayVictories(day, userId, victories), cancellationToken);
 
-            return new AcceptedResult();
+            return new OkObjectResult(await _mediator.Send(new GetDayVictories(day, userId), cancellationToken));
         }
 
         [HttpGet("weight")]
