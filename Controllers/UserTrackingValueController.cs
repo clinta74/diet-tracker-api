@@ -6,6 +6,7 @@ using diet_tracker_api.BusinessLayer.UserTrackingValues;
 using diet_tracker_api.Controllers.Models;
 using diet_tracker_api.DataLayer.Models;
 using diet_tracker_api.Extensions;
+using diet_tracker_api.Filters;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -18,6 +19,7 @@ namespace diet_tracker_api.Controllers
     [ApiController]
     [Route("api/[controller]")]
     [Produces("application/json")]
+    [ServiceFilter(typeof(UserExistsFilter))]
     public class UserTrackingValueController
     {
         private readonly ILogger<UserTrackingValueController> _logger;

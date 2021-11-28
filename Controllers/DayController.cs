@@ -9,6 +9,7 @@ using diet_tracker_api.BusinessLayer.Days.Victories;
 using diet_tracker_api.BusinessLayer.Users;
 using diet_tracker_api.DataLayer.Models;
 using diet_tracker_api.Extensions;
+using diet_tracker_api.Filters;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -21,6 +22,7 @@ namespace diet_tracker_api.Controllers
     [ApiController]
     [Route("api/[controller]")]
     [Produces("application/json")]
+    [ServiceFilter(typeof(UserExistsFilter))]
     public class DayController
     {
         private readonly ILogger<DayController> _logger;
@@ -40,12 +42,6 @@ namespace diet_tracker_api.Controllers
         public async Task<ActionResult<CurrentUserDay>> GetCurrentUserDay(DateTime day, CancellationToken cancellationToken)
         {
             var userId = _httpContextAccessor.HttpContext.GetUserId();
-
-            if (!await _mediator.Send(new UserExists(userId)))
-            {
-                return new NotFoundObjectResult($"User not found.");
-            }
-
             return new OkObjectResult(await _mediator.Send(new GetDay(day, userId), cancellationToken));
         }
 
@@ -55,12 +51,6 @@ namespace diet_tracker_api.Controllers
         public async Task<ActionResult<IEnumerable<UserDayFueling>>> GetCurrentUserDayFuelings(DateTime day, CancellationToken cancellationToken)
         {
             var userId = _httpContextAccessor.HttpContext.GetUserId();
-
-            if (!await _mediator.Send(new UserExists(userId)))
-            {
-                return new NotFoundObjectResult($"User not found.");
-            }
-
             return new OkObjectResult(await _mediator.Send(new GetDayFuelings(day, userId), cancellationToken));
         }
 
@@ -70,12 +60,6 @@ namespace diet_tracker_api.Controllers
         public async Task<ActionResult<IEnumerable<UserDayMeal>>> GetCurrentUserDayMeals(DateTime day, CancellationToken cancellationToken)
         {
             var userId = _httpContextAccessor.HttpContext.GetUserId();
-
-            if (!await _mediator.Send(new UserExists(userId)))
-            {
-                return new NotFoundObjectResult($"User not found.");
-            }
-
             return new OkObjectResult(await _mediator.Send(new GetDayMeals(day, userId), cancellationToken));
         }
 
@@ -85,12 +69,6 @@ namespace diet_tracker_api.Controllers
         public async Task<ActionResult<IEnumerable<UserDayVictory>>> GetCurrentUserDayVictories(DateTime day, CancellationToken cancellationToken)
         {
             var userId = _httpContextAccessor.HttpContext.GetUserId();
-
-            if (!await _mediator.Send(new UserExists(userId)))
-            {
-                return new NotFoundObjectResult($"User not found.");
-            }
-
             return new OkObjectResult(await _mediator.Send(new GetDayVictories(day, userId), cancellationToken));
         }
 
@@ -100,12 +78,6 @@ namespace diet_tracker_api.Controllers
         public async Task<ActionResult<CurrentUserDay>> UpdateCurrentUserDay(DateTime day, CurrentUserDay userDay, CancellationToken cancellationToken)
         {
             var userId = _httpContextAccessor.HttpContext.GetUserId();
-
-            if (!await _mediator.Send(new UserExists(userId)))
-            {
-                return new NotFoundObjectResult($"User not found.");
-            }
-
             await _mediator.Send(new UpdateDay(day, userId, userDay), cancellationToken);
 
             return await _mediator.Send(new GetDay(day, userId), cancellationToken);
@@ -117,12 +89,6 @@ namespace diet_tracker_api.Controllers
         public async Task<ActionResult<IEnumerable<UserDayFueling>>> UpdateDayFuelings(DateTime day, IEnumerable<UserFueling> fuelings, CancellationToken cancellationToken)
         {
             var userId = _httpContextAccessor.HttpContext.GetUserId();
-
-            if (!await _mediator.Send(new UserExists(userId)))
-            {
-                return new NotFoundObjectResult($"User not found.");
-            }
-
             await _mediator.Send(new UpdateDayFuelings(day, userId, fuelings), cancellationToken);
 
             return new OkObjectResult(await _mediator.Send(new GetDayFuelings(day, userId), cancellationToken));
@@ -134,12 +100,6 @@ namespace diet_tracker_api.Controllers
         public async Task<ActionResult<IEnumerable<UserDayMeal>>> UpdateDayMeals(DateTime day, IEnumerable<UserMeal> meals, CancellationToken cancellationToken)
         {
             var userId = _httpContextAccessor.HttpContext.GetUserId();
-
-            if (!await _mediator.Send(new UserExists(userId)))
-            {
-                return new NotFoundObjectResult($"User not found.");
-            }
-
             await _mediator.Send(new UpdateDayMeals(day, userId, meals), cancellationToken);
 
             return new OkObjectResult(await _mediator.Send(new GetDayMeals(day, userId), cancellationToken));
@@ -151,12 +111,6 @@ namespace diet_tracker_api.Controllers
         public async Task<ActionResult<IEnumerable<UserDayVictory>>> UpdateDayVictories(DateTime day, IEnumerable<Victory> victories, CancellationToken cancellationToken)
         {
             var userId = _httpContextAccessor.HttpContext.GetUserId();
-
-            if (!await _mediator.Send(new UserExists(userId)))
-            {
-                return new NotFoundObjectResult($"User not found.");
-            }
-
             await _mediator.Send(new UpdateDayVictories(day, userId, victories), cancellationToken);
 
             return new OkObjectResult(await _mediator.Send(new GetDayVictories(day, userId), cancellationToken));
@@ -168,12 +122,6 @@ namespace diet_tracker_api.Controllers
         public async Task<ActionResult<IAsyncEnumerable<GraphValue>>> GetWeight(DateTime startDate, Nullable<DateTime> endDate = null)
         {
             var userId = _httpContextAccessor.HttpContext.GetUserId();
-
-            if (!await _mediator.Send(new UserExists(userId)))
-            {
-                return new NotFoundObjectResult($"User not found.");
-            }
-
             return new OkObjectResult(await _mediator.Send(new GetWeightGraphData(userId, startDate, endDate)));
         }
 
@@ -183,12 +131,6 @@ namespace diet_tracker_api.Controllers
         public async Task<ActionResult<IAsyncEnumerable<GraphValue>>> GetWater(DateTime startDate, Nullable<DateTime> endDate = null)
         {
             var userId = _httpContextAccessor.HttpContext.GetUserId();
-
-            if (!await _mediator.Send(new UserExists(userId)))
-            {
-                return new NotFoundObjectResult($"User not found.");
-            }
-
             return new OkObjectResult(await _mediator.Send(new GetWaterGraphData(userId, startDate, endDate)));
         }
     }

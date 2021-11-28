@@ -126,6 +126,8 @@ namespace diet_tracker_api
             var apiClientId = Configuration["Auth0:ApiClientId"];
 
             services.AddTransient<IAuth0ManagementApiClient>(provider => new Auth0ManagementApiClient(apiClientId, clientSecret, Configuration["Auth0:Domain"]));
+
+            services.AddScoped<UserExistsFilter>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

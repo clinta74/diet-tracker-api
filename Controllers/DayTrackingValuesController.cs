@@ -7,6 +7,7 @@ using diet_tracker_api.BusinessLayer.UserDailyTrackingValues;
 using diet_tracker_api.BusinessLayer.Users;
 using diet_tracker_api.DataLayer.Models;
 using diet_tracker_api.Extensions;
+using diet_tracker_api.Filters;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -15,7 +16,7 @@ using Microsoft.Extensions.Logging;
 
 namespace diet_tracker_api.Controllers
 {
-
+    [ServiceFilter(typeof(UserExistsFilter))]
     public record UserDailyTrackingValueRequest(int Occurrence, int UserTrackingValueId, decimal Value, Nullable<DateTime> When);
 
     [Authorize]
@@ -41,12 +42,6 @@ namespace diet_tracker_api.Controllers
         public async Task<ActionResult<IEnumerable<UserDailyTrackingValue>>> GetCurrentUserDayTrackingValues(DateTime day, CancellationToken cancellationToken)
         {
             var userId = _httpContextAccessor.HttpContext.GetUserId();
-
-            if (!await _mediator.Send(new UserExists(userId)))
-            {
-                return new NotFoundObjectResult($"User not found.");
-            }
-
             var data = await _mediator.Send(new GetCurrentUserDailyTrackingValues(day, userId), cancellationToken);
 
             return new OkObjectResult(data);
@@ -58,13 +53,7 @@ namespace diet_tracker_api.Controllers
         public async Task<ActionResult<UserDailyTrackingValue>> UpdateCurrentUserDayTrackingValue(DateTime day, UserDailyTrackingValueRequest[] values, CancellationToken cancellationToken)
         {
             var userId = _httpContextAccessor.HttpContext.GetUserId();
-
-            if (!await _mediator.Send(new UserExists(userId)))
-            {
-                return new NotFoundObjectResult($"User not found.");
-            }
-
-            var data = await _mediator.Send(new UpdateUserDailyTrackingValues(day, userId, values.Select(value => 
+            var data = await _mediator.Send(new UpdateUserDailyTrackingValues(day, userId, values.Select(value =>
                 new UpdateUserDailyTrackingValue(value.UserTrackingValueId, value.Occurrence, value.Value, value.When)).ToArray()));
 
             return new OkObjectResult(data);
@@ -76,13 +65,7 @@ namespace diet_tracker_api.Controllers
         public async Task<ActionResult<IAsyncEnumerable<UserDailyTrackingValue>>> GetHistory(int userTrackingId, DateTime startDate, Nullable<DateTime> endDate = null)
         {
             var userId = _httpContextAccessor.HttpContext.GetUserId();
-
-            if (!await _mediator.Send(new UserExists(userId)))
-            {
-                return new NotFoundObjectResult($"User not found.");
-            }
-
             return new OkObjectResult(await _mediator.Send(new GetCurrentUserDailyTrackingValuesHistory(userId, userTrackingId, startDate, endDate)));
-        } 
+        }
     }
 }
