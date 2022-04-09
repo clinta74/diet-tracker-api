@@ -57,11 +57,15 @@ namespace diet_tracker_api
             /**
             * Setup the database configuration.
             */
+            var dataSource = Configuration["DATA_SOURCE"];
+            var initialCatalog = Configuration["INITIAL_CATALOG"];
             var dbPassword = Configuration["DB_PASSWORD"];
             var userID = Configuration["DB_USERNAME"];
 
-            var builder = new SqlConnectionStringBuilder(Configuration.GetConnectionString("DietTrackerDatabase"))
+            var builder = new SqlConnectionStringBuilder()
             {
+                DataSource = dataSource,
+                InitialCatalog = initialCatalog,
                 Password = dbPassword,
                 UserID = userID,
                 IntegratedSecurity = false,
@@ -138,13 +142,14 @@ namespace diet_tracker_api
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-                app.UseSwagger();
-                app.UseSwaggerUI(c =>
-                {
-                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "diet_tracker_api v1");
-                    c.OAuthClientId(Configuration["Auth0:ClientId"]);
-                });
             }
+            app.UseSwagger();
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "diet_tracker_api v1");
+                c.OAuthClientId(Configuration["Auth0:ClientId"]);
+            });
+
 
             app.UseCors(config => config
                 .WithExposedHeaders("x-total-count")
