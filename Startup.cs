@@ -1,3 +1,6 @@
+global using System;
+global using MediatR;
+
 using System.Security.Claims;
 using diet_tracker_api.Authorization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -15,12 +18,12 @@ using Microsoft.Data.SqlClient;
 using diet_tracker_api.DataLayer;
 using diet_tracker_api.Services;
 using System.Collections.Generic;
-using System;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
-using MediatR;
+
 using System.Text.Json.Serialization;
+using Swashbuckle.AspNetCore.SwaggerUI;
 
 namespace diet_tracker_api
 {
@@ -148,6 +151,8 @@ namespace diet_tracker_api
             {
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "diet_tracker_api v1");
                 c.OAuthClientId(Configuration["Auth0:ClientId"]);
+                c.DefaultModelRendering(ModelRendering.Example);
+                c.DefaultModelExpandDepth(1); 
             });
 
 
@@ -156,7 +161,8 @@ namespace diet_tracker_api
                 .WithOrigins(new string[]
                 {
                     "http://localhost:4000",
-                    "https://food.pollyspeople.net"
+                    "https://food.pollyspeople.net",
+                    "https://app.yourmealtracker.com",
                 })
                 .AllowAnyMethod()
                 .AllowAnyHeader());
