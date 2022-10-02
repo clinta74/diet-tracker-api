@@ -44,13 +44,9 @@ namespace diet_tracker_api.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<Plan>> GetById(int id, CancellationToken cancellationToken)
         {
-            var data = await _mediator.Send(new GetPlanById(id));
-            if (data == null)
-            {
-                return new NotFoundResult();
-            }
+            var result = await _mediator.Send(new GetPlanById(id), cancellationToken);
 
-            return data;
+            return result.Match<ActionResult>(r => new OkObjectResult(r as Plan), r => new NotFoundObjectResult(r.Message));
         }
 
         [Authorize("write:plans")]
@@ -72,29 +68,23 @@ namespace diet_tracker_api.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> Update(int id, Plan plan, CancellationToken cancellationToken)
+        public async Task<ActionResult<Plan>> Update(int id, Plan plan, CancellationToken cancellationToken)
         {
             if (plan == null)
             {
                 return new BadRequestResult();
             }
 
-            try
-            {
-                await _mediator.Send(new UpdatePlan(id, plan.Name, plan.FuelingCount, plan.MealCount), cancellationToken);
-                return new OkResult();
-            }
-            catch (ArgumentException ex)
-            {
-                return new NotFoundObjectResult(ex.Message);
-            }
+            var result = await _mediator.Send(new UpdatePlan(id, plan.Name, plan.FuelingCount, plan.MealCount), cancellationToken);
+
+            return result.Match<ActionResult>(r => new OkObjectResult(r as Plan), r => new NotFoundObjectResult(r.Message));
         }
 
         [Authorize("write:plans")]
         [HttpDelete("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> Remove(int id, CancellationToken cancellationToken)
+        public async Task<ActionResult> Remove(int id, CancellationToken cancellationToken)
         {
             try
             {
@@ -110,7 +100,7 @@ namespace diet_tracker_api.Controllers
         [HttpPut("change")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<int>> Change([FromBody]int planId, CancellationToken cancellationToken)
+        public async Task<ActionResult<int>> Change([FromBody] int planId, CancellationToken cancellationToken)
         {
             var userId = _httpContextAccessor.HttpContext.GetUserId();
 
@@ -118,7 +108,7 @@ namespace diet_tracker_api.Controllers
 
             if (userExists)
             {
-                return await _mediator.Send(new ChangeUserPlan(userId, planId));
+                return await _mediator.Send(new ChangeUserPlan(userId, planId), cancellationToken);
             }
 
             return new NotFoundObjectResult($"User not found.");

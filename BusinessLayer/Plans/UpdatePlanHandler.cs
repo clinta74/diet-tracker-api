@@ -3,13 +3,14 @@ using System.Threading;
 using System.Threading.Tasks;
 using diet_tracker_api.DataLayer;
 using diet_tracker_api.DataLayer.Models;
+using LanguageExt.Common;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 namespace diet_tracker_api.BusinessLayer.Plans
 {
-    public record UpdatePlan(int PlanId, string Name, int FuelingCount, int MealCount) : IRequest<Plan>;
-    public class UpdatePlanHandler : IRequestHandler<UpdatePlan, Plan>
+    public record UpdatePlan(int PlanId, string Name, int FuelingCount, int MealCount) : IRequest<Result<Plan>>;
+    public class UpdatePlanHandler : IRequestHandler<UpdatePlan, Result<Plan>>
     {
         private readonly DietTrackerDbContext _dbContext;
         public UpdatePlanHandler(DietTrackerDbContext dbContext)
@@ -17,15 +18,16 @@ namespace diet_tracker_api.BusinessLayer.Plans
             _dbContext = dbContext;
         }
 
-        public async Task<Plan> Handle(UpdatePlan request, CancellationToken cancellationToken)
+        public async Task<Result<Plan>> Handle(UpdatePlan request, CancellationToken cancellationToken)
         {
             var data = await _dbContext.Plans
                 .AsNoTracking()
-                .SingleOrDefaultAsync(plan => plan.PlanId == request.PlanId);
+                .SingleOrDefaultAsync(plan => plan.PlanId.Equals(request.PlanId));
 
             if (data == null)
             {
-                throw new ArgumentException($"Plan Id ({request.PlanId}) not found.");
+                var argumentException = new ArgumentException($"Plan Id ({request.PlanId}) not found.");
+                return new Result<Plan>(argumentException);
             }
 
             _dbContext.Plans.Update(data with
