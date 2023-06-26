@@ -113,6 +113,8 @@ namespace diet_tracker_api
                     options.Audience = audience;
                     options.TokenValidationParameters = new TokenValidationParameters
                     {
+                        ValidateIssuer = true,
+                        ClockSkew = TimeSpan.FromSeconds(5),
                         NameClaimType = ClaimTypes.NameIdentifier
                     };
                 });
