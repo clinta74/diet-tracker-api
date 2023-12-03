@@ -26,6 +26,7 @@ namespace diet_tracker_api.BusinessLayer.UserDailyTrackingValues
                 .Where(u => u.TrackingValue.UserTrackingId.Equals(request.UserTrackingId))
                 .OrderBy(u => u.Day)
                 .Include(u => u.TrackingValue)
+                .AsSingleQuery()
                 .Select(u => new UserDailyTrackingValue
                 {
                     UserId = u.UserId,

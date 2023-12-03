@@ -20,6 +20,7 @@ namespace diet_tracker_api.BusinessLayer.UserTrackings
             var data = await _dbContext.UserTrackings
                         .AsNoTracking()
                         .Include(u => u.Values)
+                        .AsSplitQuery()
                         .Where(u => u.UserTrackingId.Equals(request.UserTrackingId))
                         .Where(u => u.UserId.Equals(request.UserId))
                         .SingleOrDefaultAsync(cancellationToken);
