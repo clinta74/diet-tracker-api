@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -6,12 +5,11 @@ using System.Threading.Tasks;
 using diet_tracker_api.BusinessLayer.Victories;
 using diet_tracker_api.DataLayer;
 using diet_tracker_api.DataLayer.Models;
-using MediatR;
 
 namespace diet_tracker_api.BusinessLayer.Days.Victories
 {
     public record GetDayVictories(DateTime Day, string UserId) : IRequest<IEnumerable<UserDayVictory>>;
-    public record UserDayVictory(int VictoryId, string UserId, DateTime Day, string Name, Nullable<DateTime> When);
+    public record UserDayVictory(int VictoryId, string UserId, DateTime Day, string Name, DateTime? When);
     public class GetDayVictoriesHandler : IRequestHandler<GetDayVictories, IEnumerable<UserDayVictory>>
     {
         private readonly DietTrackerDbContext _dbContext;

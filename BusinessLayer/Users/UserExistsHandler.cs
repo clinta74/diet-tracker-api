@@ -1,14 +1,12 @@
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using diet_tracker_api.DataLayer;
-using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 namespace diet_tracker_api.BusinessLayer.Users
 {
     public record UserExists(string UserId) : IRequest<bool>;
-    public class UserExistsHandler : IRequestHandler<Users.UserExists, bool>
+    public class UserExistsHandler : IRequestHandler<UserExists, bool>
     {
         private readonly DietTrackerDbContext _dbContext;
         public UserExistsHandler(DietTrackerDbContext dbContext)

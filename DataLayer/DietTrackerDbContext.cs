@@ -8,7 +8,7 @@ namespace diet_tracker_api.DataLayer
 {
     public class DietTrackerDbContext : DbContext
     {
-        public DietTrackerDbContext([NotNullAttribute] DbContextOptions options) : base(options)
+        public DietTrackerDbContext([NotNull] DbContextOptions options) : base(options)
         {
         }
 

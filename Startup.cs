@@ -55,7 +55,7 @@ namespace diet_tracker_api
 
             services.AddHttpContextAccessor();
 
-            services.AddMediatR(typeof(Startup));
+            services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<Startup>());
 
             /**
             * Setup the database configuration.

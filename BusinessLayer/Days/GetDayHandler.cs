@@ -1,11 +1,7 @@
-using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using diet_tracker_api.DataLayer;
-using diet_tracker_api.DataLayer.Models;
-using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 namespace diet_tracker_api.BusinessLayer.Days
@@ -22,7 +18,7 @@ namespace diet_tracker_api.BusinessLayer.Days
     }
 
     public record GetDay(DateTime Date, string UserId) : IRequest<CurrentUserDay>;
-    public class GetDayHandler : IRequestHandler<Days.GetDay, CurrentUserDay>
+    public class GetDayHandler : IRequestHandler<GetDay, CurrentUserDay>
     {
         private readonly DietTrackerDbContext _dbContext;
         private readonly IMediator _mediator;
@@ -33,7 +29,7 @@ namespace diet_tracker_api.BusinessLayer.Days
             _mediator = mediator;
         }
 
-        public async Task<CurrentUserDay> Handle(Days.GetDay request, CancellationToken cancellationToken)
+        public async Task<CurrentUserDay> Handle(GetDay request, CancellationToken cancellationToken)
         {
             var data = await _dbContext.UserDays
                 .Where(userDay => userDay.UserId == request.UserId)

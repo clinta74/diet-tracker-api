@@ -1,13 +1,9 @@
-using System;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using diet_tracker_api.BusinessLayer.Plans;
 using diet_tracker_api.BusinessLayer.Users;
-using diet_tracker_api.DataLayer;
 using diet_tracker_api.DataLayer.Models;
 using diet_tracker_api.Extensions;
-using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -34,9 +30,9 @@ namespace diet_tracker_api.Controllers
 
         [HttpGet("/api/plans")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public IAsyncEnumerable<Plan> Get(CancellationToken cancellationToken)
+        public IActionResult Get(CancellationToken cancellationToken)
         {
-            return _mediator.Send(new GetPlans(), cancellationToken).Result;
+            return new OkObjectResult(_mediator.Send(new GetPlans(), cancellationToken));
         }
 
         [HttpGet("{id}")]

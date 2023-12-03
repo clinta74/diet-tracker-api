@@ -1,16 +1,14 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using diet_tracker_api.DataLayer;
 using diet_tracker_api.DataLayer.Models;
-using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 namespace diet_tracker_api.BusinessLayer.UserDailyTrackingValues
 {
-    public record UpdateUserDailyTrackingValue(int UserTrackingValueId, int Occurance, decimal Value, Nullable<DateTime> When);
+    public record UpdateUserDailyTrackingValue(int UserTrackingValueId, int Occurance, decimal Value, DateTime? When);
     public record UpdateUserDailyTrackingValues(DateTime Day, string UserId, UpdateUserDailyTrackingValue[] Values) : IRequest<IEnumerable<UserDailyTrackingValue>>;
     public class UpdateUserDailyTrackingValueHandler : IRequestHandler<UpdateUserDailyTrackingValues, IEnumerable<UserDailyTrackingValue>>
     {

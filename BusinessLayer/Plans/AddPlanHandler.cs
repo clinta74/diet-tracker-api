@@ -2,7 +2,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using diet_tracker_api.DataLayer;
 using diet_tracker_api.DataLayer.Models;
-using MediatR;
 
 namespace diet_tracker_api.BusinessLayer.Plans
 {

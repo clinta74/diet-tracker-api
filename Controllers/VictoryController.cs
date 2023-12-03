@@ -1,11 +1,9 @@
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using diet_tracker_api.BusinessLayer.Victories;
 using diet_tracker_api.DataLayer.Models;
 using diet_tracker_api.Extensions;
 using diet_tracker_api.Filters;
-using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -33,7 +31,7 @@ namespace diet_tracker_api.Controllers
 
         [HttpGet("/api/victories")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<IEnumerable<Victory>> GetAll([FromQuery]Nullable<VictoryType> type)
+        public async Task<IEnumerable<Victory>> GetAll([FromQuery] VictoryType? type)
         {
             var userId = _httpContextAccessor.HttpContext.GetUserId();
             return await _mediator.Send(new GetVictories(userId, type, null));

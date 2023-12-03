@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 namespace diet_tracker_api.BusinessLayer.Plans
 {
     public record GetPlanById(int PlanId) : IRequest<Result<Plan>>;
-    public class GetByIdHandler : IRequestHandler<Plans.GetPlanById, Result<Plan>>
+    public class GetByIdHandler : IRequestHandler<GetPlanById, Result<Plan>>
     {
         private readonly DietTrackerDbContext _dbContext;
         public GetByIdHandler(DietTrackerDbContext dbContext)
@@ -16,7 +16,7 @@ namespace diet_tracker_api.BusinessLayer.Plans
             _dbContext = dbContext;
         }
 
-        public async Task<Result<Plan>> Handle(Plans.GetPlanById request, CancellationToken cancellationToken)
+        public async Task<Result<Plan>> Handle(GetPlanById request, CancellationToken cancellationToken)
         {
             var data = await _dbContext.Plans
                 .AsNoTracking()
