@@ -72,7 +72,6 @@ namespace diet_tracker_api
                 Password = dbPassword,
                 UserID = userID,
                 IntegratedSecurity = false,
-                TrustServerCertificate = true,
             };
 
             services.AddDbContext<DietTrackerDbContext>(options =>
