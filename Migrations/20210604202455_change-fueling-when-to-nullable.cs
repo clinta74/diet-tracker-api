@@ -1,9 +1,8 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace diet_tracker_api.Migrations
 {
-    public partial class changefuelingwhentonullable : Migration
+    public partial class Changefuelingwhentonullable : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {

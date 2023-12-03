@@ -1,16 +1,15 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using diet_tracker_api.DataLayer;
 using diet_tracker_api.DataLayer.Models;
-using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 namespace diet_tracker_api.BusinessLayer.UserDailyTrackingValues
 {
-    public record GetCurrentUserDailyTrackingValuesHistory(string userId, int UserTrackingId, Nullable<DateTime> StartDate, Nullable<DateTime> EndDate) :
-        IRequest<IAsyncEnumerable<UserDailyTrackingValue>>;
-    public class GetCurrentUserDailyTrackingValuesHistoryHandler : RequestHandler<GetCurrentUserDailyTrackingValuesHistory, IAsyncEnumerable<UserDailyTrackingValue>>
+    public record GetCurrentUserDailyTrackingValuesHistory(string userId, int UserTrackingId, DateTime? StartDate, DateTime? EndDate) :
+        IStreamRequest<UserDailyTrackingValue>;
+    public class GetCurrentUserDailyTrackingValuesHistoryHandler : IStreamRequestHandler<GetCurrentUserDailyTrackingValuesHistory, UserDailyTrackingValue>
     {
         private readonly DietTrackerDbContext _dbContext;
 
@@ -19,7 +18,7 @@ namespace diet_tracker_api.BusinessLayer.UserDailyTrackingValues
             _dbContext = dbContext;
         }
 
-        protected override IAsyncEnumerable<UserDailyTrackingValue> Handle(GetCurrentUserDailyTrackingValuesHistory request)
+        public IAsyncEnumerable<UserDailyTrackingValue> Handle(GetCurrentUserDailyTrackingValuesHistory request, CancellationToken cancellationToken)
         {
             var exp = _dbContext.UserDailyTrackingValues
                 .AsNoTracking()

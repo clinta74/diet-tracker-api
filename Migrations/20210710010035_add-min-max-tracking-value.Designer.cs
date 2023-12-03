@@ -11,7 +11,7 @@ namespace diet_tracker_api.Migrations
 {
     [DbContext(typeof(DietTrackerDbContext))]
     [Migration("20210710010035_add-min-max-tracking-value")]
-    partial class addminmaxtrackingvalue
+    partial class Addminmaxtrackingvalue
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {

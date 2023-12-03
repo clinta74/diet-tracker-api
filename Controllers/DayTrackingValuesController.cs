@@ -1,14 +1,11 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using diet_tracker_api.BusinessLayer.UserDailyTrackingValues;
-using diet_tracker_api.BusinessLayer.Users;
 using diet_tracker_api.DataLayer.Models;
 using diet_tracker_api.Extensions;
 using diet_tracker_api.Filters;
-using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -17,7 +14,7 @@ using Microsoft.Extensions.Logging;
 namespace diet_tracker_api.Controllers
 {
     [ServiceFilter(typeof(UserExistsFilter))]
-    public record UserDailyTrackingValueRequest(int Occurrence, int UserTrackingValueId, decimal Value, Nullable<DateTime> When);
+    public record UserDailyTrackingValueRequest(int Occurrence, int UserTrackingValueId, decimal Value, DateTime? When);
 
     [Authorize]
     [ApiController]
@@ -62,7 +59,7 @@ namespace diet_tracker_api.Controllers
         [HttpGet("{userTrackingId}/history")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<IAsyncEnumerable<UserDailyTrackingValue>>> GetHistory(int userTrackingId, DateTime startDate, Nullable<DateTime> endDate = null)
+        public async Task<ActionResult<IAsyncEnumerable<UserDailyTrackingValue>>> GetHistory(int userTrackingId, DateTime startDate, DateTime? endDate = null)
         {
             var userId = _httpContextAccessor.HttpContext.GetUserId();
             return new OkObjectResult(await _mediator.Send(new GetCurrentUserDailyTrackingValuesHistory(userId, userTrackingId, startDate, endDate)));

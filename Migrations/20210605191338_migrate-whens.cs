@@ -1,10 +1,13 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace diet_tracker_api.Migrations
 {
-    public partial class migratewhens : Migration
+    public partial class Migratewhens : Migration
     {
+        public Migratewhens()
+        {
+        }
+
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AlterColumn<DateTime>(

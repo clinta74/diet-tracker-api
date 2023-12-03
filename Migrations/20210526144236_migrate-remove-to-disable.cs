@@ -2,7 +2,7 @@
 
 namespace diet_tracker_api.Migrations
 {
-    public partial class migrateremovetodisable : Migration
+    public partial class Migrateremovetodisable : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {

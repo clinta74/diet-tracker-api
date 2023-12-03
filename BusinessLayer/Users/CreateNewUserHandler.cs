@@ -1,14 +1,12 @@
-using System;
 using System.Threading;
 using System.Threading.Tasks;
 using diet_tracker_api.DataLayer;
 using diet_tracker_api.DataLayer.Models;
-using MediatR;
 
 namespace diet_tracker_api.BusinessLayer.Users
 {
     public record CreateNewUser(string UserId, string FirstName, string LastName, string EmailAddress) : IRequest<User>;
-    public class CreateNewUserHandler : IRequestHandler<Users.CreateNewUser, User>
+    public class CreateNewUserHandler : IRequestHandler<CreateNewUser, User>
     {
         private readonly DietTrackerDbContext _dbContext;
         public CreateNewUserHandler(DietTrackerDbContext dbContext)

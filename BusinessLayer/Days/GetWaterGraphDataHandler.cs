@@ -1,15 +1,14 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using diet_tracker_api.DataLayer;
-using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 namespace diet_tracker_api.BusinessLayer.Days
 {
-    public record GetWaterGraphData(string UserId, DateTime StartDate, Nullable<DateTime> EndDate) : 
-    GetGraphData(UserId, StartDate, EndDate), IRequest<IAsyncEnumerable<GraphValue>>;
-    public class GetWaterGraphDataHandler : RequestHandler<GetWaterGraphData, IAsyncEnumerable<GraphValue>>
+    public record GetWaterGraphData(string UserId, DateTime StartDate, DateTime? EndDate) : 
+    GetGraphData(UserId, StartDate, EndDate), IStreamRequest<GraphValue>;
+    public class GetWaterGraphDataHandler : IStreamRequestHandler<GetWaterGraphData, GraphValue>
     {
         private readonly DietTrackerDbContext _dbContext;
 
@@ -18,7 +17,7 @@ namespace diet_tracker_api.BusinessLayer.Days
             _dbContext = dbContext;
         }
 
-        protected override IAsyncEnumerable<GraphValue> Handle(GetWaterGraphData request)
+        public IAsyncEnumerable<GraphValue> Handle(GetWaterGraphData request, CancellationToken cancellationToken)
         {
             var exp = _dbContext.UserDays
                 .Where(userDay => userDay.UserId.Equals(request.UserId))

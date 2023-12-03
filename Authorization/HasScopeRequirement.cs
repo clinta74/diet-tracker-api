@@ -1,4 +1,3 @@
-using System;
 using Microsoft.AspNetCore.Authorization;
 
 namespace diet_tracker_api.Authorization

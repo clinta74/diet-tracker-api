@@ -11,7 +11,7 @@ namespace diet_tracker_api.Migrations
 {
     [DbContext(typeof(DietTrackerDbContext))]
     [Migration("20210618031622_enabled-has-time-for-tracking")]
-    partial class enabledhastimefortracking
+    partial class Enabledhastimefortracking
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {

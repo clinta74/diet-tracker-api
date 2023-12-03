@@ -11,7 +11,7 @@ namespace diet_tracker_api.Migrations
 {
     [DbContext(typeof(DietTrackerDbContext))]
     [Migration("20210704162133_change-tracking-values-to-decimal")]
-    partial class changetrackingvaluestodecimal
+    partial class Changetrackingvaluestodecimal
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {

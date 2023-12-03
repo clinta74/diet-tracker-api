@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -6,11 +5,9 @@ using diet_tracker_api.BusinessLayer.Days;
 using diet_tracker_api.BusinessLayer.Days.Fuelings;
 using diet_tracker_api.BusinessLayer.Days.Meals;
 using diet_tracker_api.BusinessLayer.Days.Victories;
-using diet_tracker_api.BusinessLayer.Users;
 using diet_tracker_api.DataLayer.Models;
 using diet_tracker_api.Extensions;
 using diet_tracker_api.Filters;
-using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -119,19 +116,19 @@ namespace diet_tracker_api.Controllers
         [HttpGet("weight")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<IAsyncEnumerable<GraphValue>>> GetWeight(DateTime startDate, Nullable<DateTime> endDate = null)
+        public IActionResult GetWeight(DateTime startDate, DateTime? endDate = null)
         {
             var userId = _httpContextAccessor.HttpContext.GetUserId();
-            return new OkObjectResult(await _mediator.Send(new GetWeightGraphData(userId, startDate, endDate)));
+            return new OkObjectResult(_mediator.CreateStream(new GetWeightGraphData(userId, startDate, endDate)));
         }
 
         [HttpGet("water")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<IAsyncEnumerable<GraphValue>>> GetWater(DateTime startDate, Nullable<DateTime> endDate = null)
+        public IActionResult GetWater(DateTime startDate, DateTime? endDate = null)
         {
             var userId = _httpContextAccessor.HttpContext.GetUserId();
-            return new OkObjectResult(await _mediator.Send(new GetWaterGraphData(userId, startDate, endDate)));
+            return new OkObjectResult(_mediator.CreateStream(new GetWaterGraphData(userId, startDate, endDate)));
         }
     }
 }

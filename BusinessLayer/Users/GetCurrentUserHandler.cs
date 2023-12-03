@@ -1,10 +1,8 @@
-using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using diet_tracker_api.DataLayer;
 using diet_tracker_api.DataLayer.Models;
-using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 namespace diet_tracker_api.BusinessLayer.Users
@@ -23,7 +21,7 @@ namespace diet_tracker_api.BusinessLayer.Users
         public DateTime? Started { get; init; }
     }
 
-    public class GetCurrentUserHandler : IRequestHandler<Users.GetCurrentUser, CurrentUser>
+    public class GetCurrentUserHandler : IRequestHandler<GetCurrentUser, CurrentUser>
     {
         private readonly DietTrackerDbContext _dbContext;
         public GetCurrentUserHandler(DietTrackerDbContext dbContext)

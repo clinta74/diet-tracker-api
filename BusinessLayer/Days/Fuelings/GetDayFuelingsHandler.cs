@@ -1,18 +1,15 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using diet_tracker_api.DataLayer;
-using diet_tracker_api.DataLayer.Models;
-using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 namespace diet_tracker_api.BusinessLayer.Days.Fuelings
 {
     public record GetDayFuelings(DateTime Date, string UserId) : IRequest<IEnumerable<UserDayFueling>>;
 
-    public record UserDayFueling(int UserFuelingId, string UserId, DateTime Day, string Name, Nullable<DateTime> When);
+    public record UserDayFueling(int UserFuelingId, string UserId, DateTime Day, string Name, DateTime? When);
 
     public class GetDayFuelingsHandler : IRequestHandler<GetDayFuelings, IEnumerable<UserDayFueling>>
     {

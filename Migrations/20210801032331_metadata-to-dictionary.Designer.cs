@@ -11,7 +11,7 @@ namespace diet_tracker_api.Migrations
 {
     [DbContext(typeof(DietTrackerDbContext))]
     [Migration("20210801032331_metadata-to-dictionary")]
-    partial class metadatatodictionary
+    partial class Metadatatodictionary
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {

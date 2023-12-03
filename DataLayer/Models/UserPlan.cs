@@ -1,5 +1,3 @@
-using System;
-
 namespace diet_tracker_api.DataLayer.Models
 {
     public record UserPlan

@@ -11,7 +11,7 @@ namespace diet_tracker_api.Migrations
 {
     [DbContext(typeof(DietTrackerDbContext))]
     [Migration("20210619155452_remove-condiments")]
-    partial class removecondiments
+    partial class Removecondiments
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
