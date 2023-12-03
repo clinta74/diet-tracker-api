@@ -11,7 +11,7 @@ namespace diet_tracker_api.Migrations
 {
     [DbContext(typeof(DietTrackerDbContext))]
     [Migration("20210604201852_change-meal-when-to-nullable")]
-    partial class changemealwhentonullable
+    partial class Changemealwhentonullable
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {

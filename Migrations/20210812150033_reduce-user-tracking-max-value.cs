@@ -2,7 +2,7 @@
 
 namespace diet_tracker_api.Migrations
 {
-    public partial class reduceusertrackingmaxvalue : Migration
+    public partial class Reduceusertrackingmaxvalue : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {

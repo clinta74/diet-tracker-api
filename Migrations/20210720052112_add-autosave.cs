@@ -2,7 +2,7 @@
 
 namespace diet_tracker_api.Migrations
 {
-    public partial class addautosave : Migration
+    public partial class Addautosave : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {

@@ -2,7 +2,7 @@
 
 namespace diet_tracker_api.Migrations
 {
-    public partial class metadatatodictionary : Migration
+    public partial class Metadatatodictionary : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {

@@ -11,7 +11,7 @@ namespace diet_tracker_api.Migrations
 {
     [DbContext(typeof(DietTrackerDbContext))]
     [Migration("20210525193052_initial")]
-    partial class initial
+    partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {

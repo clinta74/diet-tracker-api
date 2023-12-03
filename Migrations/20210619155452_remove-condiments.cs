@@ -2,7 +2,7 @@
 
 namespace diet_tracker_api.Migrations
 {
-    public partial class removecondiments : Migration
+    public partial class Removecondiments : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {

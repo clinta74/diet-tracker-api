@@ -2,7 +2,7 @@
 
 namespace diet_tracker_api.Migrations
 {
-    public partial class enabledhastimefortracking : Migration
+    public partial class Enabledhastimefortracking : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {

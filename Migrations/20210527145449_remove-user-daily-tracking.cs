@@ -1,9 +1,8 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace diet_tracker_api.Migrations
 {
-    public partial class removeuserdailytracking : Migration
+    public partial class Removeuserdailytracking : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {

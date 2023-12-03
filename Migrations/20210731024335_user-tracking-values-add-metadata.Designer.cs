@@ -11,7 +11,7 @@ namespace diet_tracker_api.Migrations
 {
     [DbContext(typeof(DietTrackerDbContext))]
     [Migration("20210731024335_user-tracking-values-add-metadata")]
-    partial class usertrackingvaluesaddmetadata
+    partial class Usertrackingvaluesaddmetadata
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {

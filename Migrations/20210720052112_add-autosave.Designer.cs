@@ -11,7 +11,7 @@ namespace diet_tracker_api.Migrations
 {
     [DbContext(typeof(DietTrackerDbContext))]
     [Migration("20210720052112_add-autosave")]
-    partial class addautosave
+    partial class Addautosave
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {

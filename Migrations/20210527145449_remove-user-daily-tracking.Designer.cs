@@ -11,7 +11,7 @@ namespace diet_tracker_api.Migrations
 {
     [DbContext(typeof(DietTrackerDbContext))]
     [Migration("20210527145449_remove-user-daily-tracking")]
-    partial class removeuserdailytracking
+    partial class Removeuserdailytracking
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
