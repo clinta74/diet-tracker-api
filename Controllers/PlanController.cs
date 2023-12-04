@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using diet_tracker_api.BusinessLayer.Plans;
@@ -30,9 +31,9 @@ namespace diet_tracker_api.Controllers
 
         [HttpGet("/api/plans")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public IActionResult Get(CancellationToken cancellationToken)
+        public ActionResult<IAsyncEnumerable<Plan>> Get(CancellationToken cancellationToken)
         {
-            return new OkObjectResult(_mediator.Send(new GetPlans(), cancellationToken));
+            return new OkObjectResult(_mediator.CreateStream(new GetPlans(), cancellationToken));
         }
 
         [HttpGet("{id}")]

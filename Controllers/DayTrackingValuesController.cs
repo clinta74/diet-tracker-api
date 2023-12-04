@@ -59,10 +59,10 @@ namespace diet_tracker_api.Controllers
         [HttpGet("{userTrackingId}/history")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<IAsyncEnumerable<UserDailyTrackingValue>>> GetHistory(int userTrackingId, DateTime startDate, DateTime? endDate = null)
+        public ActionResult<IAsyncEnumerable<UserDailyTrackingValue>> GetHistory(int userTrackingId, DateTime startDate, DateTime? endDate = null)
         {
             var userId = _httpContextAccessor.HttpContext.GetUserId();
-            return new OkObjectResult(await _mediator.Send(new GetCurrentUserDailyTrackingValuesHistory(userId, userTrackingId, startDate, endDate)));
+            return new OkObjectResult(_mediator.CreateStream(new GetCurrentUserDailyTrackingValuesHistory(userId, userTrackingId, startDate, endDate)));
         }
     }
 }

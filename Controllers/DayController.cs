@@ -116,7 +116,7 @@ namespace diet_tracker_api.Controllers
         [HttpGet("weight")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public IActionResult GetWeight(DateTime startDate, DateTime? endDate = null)
+        public ActionResult<IAsyncEnumerable<GraphValue>> GetWeight(DateTime startDate, DateTime? endDate = null)
         {
             var userId = _httpContextAccessor.HttpContext.GetUserId();
             return new OkObjectResult(_mediator.CreateStream(new GetWeightGraphData(userId, startDate, endDate)));
@@ -125,7 +125,7 @@ namespace diet_tracker_api.Controllers
         [HttpGet("water")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public IActionResult GetWater(DateTime startDate, DateTime? endDate = null)
+        public ActionResult<IAsyncEnumerable<GraphValue>> GetWater(DateTime startDate, DateTime? endDate = null)
         {
             var userId = _httpContextAccessor.HttpContext.GetUserId();
             return new OkObjectResult(_mediator.CreateStream(new GetWaterGraphData(userId, startDate, endDate)));
