@@ -7,6 +7,7 @@ using diet_tracker_api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Query.Internal;
 using Microsoft.Extensions.Logging;
 
 namespace diet_tracker_api.Controllers
@@ -44,7 +45,10 @@ namespace diet_tracker_api.Controllers
             var userId = _httpContextAccessor.HttpContext.GetUserId();
             var userData = await _managementApiClient.Client.Users.GetAsync(userId);
 
-            var data = await _mediator.Send(new CreateNewUser(userId, userData.FirstName, userData.LastName, userData.Email));
+            var data = await _mediator.Send(
+                new CreateNewUser(userId, userData.FirstName, userData.LastName, userData.Email),
+                cancellationToken
+            );
 
             return data;
         }
@@ -54,14 +58,17 @@ namespace diet_tracker_api.Controllers
         {
             var userId = _httpContextAccessor.HttpContext.GetUserId();
 
-            return await _mediator.Send(new AddNewUser(userId, userData.FirstName, userData.LastName, userData.EmailAddress, userData.PlanId));
+            return await _mediator.Send(
+                new AddNewUser(userId, userData.FirstName, userData.LastName, userData.EmailAddress, userData.PlanId),
+                cancellationToken
+            );
         }
 
         [HttpGet]
         public async Task<ActionResult<NewUser>> GetNewUser(CancellationToken cancellationToken)
         {
             var userId = _httpContextAccessor.HttpContext.GetUserId();
-            var userData = await _managementApiClient.Client.Users.GetAsync(userId);
+            var userData = await _managementApiClient.Client.Users.GetAsync(userId, null, true, cancellationToken);
 
             return new NewUser
             {
