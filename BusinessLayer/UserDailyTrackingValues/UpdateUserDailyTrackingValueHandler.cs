@@ -27,36 +27,25 @@ namespace diet_tracker_api.BusinessLayer.UserDailyTrackingValues
 
             foreach (var value in request.Values)
             {
-                var data = await _dbContext.UserDailyTrackingValues
-                            .AsNoTracking()
-                            .Where(u => u.Day.Equals(request.Day))
-                            .Where(u => u.UserId.Equals(request.UserId))
-                            .Where(u => u.UserTrackingValueId.Equals(value.UserTrackingValueId))
-                            .Where(u => u.Occurrence.Equals(value.Occurance))
-                            .SingleOrDefaultAsync(cancellationToken);
+                var rowsAffected = await _dbContext.UserDailyTrackingValues
+                    .Where(u => u.Day.Equals(request.Day))
+                    .Where(u => u.UserId.Equals(request.UserId))
+                    .Where(u => u.UserTrackingValueId.Equals(value.UserTrackingValueId))
+                    .Where(u => u.Occurrence.Equals(value.Occurance))
+                    .ExecuteUpdateAsync(setters => setters
+                        .SetProperty(u => u.Value, value.Value)
+                        .SetProperty(u => u.When, value.When),
+                        cancellationToken);
 
-                if (data == null)
+                if (rowsAffected == 0)
                 {
                     var result = _dbContext.UserDailyTrackingValues
-                    .Add(new UserDailyTrackingValue
-                    {
-                        Day = request.Day,
-                        UserId = request.UserId,
-                        UserTrackingValueId = value.UserTrackingValueId,
-                        Occurrence = value.Occurance,
-                        Value = value.Value,
-                        When = value.When,
-                    });
-
-                    await _dbContext.SaveChangesAsync(cancellationToken);
-
-                    results.Add(result.Entity);
-                }
-                else
-                {
-                    var result = _dbContext.UserDailyTrackingValues
-                        .Update(data with
+                        .Add(new UserDailyTrackingValue
                         {
+                            Day = request.Day,
+                            UserId = request.UserId,
+                            UserTrackingValueId = value.UserTrackingValueId,
+                            Occurrence = value.Occurance,
                             Value = value.Value,
                             When = value.When,
                         });
@@ -64,6 +53,19 @@ namespace diet_tracker_api.BusinessLayer.UserDailyTrackingValues
                     await _dbContext.SaveChangesAsync(cancellationToken);
 
                     results.Add(result.Entity);
+                }
+                else
+                {
+                    // Fetch the updated entity to add to results
+                    var updated = await _dbContext.UserDailyTrackingValues
+                        .AsNoTracking()
+                        .Where(u => u.Day.Equals(request.Day))
+                        .Where(u => u.UserId.Equals(request.UserId))
+                        .Where(u => u.UserTrackingValueId.Equals(value.UserTrackingValueId))
+                        .Where(u => u.Occurrence.Equals(value.Occurance))
+                        .FirstAsync(cancellationToken);
+
+                    results.Add(updated);
                 }
             }
             await transaction.CommitAsync(cancellationToken);

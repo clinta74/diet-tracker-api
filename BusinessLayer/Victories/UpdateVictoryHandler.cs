@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using diet_tracker_api.DataLayer;
@@ -18,21 +19,14 @@ public class UpdateVictoryHandler : IRequestHandler<UpdateVictory, bool>
 
         public async Task<bool> Handle(UpdateVictory request, CancellationToken cancellationToken)
         {
-            var data = await ctx.Victories
-                .AsNoTracking()
-                .FirstOrDefaultAsync(v => v.VictoryId == request.VictoryId, cancellationToken);
+            var rowsAffected = await ctx.Victories
+                .Where(v => v.VictoryId == request.VictoryId)
+                .ExecuteUpdateAsync(setters => setters
+                    .SetProperty(v => v.Name, request.Name)
+                    .SetProperty(v => v.When, request.When),
+                    cancellationToken);
 
-            if (data == null) return false;
-
-            ctx.Victories.Update(data with
-            {
-                Name = request.Name,
-                When = request.When,
-            });
-
-            await ctx.SaveChangesAsync(cancellationToken);
-
-            return true;
+            return rowsAffected > 0;
         }
     }
 }

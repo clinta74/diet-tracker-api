@@ -17,26 +17,17 @@ namespace diet_tracker_api.BusinessLayer.Users
 
         public async Task<bool> Handle(UpdateUser request, CancellationToken cancellationToken)
         {
-            var user = await _dbContext.Users
-                .AsNoTracking()
-                .FirstOrDefaultAsync(user => user.UserId.Equals(request.userId), cancellationToken);
+            var rowsAffected = await _dbContext.Users
+                .Where(user => user.UserId.Equals(request.userId))
+                .ExecuteUpdateAsync(setters => setters
+                    .SetProperty(u => u.FirstName, request.FirstName)
+                    .SetProperty(u => u.LastName, request.LastName)
+                    .SetProperty(u => u.WaterSize, request.WaterSize)
+                    .SetProperty(u => u.WaterTarget, request.WaterTarget)
+                    .SetProperty(u => u.Autosave, request.Autosave),
+                    cancellationToken);
 
-            if (user != null)
-            {
-                _dbContext.Users
-                .Update(user with
-                {
-                    FirstName = request.FirstName,
-                    LastName = request.LastName,
-                    WaterSize = request.WaterSize,
-                    WaterTarget = request.WaterTarget,
-                    Autosave = request.Autosave,
-                });
-
-                return await _dbContext.SaveChangesAsync(cancellationToken) == 1;
-            }
-
-            return false;
+            return rowsAffected == 1;
         }
     }
 }
