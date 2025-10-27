@@ -21,7 +21,6 @@ namespace diet_tracker_api.BusinessLayer.UserTrackingValues
         public async Task<bool> Handle(UpdateUserTrackingValue request, CancellationToken cancellationToken)
         {
             var data = await _dbContext.UserTrackingValues
-                .AsNoTracking()
                 .Where(p => p.UserTrackingValueId == request.UserTrackingValueId)
                 .Where(p => p.Tracking.UserId == request.UserId)
                 .FirstOrDefaultAsync(cancellationToken);

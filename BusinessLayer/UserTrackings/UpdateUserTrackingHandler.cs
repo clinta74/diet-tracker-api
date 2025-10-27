@@ -29,7 +29,6 @@ namespace diet_tracker_api.BusinessLayer.UserTrackings
         public async Task<UserTracking> Handle(UpdateUserTracking request, CancellationToken cancellationToken)
         {
             var data = await _dbContext.UserTrackings
-                        .AsNoTracking()
                         .Where(u => u.UserTrackingId.Equals(request.UserTrackingId))
                         .Where(u => u.UserId.Equals(request.UserId))
                         .SingleOrDefaultAsync(cancellationToken);
@@ -69,7 +68,6 @@ namespace diet_tracker_api.BusinessLayer.UserTrackings
                 );
 
             var values = await _dbContext.UserTrackingValues
-                .AsNoTracking()
                 .Where(u => u.Tracking.UserTrackingId.Equals(request.UserTrackingId))
                 .Where(u => u.Tracking.UserId.Equals(request.UserId))
                 .ToListAsync(cancellationToken);
@@ -77,7 +75,6 @@ namespace diet_tracker_api.BusinessLayer.UserTrackings
             foreach (var userTrackingValue in request.Values.Where(v => v.UserTrackingValueId != 0))
             {
                 var value = await _dbContext.UserTrackingValues
-                    .AsNoTracking()
                     .Where(p => p.UserTrackingValueId == userTrackingValue.UserTrackingValueId)
                     .Where(p => p.Tracking.UserId == request.UserId)
                     .FirstOrDefaultAsync(cancellationToken);
@@ -92,7 +89,6 @@ namespace diet_tracker_api.BusinessLayer.UserTrackings
                 });
 
                 var metadata = await _dbContext.UserTrackingValueMetadata
-                    .AsNoTracking()
                     .Where(p => p.UserTrackingValueId == userTrackingValue.UserTrackingValueId)
                     .ToListAsync(cancellationToken);
 

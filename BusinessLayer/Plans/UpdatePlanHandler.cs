@@ -19,8 +19,8 @@ namespace diet_tracker_api.BusinessLayer.Plans
         public async Task<Result<Plan>> Handle(UpdatePlan request, CancellationToken cancellationToken)
         {
             var data = await _dbContext.Plans
-                .AsNoTracking()
-                .SingleOrDefaultAsync(plan => plan.PlanId.Equals(request.PlanId));
+                .Where(plan => plan.PlanId.Equals(request.PlanId))
+                .FirstOrDefaultAsync(cancellationToken);
 
             if (data == null)
             {
@@ -28,12 +28,9 @@ namespace diet_tracker_api.BusinessLayer.Plans
                 return new Result<Plan>(argumentException);
             }
 
-            _dbContext.Plans.Update(data with
-            {
-                Name = request.Name,
-                FuelingCount = request.FuelingCount,
-                MealCount = request.MealCount,
-            });
+            data.Name = request.Name;
+            data.FuelingCount = request.FuelingCount;
+            data.MealCount = request.MealCount;
 
             await _dbContext.SaveChangesAsync(cancellationToken);
 

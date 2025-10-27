@@ -19,7 +19,6 @@ public class UpdateVictoryHandler : IRequestHandler<UpdateVictory, bool>
         public async Task<bool> Handle(UpdateVictory request, CancellationToken cancellationToken)
         {
             var data = await ctx.Victories
-                .AsNoTracking()
                 .FirstOrDefaultAsync(v => v.VictoryId == request.VictoryId, cancellationToken);
 
             if (data == null) return false;

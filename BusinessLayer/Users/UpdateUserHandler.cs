@@ -17,9 +17,8 @@ namespace diet_tracker_api.BusinessLayer.Users
 
         public async Task<bool> Handle(UpdateUser request, CancellationToken cancellationToken)
         {
-            var user = _dbContext.Users
-                .AsNoTracking()
-                .FirstOrDefault(user => user.UserId.Equals(request.userId));
+            var user = await _dbContext.Users
+                .FirstOrDefaultAsync(user => user.UserId.Equals(request.userId), cancellationToken);
 
             if (user != null)
             {

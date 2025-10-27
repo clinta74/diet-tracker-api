@@ -20,7 +20,6 @@ namespace diet_tracker_api.BusinessLayer.Days
         {
             var data = await _dbContext.UserDays
                 .Where(userDay => userDay.UserId == request.UserId && userDay.Day == request.Day.Date)
-                .AsNoTracking()
                 .FirstOrDefaultAsync(cancellationToken);
 
             if (data == null)
