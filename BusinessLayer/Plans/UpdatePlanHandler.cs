@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using diet_tracker_api.DataLayer;
@@ -28,9 +29,12 @@ namespace diet_tracker_api.BusinessLayer.Plans
                 return new Result<Plan>(argumentException);
             }
 
-            data.Name = request.Name;
-            data.FuelingCount = request.FuelingCount;
-            data.MealCount = request.MealCount;
+            _dbContext.Plans.Update(data with
+            {
+                Name = request.Name,
+                FuelingCount = request.FuelingCount,
+                MealCount = request.MealCount,
+            });
 
             await _dbContext.SaveChangesAsync(cancellationToken);
 
