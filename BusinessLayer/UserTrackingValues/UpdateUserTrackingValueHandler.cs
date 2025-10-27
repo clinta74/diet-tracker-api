@@ -20,28 +20,24 @@ namespace diet_tracker_api.BusinessLayer.UserTrackingValues
 
         public async Task<bool> Handle(UpdateUserTrackingValue request, CancellationToken cancellationToken)
         {
-            var data = await _dbContext.UserTrackingValues
-                .AsNoTracking()
+            var rowsAffected = await _dbContext.UserTrackingValues
                 .Where(p => p.UserTrackingValueId == request.UserTrackingValueId)
                 .Where(p => p.Tracking.UserId == request.UserId)
-                .FirstOrDefaultAsync(cancellationToken);
+                .ExecuteUpdateAsync(setters => setters
+                    .SetProperty(v => v.Name, request.Name)
+                    .SetProperty(v => v.Description, request.Description)
+                    .SetProperty(v => v.Order, request.Order)
+                    .SetProperty(v => v.Type, request.Type)
+                    .SetProperty(v => v.Disabled, request.Disabled)
+                    .SetProperty(v => v.Metadata, request.Metadata.ToArray()),
+                    cancellationToken);
 
-            
-            if (data == null)
+            if (rowsAffected == 0)
             {
                 throw new ArgumentException($"User Tracking Value Id ({request.UserTrackingValueId}) for User Id ({request.UserId}) not found.");
             }
 
-            _dbContext.Update(data with {
-                Name = request.Name,
-                Description = request.Description,
-                Order = request.Order,
-                Type = request.Type,
-                Disabled = request.Disabled,
-                Metadata = request.Metadata.ToArray(),
-            });
-
-            return await _dbContext.SaveChangesAsync(cancellationToken) == 1;
+            return rowsAffected == 1;
         }
     }
 }

@@ -18,34 +18,30 @@ namespace diet_tracker_api.BusinessLayer.Days
         }
         public async Task<Unit> Handle(UpdateDay request, CancellationToken cancellationToken)
         {
-            var data = await _dbContext.UserDays
-                .AsNoTracking()
-                .Where(userDay => userDay.UserId == request.UserId && userDay.Day == request.Day.Date)
-                .FirstOrDefaultAsync(cancellationToken);
+            var trimmedNotes = request.UserDay.Notes?.Trim();
+            var notes = string.IsNullOrEmpty(trimmedNotes) ? null : trimmedNotes;
 
-            if (data == null)
+            var rowsAffected = await _dbContext.UserDays
+                .Where(userDay => userDay.UserId == request.UserId && userDay.Day == request.Day.Date)
+                .ExecuteUpdateAsync(setters => setters
+                    .SetProperty(ud => ud.Water, request.UserDay.Water)
+                    .SetProperty(ud => ud.Weight, request.UserDay.Weight)
+                    .SetProperty(ud => ud.Notes, notes),
+                    cancellationToken);
+
+            if (rowsAffected == 0)
             {
-                _dbContext.UserDays
-                    .Add(new UserDay
-                    {
-                        Day = request.Day.Date,
-                        UserId = request.UserId,
-                        Water = request.UserDay.Water,
-                        Weight = request.UserDay.Weight,
-                        Notes = (request.UserDay.Notes == null || request.UserDay.Notes.Trim().Length == 0) ? null : request.UserDay.Notes.Trim(),
-                    });
-            }
-            else
-            {
-                _dbContext.UserDays.Update(data with
+                _dbContext.UserDays.Add(new UserDay
                 {
+                    Day = request.Day.Date,
+                    UserId = request.UserId,
                     Water = request.UserDay.Water,
                     Weight = request.UserDay.Weight,
-                    Notes = request.UserDay.Notes == null || request.UserDay.Notes.Trim().Length == 0 ? null : request.UserDay.Notes.Trim(),
+                    Notes = notes,
                 });
+                
+                await _dbContext.SaveChangesAsync(cancellationToken);
             }
-
-            await _dbContext.SaveChangesAsync(cancellationToken);
 
             return Unit.Value;
         }

@@ -28,37 +28,38 @@ namespace diet_tracker_api.BusinessLayer.UserTrackings
 
         public async Task<UserTracking> Handle(UpdateUserTracking request, CancellationToken cancellationToken)
         {
-            var data = await _dbContext.UserTrackings
-                        .AsNoTracking()
-                        .Where(u => u.UserTrackingId.Equals(request.UserTrackingId))
-                        .Where(u => u.UserId.Equals(request.UserId))
-                        .SingleOrDefaultAsync(cancellationToken);
+            // Verify the tracking exists
+            var exists = await _dbContext.UserTrackings
+                .Where(u => u.UserTrackingId.Equals(request.UserTrackingId))
+                .Where(u => u.UserId.Equals(request.UserId))
+                .AnyAsync(cancellationToken);
 
-            if (data == null)
+            if (!exists)
             {
                 throw new ArgumentException($"UserTrackingId ({request.UserTrackingId}) not found.");
             }
 
             using var transaction = _dbContext.Database.BeginTransaction();
             
-            _dbContext.UserTrackings
-                .Update(data with
-                {
-                    Title = request.Title,
-                    Description = request.Description,
-                    Occurrences = request.Occurrences,
-                    Disabled = request.Disabled,
-                    UseTime = request.UseTime,
-                });
+            // Update the main UserTracking
+            await _dbContext.UserTrackings
+                .Where(u => u.UserTrackingId.Equals(request.UserTrackingId))
+                .Where(u => u.UserId.Equals(request.UserId))
+                .ExecuteUpdateAsync(setters => setters
+                    .SetProperty(u => u.Title, request.Title)
+                    .SetProperty(u => u.Description, request.Description)
+                    .SetProperty(u => u.Occurrences, request.Occurrences)
+                    .SetProperty(u => u.Disabled, request.Disabled)
+                    .SetProperty(u => u.UseTime, request.UseTime),
+                    cancellationToken);
 
-            await _dbContext.SaveChangesAsync(cancellationToken);
-
+            // Add new tracking values
             _dbContext.UserTrackingValues
                 .AddRange(request.Values
                     .Where(userTrackingValue => userTrackingValue.UserTrackingValueId == 0)
                     .Select(userTrackingValue => new UserTrackingValue
                     {
-                        UserTrackingId = data.UserTrackingId,
+                        UserTrackingId = request.UserTrackingId,
                         Name = userTrackingValue.Name,
                         Description = userTrackingValue.Description,
                         Disabled = userTrackingValue.Disabled,
@@ -68,36 +69,26 @@ namespace diet_tracker_api.BusinessLayer.UserTrackings
                     })
                 );
 
-            var values = await _dbContext.UserTrackingValues
-                .AsNoTracking()
-                .Where(u => u.Tracking.UserTrackingId.Equals(request.UserTrackingId))
-                .Where(u => u.Tracking.UserId.Equals(request.UserId))
-                .ToListAsync(cancellationToken);
+            await _dbContext.SaveChangesAsync(cancellationToken);
 
+            // Update existing tracking values
             foreach (var userTrackingValue in request.Values.Where(v => v.UserTrackingValueId != 0))
             {
-                var value = await _dbContext.UserTrackingValues
-                    .AsNoTracking()
+                await _dbContext.UserTrackingValues
                     .Where(p => p.UserTrackingValueId == userTrackingValue.UserTrackingValueId)
                     .Where(p => p.Tracking.UserId == request.UserId)
-                    .FirstOrDefaultAsync(cancellationToken);
+                    .ExecuteUpdateAsync(setters => setters
+                        .SetProperty(v => v.Name, userTrackingValue.Name)
+                        .SetProperty(v => v.Description, userTrackingValue.Description)
+                        .SetProperty(v => v.Order, userTrackingValue.Order)
+                        .SetProperty(v => v.Type, userTrackingValue.Type)
+                        .SetProperty(v => v.Disabled, userTrackingValue.Disabled),
+                        cancellationToken);
 
-                _dbContext.Update(value with
-                {
-                    Name = userTrackingValue.Name,
-                    Description = userTrackingValue.Description,
-                    Order = userTrackingValue.Order,
-                    Type = userTrackingValue.Type,
-                    Disabled = userTrackingValue.Disabled,
-                });
-
-                var metadata = await _dbContext.UserTrackingValueMetadata
-                    .AsNoTracking()
+                // Delete and recreate metadata
+                await _dbContext.UserTrackingValueMetadata
                     .Where(p => p.UserTrackingValueId == userTrackingValue.UserTrackingValueId)
-                    .ToListAsync(cancellationToken);
-
-                _dbContext.UserTrackingValueMetadata
-                    .RemoveRange(metadata);
+                    .ExecuteDeleteAsync(cancellationToken);
                 
                 _dbContext.UserTrackingValueMetadata
                     .AddRange(userTrackingValue.Metadata
@@ -109,21 +100,24 @@ namespace diet_tracker_api.BusinessLayer.UserTrackings
                         }));
             }
 
-            var removeTrackingValueIds = request.Values.Where(value => value.UserTrackingValueId != 0).Select(value => value.UserTrackingValueId);
-            var removeTrackingValues = _dbContext.UserTrackingValues
-                    .Where(userTrackingValue => userTrackingValue.Tracking.UserId == request.UserId)
-                    .Where(userTrackingValue => userTrackingValue.UserTrackingId == request.UserTrackingId)
-                    .Where(userTrackingValue => !removeTrackingValueIds.Contains(userTrackingValue.UserTrackingValueId))
-                    .AsEnumerable();
-
-            _dbContext.UserTrackingValues
-                .RemoveRange(removeTrackingValues);
-
             await _dbContext.SaveChangesAsync(cancellationToken);
+
+            // Remove tracking values that are no longer in the request
+            var removeTrackingValueIds = request.Values.Where(value => value.UserTrackingValueId != 0).Select(value => value.UserTrackingValueId);
+            await _dbContext.UserTrackingValues
+                .Where(userTrackingValue => userTrackingValue.Tracking.UserId == request.UserId)
+                .Where(userTrackingValue => userTrackingValue.UserTrackingId == request.UserTrackingId)
+                .Where(userTrackingValue => !removeTrackingValueIds.Contains(userTrackingValue.UserTrackingValueId))
+                .ExecuteDeleteAsync(cancellationToken);
 
             await transaction.CommitAsync(cancellationToken);
 
-            return data;
+            // Fetch and return the updated tracking
+            var updatedTracking = await _dbContext.UserTrackings
+                .AsNoTracking()
+                .FirstAsync(u => u.UserTrackingId == request.UserTrackingId, cancellationToken);
+
+            return updatedTracking;
         }
     }
 }

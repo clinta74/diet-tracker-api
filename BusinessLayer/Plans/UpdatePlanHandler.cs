@@ -19,27 +19,25 @@ namespace diet_tracker_api.BusinessLayer.Plans
 
         public async Task<Result<Plan>> Handle(UpdatePlan request, CancellationToken cancellationToken)
         {
-            var data = await _dbContext.Plans
-                .AsNoTracking()
+            var rowsAffected = await _dbContext.Plans
                 .Where(plan => plan.PlanId.Equals(request.PlanId))
-                .FirstOrDefaultAsync(cancellationToken);
+                .ExecuteUpdateAsync(setters => setters
+                    .SetProperty(p => p.Name, request.Name)
+                    .SetProperty(p => p.FuelingCount, request.FuelingCount)
+                    .SetProperty(p => p.MealCount, request.MealCount),
+                    cancellationToken);
 
-            if (data == null)
+            if (rowsAffected == 0)
             {
                 var argumentException = new ArgumentException($"Plan Id ({request.PlanId}) not found.");
                 return new Result<Plan>(argumentException);
             }
 
-            _dbContext.Plans.Update(data with
-            {
-                Name = request.Name,
-                FuelingCount = request.FuelingCount,
-                MealCount = request.MealCount,
-            });
+            // Fetch the updated plan to return
+            var updatedPlan = await _dbContext.Plans
+                .FirstOrDefaultAsync(p => p.PlanId == request.PlanId, cancellationToken);
 
-            await _dbContext.SaveChangesAsync(cancellationToken);
-
-            return data;
+            return updatedPlan!;
         }
     }
 }

@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using diet_tracker_api.DataLayer;
@@ -17,20 +18,18 @@ namespace diet_tracker_api.BusinessLayer.Fuelings
 
         public async Task<bool> Handle(UpdateFueling request, CancellationToken cancellationToken)
         {
-            var data = await _dbContext.Fuelings
-                .AsNoTracking()
-                .SingleOrDefaultAsync(fueling => fueling.FuelingId == request.FuelingId, cancellationToken);
+            var rowsAffected = await _dbContext.Fuelings
+                .Where(fueling => fueling.FuelingId == request.FuelingId)
+                .ExecuteUpdateAsync(setters => setters
+                    .SetProperty(f => f.Name, request.Name),
+                    cancellationToken);
 
-            if (data == null)
+            if (rowsAffected == 0)
             {
                 throw new ArgumentException($"Fueling Id ({request.FuelingId}) not found.");
             }
 
-            _dbContext.Fuelings.Update(data with {
-                Name = request.Name
-            });
-
-            return await _dbContext.SaveChangesAsync(cancellationToken) == 1;
+            return rowsAffected == 1;
         }
     }
 }
