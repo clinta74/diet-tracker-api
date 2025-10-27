@@ -60,7 +60,8 @@ var sqlBuilder = new SqlConnectionStringBuilder()
 
 builder.Services.AddDbContext<DietTrackerDbContext>(options =>
 {
-    options.UseSqlServer(sqlBuilder.ConnectionString);
+    options.UseSqlServer(sqlBuilder.ConnectionString, 
+        sqlOptions => sqlOptions.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery));
 }, ServiceLifetime.Transient);
 
 builder.Services.AddSwaggerGen(c =>
