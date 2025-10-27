@@ -19,6 +19,7 @@ namespace diet_tracker_api.BusinessLayer.Days
         public async Task<Unit> Handle(UpdateDay request, CancellationToken cancellationToken)
         {
             var data = await _dbContext.UserDays
+                .AsNoTracking()
                 .Where(userDay => userDay.UserId == request.UserId && userDay.Day == request.Day.Date)
                 .FirstOrDefaultAsync(cancellationToken);
 

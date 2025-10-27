@@ -18,6 +18,7 @@ namespace diet_tracker_api.BusinessLayer.Fuelings
         public async Task<bool> Handle(UpdateFueling request, CancellationToken cancellationToken)
         {
             var data = await _dbContext.Fuelings
+                .AsNoTracking()
                 .SingleOrDefaultAsync(fueling => fueling.FuelingId == request.FuelingId, cancellationToken);
 
             if (data == null)

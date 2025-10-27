@@ -20,6 +20,7 @@ namespace diet_tracker_api.BusinessLayer.Plans
         public async Task<Result<Plan>> Handle(UpdatePlan request, CancellationToken cancellationToken)
         {
             var data = await _dbContext.Plans
+                .AsNoTracking()
                 .Where(plan => plan.PlanId.Equals(request.PlanId))
                 .FirstOrDefaultAsync(cancellationToken);
 

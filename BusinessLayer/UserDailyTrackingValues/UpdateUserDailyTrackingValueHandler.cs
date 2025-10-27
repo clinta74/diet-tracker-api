@@ -28,6 +28,7 @@ namespace diet_tracker_api.BusinessLayer.UserDailyTrackingValues
             foreach (var value in request.Values)
             {
                 var data = await _dbContext.UserDailyTrackingValues
+                            .AsNoTracking()
                             .Where(u => u.Day.Equals(request.Day))
                             .Where(u => u.UserId.Equals(request.UserId))
                             .Where(u => u.UserTrackingValueId.Equals(value.UserTrackingValueId))
