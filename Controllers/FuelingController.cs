@@ -16,13 +16,11 @@ namespace diet_tracker_api.Controllers
 
     public class FuelingController
     {
-        private readonly ILogger<FuelingController> _logger;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IMediator _mediator;
 
-        public FuelingController(ILogger<FuelingController> logger, IHttpContextAccessor httpContextAccessor, IMediator mediator)
+        public FuelingController(IHttpContextAccessor httpContextAccessor, IMediator mediator)
         {
-            _logger = logger;
             _httpContextAccessor = httpContextAccessor;
             _mediator = mediator;
         }

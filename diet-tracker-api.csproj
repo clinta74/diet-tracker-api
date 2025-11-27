@@ -5,6 +5,7 @@
     <UserSecretsId>1a99beee-f981-4635-9b48-c3b2ae488cbb</UserSecretsId>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="AspNetCore.HealthChecks.NpgSql" Version="9.0.0" />
     <PackageReference Include="Auth0.AuthenticationApi" Version="7.17.2" />
     <PackageReference Include="Auth0.ManagementApi" Version="7.17.2" />
     <PackageReference Include="LanguageExt.Core" Version="4.2.9" />

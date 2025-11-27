@@ -18,13 +18,11 @@ namespace diet_tracker_api.Controllers
     [Produces("application/json")]
     public class PlanController
     {
-        private readonly ILogger<PlanController> _logger;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IMediator _mediator;
 
-        public PlanController(ILogger<PlanController> logger, IHttpContextAccessor httpContextAccessor, IMediator mediator)
+        public PlanController(IHttpContextAccessor httpContextAccessor, IMediator mediator)
         {
-            _logger = logger;
             _httpContextAccessor = httpContextAccessor;
             _mediator = mediator;
         }

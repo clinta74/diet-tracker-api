@@ -18,13 +18,11 @@ namespace diet_tracker_api.Controllers
     [ServiceFilter(typeof(UserExistsFilter))]
     public class VictoryController
     {
-        private readonly ILogger<VictoryController> _logger;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IMediator _mediator;
 
-        public VictoryController(ILogger<VictoryController> logger, IHttpContextAccessor httpContextAccessor, IMediator mediator)
+        public VictoryController(IHttpContextAccessor httpContextAccessor, IMediator mediator)
         {
-            _logger = logger;
             _httpContextAccessor = httpContextAccessor;
             _mediator = mediator;
         }

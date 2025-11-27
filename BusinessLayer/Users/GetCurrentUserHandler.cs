@@ -43,7 +43,7 @@ namespace diet_tracker_api.BusinessLayer.Users
                     WaterSize = user.WaterSize,
                     WaterTarget = user.WaterTarget,
                     CurrentPlan = user.UserPlans.OrderByDescending(up => up.Start).Select(up => up.Plan).FirstOrDefault(),
-                    Started = user.UserPlans.OrderBy(up => up.Start).First().Start,
+                    Started = user.UserPlans.OrderBy(up => up.Start).Select(up => (DateTime?)up.Start).FirstOrDefault(),
                 })
                 .AsNoTracking()
                 .FirstOrDefaultAsync(cancellationToken);

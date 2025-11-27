@@ -27,13 +27,11 @@ namespace diet_tracker_api.Controllers
     public class NewUserController
     {
         private readonly IAuth0ManagementApiClient _managementApiClient;
-        private readonly ILogger<NewUserController> _logger;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IMediator _mediator;
 
-        public NewUserController(ILogger<NewUserController> logger, IAuth0ManagementApiClient managementApiClient, IHttpContextAccessor httpContextAccessor, IMediator mediator)
+        public NewUserController(IAuth0ManagementApiClient managementApiClient, IHttpContextAccessor httpContextAccessor, IMediator mediator)
         {
-            _logger = logger;
             _managementApiClient = managementApiClient;
             _httpContextAccessor = httpContextAccessor;
             _mediator = mediator;

@@ -22,13 +22,11 @@ namespace diet_tracker_api.Controllers
     [ServiceFilter(typeof(UserExistsFilter))]
     public class DayController
     {
-        private readonly ILogger<DayController> _logger;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IMediator _mediator;
 
-        public DayController(ILogger<DayController> logger, IHttpContextAccessor httpContextAccessor, IMediator mediator)
+        public DayController(IHttpContextAccessor httpContextAccessor, IMediator mediator)
         {
-            _logger = logger;
             _httpContextAccessor = httpContextAccessor;
             _mediator = mediator;
         }

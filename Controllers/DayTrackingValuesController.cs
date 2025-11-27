@@ -22,13 +22,11 @@ namespace diet_tracker_api.Controllers
     [Produces("application/json")]
     public class DayTrackingValuesController
     {
-        private readonly ILogger<DayTrackingValuesController> _logger;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IMediator _mediator;
 
-        public DayTrackingValuesController(ILogger<DayTrackingValuesController> logger, IHttpContextAccessor httpContextAccessor, IMediator mediator)
+        public DayTrackingValuesController(IHttpContextAccessor httpContextAccessor, IMediator mediator)
         {
-            _logger = logger;
             _httpContextAccessor = httpContextAccessor;
             _mediator = mediator;
         }

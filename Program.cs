@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
@@ -45,16 +46,21 @@ builder.Services.AddMediator(options =>
 });
 
 // Database configuration
-var host = builder.Configuration["DB_HOST"];
+var host = builder.Configuration["DB_HOST"] ?? throw new InvalidOperationException("DB_HOST configuration is required");
 var port = builder.Configuration["DB_PORT"] ?? "5432";
-var database = builder.Configuration["DB_NAME"];
-var username = builder.Configuration["DB_USERNAME"];
-var password = builder.Configuration["DB_PASSWORD"];
+var database = builder.Configuration["DB_NAME"] ?? throw new InvalidOperationException("DB_NAME configuration is required");
+var username = builder.Configuration["DB_USERNAME"] ?? throw new InvalidOperationException("DB_USERNAME configuration is required");
+var password = builder.Configuration["DB_PASSWORD"] ?? throw new InvalidOperationException("DB_PASSWORD configuration is required");
+
+if (!int.TryParse(port, out var portNumber))
+{
+    throw new InvalidOperationException($"DB_PORT must be a valid integer. Received: {port}");
+}
 
 var connectionBuilder = new NpgsqlConnectionStringBuilder
 {
     Host = host,
-    Port = int.Parse(port),
+    Port = portNumber,
     Database = database,
     Username = username,
     Password = password
@@ -64,7 +70,7 @@ builder.Services.AddDbContext<DietTrackerDbContext>(options =>
 {
     options.UseNpgsql(connectionBuilder.ConnectionString, 
         npgsqlOptions => npgsqlOptions.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery));
-}, ServiceLifetime.Transient);
+});
 
 builder.Services.AddSwaggerGen(c =>
 {
@@ -120,10 +126,16 @@ builder.Services.AddAuthorization(options =>
 
 var clientSecret = builder.Configuration["Auth0:ClientSecret"];
 var apiClientId = builder.Configuration["Auth0:ApiClientId"];
+var auth0Domain = builder.Configuration["Auth0:Domain"];
 
-builder.Services.AddTransient<IAuth0ManagementApiClient>(provider => new Auth0ManagementApiClient(apiClientId, clientSecret, builder.Configuration["Auth0:Domain"]));
+builder.Services.AddTransient<IAuth0ManagementApiClient>(provider => 
+    Auth0ManagementApiClient.CreateAsync(apiClientId, clientSecret, auth0Domain).GetAwaiter().GetResult());
 
 builder.Services.AddScoped<UserExistsFilter>();
+
+// Add health checks
+builder.Services.AddHealthChecks()
+    .AddNpgSql(connectionBuilder.ConnectionString, name: "database");
 
 var app = builder.Build();
 
@@ -152,11 +164,7 @@ app.UseSwaggerUI(c =>
 
 app.UseCors(config => config
     .WithExposedHeaders("x-total-count")
-    .WithOrigins(
-    [
-        "http://localhost:4000",
-        "https://app.yourmealtracker.com",
-    ])
+    .WithOrigins(builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? new[] { "http://localhost:4000" })
     .AllowAnyMethod()
     .AllowAnyHeader());
 
@@ -166,5 +174,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHealthChecks("/health");
 
 app.Run();

@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using Auth0.AuthenticationApi;
 using Auth0.AuthenticationApi.Models;
 using Auth0.ManagementApi;
@@ -9,18 +10,25 @@ namespace diet_tracker_api.Services
         private bool disposedValue;
 
         public ManagementApiClient Client { get; private set; }
-        public Auth0ManagementApiClient(string clientId, string clientSecret, string domain)
+        
+        private Auth0ManagementApiClient(ManagementApiClient client)
         {
-            var client = new AuthenticationApiClient(domain);
-            var response = client.GetTokenAsync(new ClientCredentialsTokenRequest
+            Client = client;
+        }
+
+        public static async Task<Auth0ManagementApiClient> CreateAsync(string clientId, string clientSecret, string domain)
+        {
+            var authClient = new AuthenticationApiClient(domain);
+            var response = await authClient.GetTokenAsync(new ClientCredentialsTokenRequest
             {
                 Audience = $"https://{domain}/api/v2/",
                 ClientId = clientId,
                 ClientSecret = clientSecret,
                 SigningAlgorithm = JwtSignatureAlgorithm.RS256,
-            }).Result;
+            });
 
-            Client = new ManagementApiClient(response.AccessToken, domain); 
+            var managementClient = new ManagementApiClient(response.AccessToken, domain);
+            return new Auth0ManagementApiClient(managementClient);
         }
 
         protected virtual void Dispose(bool disposing)
@@ -29,8 +37,7 @@ namespace diet_tracker_api.Services
             {
                 if (disposing)
                 {
-                    // TODO: dispose managed state (managed objects)
-                    Client.Dispose();
+                    Client?.Dispose();
                 }
 
                 Client = null;

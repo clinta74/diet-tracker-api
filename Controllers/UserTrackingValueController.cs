@@ -20,13 +20,11 @@ namespace diet_tracker_api.Controllers
     [ServiceFilter(typeof(UserExistsFilter))]
     public class UserTrackingValueController
     {
-        private readonly ILogger<UserTrackingValueController> _logger;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IMediator _mediator;
 
-        public UserTrackingValueController(ILogger<UserTrackingValueController> logger, IHttpContextAccessor httpContextAccessor, IMediator mediator)
+        public UserTrackingValueController(IHttpContextAccessor httpContextAccessor, IMediator mediator)
         {
-            _logger = logger;
             _httpContextAccessor = httpContextAccessor;
             _mediator = mediator;
         }

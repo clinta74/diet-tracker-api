@@ -16,13 +16,11 @@ namespace diet_tracker_api.Controllers
     [Produces("application/json")]
     public class UserController
     {
-        private readonly ILogger<UserController> _logger;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IMediator _mediator;
 
-        public UserController(ILogger<UserController> logger, IHttpContextAccessor httpContextAccessor, IMediator mediator)
+        public UserController(IHttpContextAccessor httpContextAccessor, IMediator mediator)
         {
-            _logger = logger;
             _httpContextAccessor = httpContextAccessor;
             _mediator = mediator;
         }
