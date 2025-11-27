@@ -21,7 +21,7 @@ namespace diet_tracker_api.BusinessLayer.Days.Victories
             _mediator = mediator;
         }
 
-        public async Task<IEnumerable<UserDayVictory>> Handle(GetDayVictories request, CancellationToken cancellationToken)
+        public async ValueTask<IEnumerable<UserDayVictory>> Handle(GetDayVictories request, CancellationToken cancellationToken)
         {
             var victories =  await _mediator.Send(new GetVictories(request.UserId, VictoryType.NonScale, request.Day));
 

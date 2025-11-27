@@ -14,7 +14,7 @@ namespace diet_tracker_api.BusinessLayer.Users
             _dbContext = dbContext;
         }
 
-        public async Task<User> Handle(CreateNewUser request, CancellationToken cancellationToken)
+        public async ValueTask<User> Handle(CreateNewUser request, CancellationToken cancellationToken)
         {
 
             var result = _dbContext

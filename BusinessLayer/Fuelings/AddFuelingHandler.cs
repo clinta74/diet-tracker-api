@@ -15,7 +15,7 @@ namespace diet_tracker_api.BusinessLayer.Fuelings
             _dbContext = dbContext;
         }
 
-        public async Task<Fueling> Handle(AddFueling request, CancellationToken cancellationToken)
+        public async ValueTask<Fueling> Handle(AddFueling request, CancellationToken cancellationToken)
         {
             var data = _dbContext.Fuelings
                 .Add(new Fueling

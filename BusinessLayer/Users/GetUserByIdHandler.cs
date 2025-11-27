@@ -16,7 +16,7 @@ namespace diet_tracker_api.BusinessLayer.Users
             _dbContext = dbContext;
         }
 
-        public async Task<User> Handle(GetUserById request, CancellationToken cancellationToken)
+        public async ValueTask<User> Handle(GetUserById request, CancellationToken cancellationToken)
         {
             return await _dbContext.Users
                 .AsNoTracking()

@@ -22,7 +22,7 @@ namespace diet_tracker_api.BusinessLayer.Days.Fuelings
             _mediator = mediator;
         }
 
-        public async Task<IEnumerable<UserDayFueling>> Handle(GetDayFuelings request, CancellationToken cancellationToken)
+        public async ValueTask<IEnumerable<UserDayFueling>> Handle(GetDayFuelings request, CancellationToken cancellationToken)
         {
             var data = await _dbContext.UserFuelings
                 .Where(userFueling => userFueling.UserId == request.UserId)

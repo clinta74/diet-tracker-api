@@ -1,6 +1,6 @@
 global using System;
 global using System.Collections.Generic;
-global using MediatR;
+global using Mediator;
 
 using System.Security.Claims;
 using System.Text.Json.Serialization;
@@ -40,7 +40,10 @@ builder.Services.AddControllers(config =>
 
 builder.Services.AddHttpContextAccessor();
 
-builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<Program>());
+builder.Services.AddMediator(options =>
+{
+    options.ServiceLifetime = ServiceLifetime.Transient;
+});
 
 // Database configuration
 var dataSource = builder.Configuration["DATA_SOURCE"];
@@ -153,7 +156,6 @@ app.UseCors(config => config
     .WithOrigins(
     [
         "http://localhost:4000",
-        "https://food.pollyspeople.net",
         "https://app.yourmealtracker.com",
     ])
     .AllowAnyMethod()

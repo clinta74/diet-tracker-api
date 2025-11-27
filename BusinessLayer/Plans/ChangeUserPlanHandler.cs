@@ -15,7 +15,7 @@ namespace diet_tracker_api.BusinessLayer.Plans
             ctx = context;
         }
 
-        public async Task<int> Handle(ChangeUserPlan request, CancellationToken cancellationToken)
+        public async ValueTask<int> Handle(ChangeUserPlan request, CancellationToken cancellationToken)
         {
             ctx.UserPlans.Add(new UserPlan
             {

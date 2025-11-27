@@ -18,7 +18,7 @@ namespace diet_tracker_api.BusinessLayer.UserTrackingValues
             _dbContext = dbContext;
         }
 
-        public async Task<bool> Handle(UpdateUserTrackingValue request, CancellationToken cancellationToken)
+        public async ValueTask<bool> Handle(UpdateUserTrackingValue request, CancellationToken cancellationToken)
         {
             var rowsAffected = await _dbContext.UserTrackingValues
                 .Where(p => p.UserTrackingValueId == request.UserTrackingValueId)

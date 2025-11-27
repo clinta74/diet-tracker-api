@@ -18,7 +18,7 @@ namespace diet_tracker_api.BusinessLayer.Days
             _dbContext = dbContext;
             _mediator = mediator;
         }
-        public async Task<Plan> Handle(GetCurrentUserPlan request, CancellationToken cancellationToken)
+        public async ValueTask<Plan> Handle(GetCurrentUserPlan request, CancellationToken cancellationToken)
         {
             var plan = await _dbContext.UserPlans
                     .OrderByDescending(up => up.Start)

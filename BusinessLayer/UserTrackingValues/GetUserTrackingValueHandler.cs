@@ -17,7 +17,7 @@ namespace diet_tracker_api.BusinessLayer.UserTrackingValues
             _dbContext = dbContext;
         }
 
-        public async Task<UserTrackingValue> Handle(GetUserTrackingValue request, CancellationToken cancellationToken)
+        public async ValueTask<UserTrackingValue> Handle(GetUserTrackingValue request, CancellationToken cancellationToken)
         {
             var data = await _dbContext.UserTrackingValues
                 .AsNoTracking()

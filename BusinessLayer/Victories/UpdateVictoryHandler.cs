@@ -17,7 +17,7 @@ public class UpdateVictoryHandler : IRequestHandler<UpdateVictory, bool>
             ctx = context;
         }
 
-        public async Task<bool> Handle(UpdateVictory request, CancellationToken cancellationToken)
+        public async ValueTask<bool> Handle(UpdateVictory request, CancellationToken cancellationToken)
         {
             var rowsAffected = await ctx.Victories
                 .Where(v => v.VictoryId == request.VictoryId)

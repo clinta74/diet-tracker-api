@@ -15,7 +15,7 @@ namespace diet_tracker_api.BusinessLayer.Victories
             ctx = context;
         }
 
-        public async Task<Victory> Handle(AddVictory request, CancellationToken cancellationToken)
+        public async ValueTask<Victory> Handle(AddVictory request, CancellationToken cancellationToken)
         {
             var data = ctx.Add(new Victory
             {

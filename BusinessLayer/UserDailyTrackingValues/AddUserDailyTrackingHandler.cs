@@ -16,7 +16,7 @@ namespace diet_tracker_api.BusinessLayer.UserDailyTrackingValues
             _dbContext = dbContext;
         }
 
-        public async Task<bool> Handle(AddUserDailyTracking request, CancellationToken cancellationToken)
+        public async ValueTask<bool> Handle(AddUserDailyTracking request, CancellationToken cancellationToken)
         {
             _dbContext.UserDailyTrackingValues
                 .Add(new UserDailyTrackingValue

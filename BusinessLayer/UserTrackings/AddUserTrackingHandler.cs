@@ -20,7 +20,7 @@ namespace diet_tracker_api.BusinessLayer.UserTrackings
             _mediator = mediator;
         }
 
-        public async Task<UserTracking> Handle(AddUserTracking request, CancellationToken cancellationToken)
+        public async ValueTask<UserTracking> Handle(AddUserTracking request, CancellationToken cancellationToken)
         {
             var order = await _dbContext.UserTrackings
                 .Where(t => t.UserId.Equals(request.UserId))

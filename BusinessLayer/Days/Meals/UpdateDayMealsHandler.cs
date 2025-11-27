@@ -17,7 +17,7 @@ namespace diet_tracker_api.BusinessLayer.Days.Meals
             _dbContext = dbContext;
         }
 
-        public async Task<Unit> Handle(UpdateDayMeals request, CancellationToken cancellationToken)
+        public async ValueTask<Unit> Handle(UpdateDayMeals request, CancellationToken cancellationToken)
         {
             using var transaction = _dbContext.Database.BeginTransaction();
 

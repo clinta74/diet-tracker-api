@@ -22,7 +22,7 @@ namespace diet_tracker_api.BusinessLayer.Days.Meals
             _mediator = mediator;
         }
 
-        public async Task<IEnumerable<UserDayMeal>> Handle(GetDayMeals request, CancellationToken cancellationToken)
+        public async ValueTask<IEnumerable<UserDayMeal>> Handle(GetDayMeals request, CancellationToken cancellationToken)
         {
             var data = await _dbContext.UserMeals
                 .Where(userMeal => userMeal.UserId == request.UserId)

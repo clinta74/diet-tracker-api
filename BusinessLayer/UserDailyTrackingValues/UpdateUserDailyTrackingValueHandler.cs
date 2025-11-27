@@ -19,7 +19,7 @@ namespace diet_tracker_api.BusinessLayer.UserDailyTrackingValues
             _dbContext = dbContext;
         }
 
-        public async Task<IEnumerable<UserDailyTrackingValue>> Handle(UpdateUserDailyTrackingValues request, CancellationToken cancellationToken)
+        public async ValueTask<IEnumerable<UserDailyTrackingValue>> Handle(UpdateUserDailyTrackingValues request, CancellationToken cancellationToken)
         {
 
             var results = new List<UserDailyTrackingValue>();

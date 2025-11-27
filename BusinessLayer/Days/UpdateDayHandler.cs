@@ -16,7 +16,7 @@ namespace diet_tracker_api.BusinessLayer.Days
         {
             _dbContext = dbContext;
         }
-        public async Task<Unit> Handle(UpdateDay request, CancellationToken cancellationToken)
+        public async ValueTask<Unit> Handle(UpdateDay request, CancellationToken cancellationToken)
         {
             var trimmedNotes = request.UserDay.Notes?.Trim();
             var notes = string.IsNullOrEmpty(trimmedNotes) ? null : trimmedNotes;

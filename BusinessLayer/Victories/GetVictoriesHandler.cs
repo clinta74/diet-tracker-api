@@ -16,7 +16,7 @@ namespace diet_tracker_api.BusinessLayer.Victories
         {
             _dbContext = dbContext;
         }
-        public async Task<IEnumerable<Victory>> Handle(GetVictories request, CancellationToken cancellationToken)
+        public async ValueTask<IEnumerable<Victory>> Handle(GetVictories request, CancellationToken cancellationToken)
         {
             var exp = _dbContext.Victories
                 .Where(victory => victory.UserId == request.UserId);

@@ -15,7 +15,7 @@ namespace diet_tracker_api.BusinessLayer.Fuelings
             _dbContext = dbContext;
         }
 
-        public async Task<bool> Handle(DeleteFueling request, CancellationToken cancellationToken)
+        public async ValueTask<bool> Handle(DeleteFueling request, CancellationToken cancellationToken)
         {
             var data = await _dbContext.Fuelings
                 .AsNoTracking()

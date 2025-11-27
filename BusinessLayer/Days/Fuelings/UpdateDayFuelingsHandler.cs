@@ -17,7 +17,7 @@ namespace diet_tracker_api.BusinessLayer.Days.Fuelings
             _dbContext = dbContext;
         }
 
-        public async Task<Unit> Handle(UpdateDayFuelings request, CancellationToken cancellationToken)
+        public async ValueTask<Unit> Handle(UpdateDayFuelings request, CancellationToken cancellationToken)
         {
             using var transaction = _dbContext.Database.BeginTransaction();
             // Handle Fuelings

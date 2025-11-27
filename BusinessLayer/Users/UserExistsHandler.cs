@@ -14,7 +14,7 @@ namespace diet_tracker_api.BusinessLayer.Users
             _dbContext = dbContext;
         }
 
-        public async Task<bool> Handle(UserExists request, CancellationToken cancellationToken)
+        public async ValueTask<bool> Handle(UserExists request, CancellationToken cancellationToken)
         {
             return await _dbContext
                 .Users

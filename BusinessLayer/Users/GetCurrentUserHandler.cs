@@ -29,7 +29,7 @@ namespace diet_tracker_api.BusinessLayer.Users
             _dbContext = dbContext;
         }
 
-        public async Task<CurrentUser> Handle(GetCurrentUser request, CancellationToken cancellationToken)
+        public async ValueTask<CurrentUser> Handle(GetCurrentUser request, CancellationToken cancellationToken)
         {
             return await _dbContext.Users
                 .Where(user => user.UserId == request.UserId)

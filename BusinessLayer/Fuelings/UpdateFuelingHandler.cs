@@ -16,7 +16,7 @@ namespace diet_tracker_api.BusinessLayer.Fuelings
             _dbContext = dbContext;
         }
 
-        public async Task<bool> Handle(UpdateFueling request, CancellationToken cancellationToken)
+        public async ValueTask<bool> Handle(UpdateFueling request, CancellationToken cancellationToken)
         {
             var rowsAffected = await _dbContext.Fuelings
                 .Where(fueling => fueling.FuelingId == request.FuelingId)

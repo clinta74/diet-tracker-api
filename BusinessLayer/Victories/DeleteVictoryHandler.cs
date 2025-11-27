@@ -15,7 +15,7 @@ namespace diet_tracker_api.BusinessLayer.Victories
             ctx = context;
         }
 
-        public async Task<bool> Handle(DeleteVictory request, CancellationToken cancellationToken)
+        public async ValueTask<bool> Handle(DeleteVictory request, CancellationToken cancellationToken)
         {
             var data = await ctx.Victories
                 .AsNoTracking()

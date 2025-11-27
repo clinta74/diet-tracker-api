@@ -15,7 +15,7 @@ namespace diet_tracker_api.BusinessLayer.Users
             _dbContext = dbContext;
         }
 
-        public async Task<bool> Handle(UpdateUser request, CancellationToken cancellationToken)
+        public async ValueTask<bool> Handle(UpdateUser request, CancellationToken cancellationToken)
         {
             var rowsAffected = await _dbContext.Users
                 .Where(user => user.UserId.Equals(request.userId))

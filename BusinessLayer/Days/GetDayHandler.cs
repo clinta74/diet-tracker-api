@@ -29,7 +29,7 @@ namespace diet_tracker_api.BusinessLayer.Days
             _mediator = mediator;
         }
 
-        public async Task<CurrentUserDay> Handle(GetDay request, CancellationToken cancellationToken)
+        public async ValueTask<CurrentUserDay> Handle(GetDay request, CancellationToken cancellationToken)
         {
             var data = await _dbContext.UserDays
                 .Where(userDay => userDay.UserId == request.UserId)

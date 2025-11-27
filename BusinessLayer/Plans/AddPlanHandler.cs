@@ -14,7 +14,7 @@ namespace diet_tracker_api.BusinessLayer.Plans
             _dbContext = dbContext;
         }
 
-        public async Task<int> Handle(AddPlan request, CancellationToken cancellationToken)
+        public async ValueTask<int> Handle(AddPlan request, CancellationToken cancellationToken)
         {
             var result = _dbContext.Plans
                 .Add(new Plan

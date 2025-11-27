@@ -26,7 +26,7 @@ namespace diet_tracker_api.BusinessLayer.UserTrackings
             _dbContext = dbContext;
         }
 
-        public async Task<UserTracking> Handle(UpdateUserTracking request, CancellationToken cancellationToken)
+        public async ValueTask<UserTracking> Handle(UpdateUserTracking request, CancellationToken cancellationToken)
         {
             // Verify the tracking exists
             var exists = await _dbContext.UserTrackings

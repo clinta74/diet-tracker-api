@@ -18,7 +18,7 @@ namespace diet_tracker_api.BusinessLayer.UserTrackings
             _dbContext = dbContext;
         }
 
-        public async Task<IEnumerable<UserTracking>> Handle(GetUserTrackings request, CancellationToken cancellationToken)
+        public async ValueTask<IEnumerable<UserTracking>> Handle(GetUserTrackings request, CancellationToken cancellationToken)
         {
             return await _dbContext.UserTrackings
                 .Where(userTracking => userTracking.UserId == request.UserId)

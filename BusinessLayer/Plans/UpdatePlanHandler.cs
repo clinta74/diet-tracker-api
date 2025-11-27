@@ -17,7 +17,7 @@ namespace diet_tracker_api.BusinessLayer.Plans
             _dbContext = dbContext;
         }
 
-        public async Task<Result<Plan>> Handle(UpdatePlan request, CancellationToken cancellationToken)
+        public async ValueTask<Result<Plan>> Handle(UpdatePlan request, CancellationToken cancellationToken)
         {
             var rowsAffected = await _dbContext.Plans
                 .Where(plan => plan.PlanId.Equals(request.PlanId))
