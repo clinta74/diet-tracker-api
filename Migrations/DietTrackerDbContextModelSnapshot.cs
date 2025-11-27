@@ -70,7 +70,7 @@ namespace diet_tracker_api.Migrations
                         .HasColumnType("boolean");
 
                     b.Property<DateTime>("Created")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("EmailAddress")
                         .HasColumnType("text");
@@ -116,7 +116,7 @@ namespace diet_tracker_api.Migrations
                         .HasColumnType("decimal(10, 2)");
 
                     b.Property<DateTime?>("When")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.HasKey("UserId", "Day", "UserTrackingValueId", "Occurrence");
 
@@ -165,7 +165,7 @@ namespace diet_tracker_api.Migrations
                         .HasColumnType("character varying(250)");
 
                     b.Property<DateTime?>("When")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.HasKey("UserFuelingId");
 
@@ -192,7 +192,7 @@ namespace diet_tracker_api.Migrations
                         .HasColumnType("character varying(250)");
 
                     b.Property<DateTime?>("When")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.HasKey("UserMealId");
 
@@ -210,7 +210,7 @@ namespace diet_tracker_api.Migrations
                         .HasColumnType("integer");
 
                     b.Property<DateTime>("Start")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.HasKey("UserId", "PlanId", "Start");
 
@@ -324,7 +324,7 @@ namespace diet_tracker_api.Migrations
                         .HasColumnType("character varying(250)");
 
                     b.Property<DateTime?>("When")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.HasKey("VictoryId");
 
