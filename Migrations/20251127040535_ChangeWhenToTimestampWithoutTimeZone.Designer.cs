@@ -2,306 +2,338 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using diet_tracker_api.DataLayer;
+
+#nullable disable
 
 namespace diet_tracker_api.Migrations
 {
     [DbContext(typeof(DietTrackerDbContext))]
-    [Migration("20210704162133_change-tracking-values-to-decimal")]
-    partial class Changetrackingvaluestodecimal
+    [Migration("20251127040535_ChangeWhenToTimestampWithoutTimeZone")]
+    partial class ChangeWhenToTimestampWithoutTimeZone
     {
+        /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("Relational:MaxIdentifierLength", 128)
-                .HasAnnotation("ProductVersion", "5.0.5")
-                .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                .HasAnnotation("ProductVersion", "8.0.0")
+                .HasAnnotation("Relational:MaxIdentifierLength", 63);
+
+            NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
             modelBuilder.Entity("diet_tracker_api.DataLayer.Models.Fueling", b =>
                 {
                     b.Property<int>("FuelingId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("FuelingId"));
 
                     b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.HasKey("FuelingId");
 
-                    b.ToTable("Fueling");
+                    b.ToTable("fuelings", (string)null);
                 });
 
             modelBuilder.Entity("diet_tracker_api.DataLayer.Models.Plan", b =>
                 {
                     b.Property<int>("PlanId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("PlanId"));
 
                     b.Property<int>("FuelingCount")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("MealCount")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.HasKey("PlanId");
 
-                    b.ToTable("Plan");
+                    b.ToTable("plans", (string)null);
                 });
 
             modelBuilder.Entity("diet_tracker_api.DataLayer.Models.User", b =>
                 {
                     b.Property<string>("UserId")
                         .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
+                        .HasColumnType("character varying(250)");
+
+                    b.Property<bool>("Autosave")
+                        .HasColumnType("boolean");
 
                     b.Property<DateTime>("Created")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("EmailAddress")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("FirstName")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<string>("LastName")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<int>("WaterSize")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasDefaultValue(8);
 
                     b.Property<int>("WaterTarget")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasDefaultValue(64);
 
                     b.HasKey("UserId");
 
-                    b.ToTable("User");
+                    b.ToTable("users", (string)null);
                 });
 
             modelBuilder.Entity("diet_tracker_api.DataLayer.Models.UserDailyTrackingValue", b =>
                 {
                     b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(250)");
+                        .HasColumnType("character varying(250)");
 
                     b.Property<DateTime>("Day")
                         .HasColumnType("date");
 
                     b.Property<int>("UserTrackingValueId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("Occurrence")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<decimal>("Value")
-                        .HasColumnType("decimal(5,2)");
+                        .HasColumnType("decimal(10, 2)");
 
                     b.Property<DateTime?>("When")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp without time zone");
 
                     b.HasKey("UserId", "Day", "UserTrackingValueId", "Occurrence");
 
                     b.HasIndex("UserTrackingValueId");
 
-                    b.ToTable("UserDailyTrackingValue");
+                    b.ToTable("user_daily_tracking_values", (string)null);
                 });
 
             modelBuilder.Entity("diet_tracker_api.DataLayer.Models.UserDay", b =>
                 {
                     b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(250)");
+                        .HasColumnType("character varying(250)");
 
                     b.Property<DateTime>("Day")
                         .HasColumnType("date");
 
                     b.Property<string>("Notes")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<int>("Water")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<decimal>("Weight")
-                        .HasColumnType("decimal(5,2)");
+                        .HasColumnType("decimal(5, 2)");
 
                     b.HasKey("UserId", "Day");
 
-                    b.ToTable("UserDay");
+                    b.ToTable("user_days", (string)null);
                 });
 
             modelBuilder.Entity("diet_tracker_api.DataLayer.Models.UserFueling", b =>
                 {
                     b.Property<int>("UserFuelingId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("UserFuelingId"));
 
                     b.Property<DateTime>("Day")
                         .HasColumnType("date");
 
                     b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(250)");
+                        .HasColumnType("character varying(250)");
 
                     b.Property<DateTime?>("When")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp without time zone");
 
                     b.HasKey("UserFuelingId");
 
                     b.HasIndex("UserId", "Day");
 
-                    b.ToTable("UserFueling");
+                    b.ToTable("user_fuelings", (string)null);
                 });
 
             modelBuilder.Entity("diet_tracker_api.DataLayer.Models.UserMeal", b =>
                 {
                     b.Property<int>("UserMealId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("UserMealId"));
 
                     b.Property<DateTime>("Day")
                         .HasColumnType("date");
 
                     b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(250)");
+                        .HasColumnType("character varying(250)");
 
                     b.Property<DateTime?>("When")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp without time zone");
 
                     b.HasKey("UserMealId");
 
                     b.HasIndex("UserId", "Day");
 
-                    b.ToTable("UserMeal");
+                    b.ToTable("user_meals", (string)null);
                 });
 
             modelBuilder.Entity("diet_tracker_api.DataLayer.Models.UserPlan", b =>
                 {
                     b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(250)");
+                        .HasColumnType("character varying(250)");
 
                     b.Property<int>("PlanId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<DateTime>("Start")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp without time zone");
 
                     b.HasKey("UserId", "PlanId", "Start");
 
                     b.HasIndex("PlanId");
 
-                    b.ToTable("UserPlan");
+                    b.ToTable("user_plans", (string)null);
                 });
 
             modelBuilder.Entity("diet_tracker_api.DataLayer.Models.UserTracking", b =>
                 {
                     b.Property<int>("UserTrackingId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("UserTrackingId"));
 
                     b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<bool>("Disabled")
-                        .HasColumnType("bit");
+                        .HasColumnType("boolean");
 
                     b.Property<int>("Occurrences")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("Order")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<string>("Title")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<bool>("UseTime")
-                        .HasColumnType("bit");
+                        .HasColumnType("boolean");
 
                     b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(250)");
+                        .HasColumnType("character varying(250)");
 
                     b.HasKey("UserTrackingId");
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("UserTracking");
+                    b.ToTable("user_trackings", (string)null);
                 });
 
             modelBuilder.Entity("diet_tracker_api.DataLayer.Models.UserTrackingValue", b =>
                 {
                     b.Property<int>("UserTrackingValueId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("UserTrackingValueId"));
 
                     b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<bool>("Disabled")
-                        .HasColumnType("bit");
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<int>("Order")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<string>("Type")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<int>("UserTrackingId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.HasKey("UserTrackingValueId");
 
                     b.HasIndex("UserTrackingId");
 
-                    b.ToTable("UserTrackingValue");
+                    b.ToTable("user_tracking_values", (string)null);
+                });
+
+            modelBuilder.Entity("diet_tracker_api.DataLayer.Models.UserTrackingValueMetadata", b =>
+                {
+                    b.Property<int>("UserTrackingValueId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Key")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Value")
+                        .HasColumnType("text");
+
+                    b.HasKey("UserTrackingValueId", "Key");
+
+                    b.ToTable("user_tracking_value_metadata", (string)null);
                 });
 
             modelBuilder.Entity("diet_tracker_api.DataLayer.Models.Victory", b =>
                 {
                     b.Property<int>("VictoryId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("VictoryId"));
 
                     b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("Type")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(250)");
+                        .HasColumnType("character varying(250)");
 
                     b.Property<DateTime?>("When")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp without time zone");
 
                     b.HasKey("VictoryId");
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Victory");
+                    b.ToTable("victories", (string)null);
                 });
 
             modelBuilder.Entity("diet_tracker_api.DataLayer.Models.UserDailyTrackingValue", b =>
@@ -399,6 +431,17 @@ namespace diet_tracker_api.Migrations
                     b.Navigation("Tracking");
                 });
 
+            modelBuilder.Entity("diet_tracker_api.DataLayer.Models.UserTrackingValueMetadata", b =>
+                {
+                    b.HasOne("diet_tracker_api.DataLayer.Models.UserTrackingValue", "UserTrackingValue")
+                        .WithMany("Metadata")
+                        .HasForeignKey("UserTrackingValueId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("UserTrackingValue");
+                });
+
             modelBuilder.Entity("diet_tracker_api.DataLayer.Models.Victory", b =>
                 {
                     b.HasOne("diet_tracker_api.DataLayer.Models.User", "User")
@@ -445,6 +488,8 @@ namespace diet_tracker_api.Migrations
             modelBuilder.Entity("diet_tracker_api.DataLayer.Models.UserTrackingValue", b =>
                 {
                     b.Navigation("DailyTrackingValues");
+
+                    b.Navigation("Metadata");
                 });
 #pragma warning restore 612, 618
         }

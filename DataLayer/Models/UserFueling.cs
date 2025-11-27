@@ -12,6 +12,7 @@ namespace diet_tracker_api.DataLayer.Models
         public DateTime Day { get; init; }
 
         public string Name { get; init; }
+        [Column(TypeName = "timestamp without time zone")]
         public DateTime? When { get; init; }
         public virtual UserDay UserDay { get; init; }
     }
