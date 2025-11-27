@@ -3,7 +3,7 @@
 
 param(
     [Parameter(Mandatory=$false)]
-    [string]$Host = "localhost",
+    [string]$ServerHost = "localhost",
     
     [Parameter(Mandatory=$false)]
     [int]$Port = 5433,
@@ -21,7 +21,7 @@ param(
     [string]$InputPath
 )
 
-Write-Host "Importing data into $Database on $Host from $InputPath" -ForegroundColor Green
+Write-Host "Importing data into $Database on $ServerHost from $InputPath" -ForegroundColor Green
 
 # Set PostgreSQL password environment variable
 $env:PGPASSWORD = $Password
@@ -53,16 +53,27 @@ function Import-CSVToPostgreSQL {
         
         # Create temporary file with data only (no header)
         $tempFile = [System.IO.Path]::GetTempFileName()
-        $csvContent | Set-Content $tempFile -Encoding UTF8
         
-        # Build COPY command
-        $columnList = $Columns -join ", "
-        $copyCommand = "COPY `"$TableName`" ($columnList) FROM STDIN WITH (FORMAT csv, DELIMITER ',', NULL '');"
+        # Convert empty strings to actual empty values for NULL handling
+        $csvContent | ForEach-Object {
+            # Replace quoted empty strings with nothing so PostgreSQL treats them as NULL
+            $_ -replace '""', ''
+        } | Set-Content $tempFile -Encoding UTF8
+        
+        # Build COPY command - use \copy for client-side file import
+        # Quote each column name to handle case sensitivity and reserved keywords
+        $quotedColumns = $Columns | ForEach-Object { "`"$_`"" }
+        $columnList = $quotedColumns -join ", "
+        $copyCommand = "\copy `"$TableName`" ($columnList) FROM '$($tempFile -replace '\\', '/')' WITH (FORMAT csv, DELIMITER ',', NULL '');"
         
         # Execute COPY using psql
-        $copyCommand | & psql -h $Host -p $Port -U $Username -d $Database 2>&1 | Tee-Object -Variable output
+        $result = $copyCommand | & $psqlPath -h $ServerHost -p $Port -U $Username -d $Database 2>&1
         
-        Get-Content $tempFile | & psql -h $Host -p $Port -U $Username -d $Database 2>&1 | Out-Null
+        if ($LASTEXITCODE -ne 0) {
+            Write-Host "  ✗ Error importing $TableName : $result" -ForegroundColor Red
+            Remove-Item $tempFile -Force
+            return
+        }
         
         # Clean up temp file
         Remove-Item $tempFile -Force
@@ -70,7 +81,7 @@ function Import-CSVToPostgreSQL {
         # Reset identity sequence if table has identity column
         if ($HasIdentity) {
             $seqResetCommand = "SELECT setval(pg_get_serial_sequence('`"$TableName`"', '$($Columns[0])'), (SELECT MAX($($Columns[0])) FROM `"$TableName`"`));"
-            $seqResetCommand | & psql -h $Host -p $Port -U $Username -d $Database 2>&1 | Out-Null
+            $seqResetCommand | & $psqlPath -h $ServerHost -p $Port -U $Username -d $Database 2>&1 | Out-Null
         }
         
         $rowCount = $csvContent.Count
@@ -83,7 +94,8 @@ function Import-CSVToPostgreSQL {
 
 # Check if psql is available
 try {
-    & psql --version | Out-Null
+    $psqlPath = (Get-Command psql -ErrorAction Stop).Source
+    Write-Host "Found psql at: $psqlPath" -ForegroundColor Cyan
 }
 catch {
     Write-Host "ERROR: psql command not found. Please install PostgreSQL client tools." -ForegroundColor Red
@@ -97,7 +109,7 @@ Write-Host "`nStarting import process..." -ForegroundColor Cyan
 
 # 1. Base tables without dependencies
 Import-CSVToPostgreSQL -TableName "users" -FilePath (Join-Path $InputPath "User.csv") `
-    -Columns @("UserId", "Autosave", "Created") -HasIdentity $false
+    -Columns @("UserId", "FirstName", "LastName", "EmailAddress", "Created", "WaterTarget", "WaterSize", "Autosave") -HasIdentity $false
 
 Import-CSVToPostgreSQL -TableName "plans" -FilePath (Join-Path $InputPath "Plan.csv") `
     -Columns @("PlanId", "Name", "MealCount", "FuelingCount") -HasIdentity $true
@@ -110,7 +122,7 @@ Import-CSVToPostgreSQL -TableName "victories" -FilePath (Join-Path $InputPath "V
 
 # 2. Tables with User dependency
 Import-CSVToPostgreSQL -TableName "user_days" -FilePath (Join-Path $InputPath "UserDay.csv") `
-    -Columns @("UserId", "Day", "Weight") -HasIdentity $false
+    -Columns @("UserId", "Day", "Water", "Weight", "Notes") -HasIdentity $false
 
 Import-CSVToPostgreSQL -TableName "user_plans" -FilePath (Join-Path $InputPath "UserPlan.csv") `
     -Columns @("UserId", "PlanId", "Start") -HasIdentity $false

@@ -53,6 +53,20 @@ function Export-TableToCSV {
         $dataset = New-Object System.Data.DataSet
         $adapter.Fill($dataset) | Out-Null
         
+        # Convert DateTime columns to UTC ISO format for PostgreSQL compatibility
+        foreach ($row in $dataset.Tables[0].Rows) {
+            foreach ($column in $dataset.Tables[0].Columns) {
+                if ($column.DataType -eq [DateTime] -and $row[$column] -isnot [DBNull]) {
+                    $dateValue = [DateTime]$row[$column]
+                    # Convert to UTC if not already, then format as ISO 8601
+                    if ($dateValue.Kind -eq [DateTimeKind]::Unspecified) {
+                        $dateValue = [DateTime]::SpecifyKind($dateValue, [DateTimeKind]::Utc)
+                    }
+                    $row[$column] = $dateValue.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ss.fffZ")
+                }
+            }
+        }
+        
         $dataset.Tables[0] | Export-Csv -Path $FilePath -NoTypeInformation -Encoding UTF8
         
         $connection.Close()
@@ -67,13 +81,13 @@ function Export-TableToCSV {
 
 # Export all tables
 $tables = @(
-    @{Name="User"; Query="SELECT UserId, Autosave, Created FROM [User]"},
+    @{Name="User"; Query="SELECT UserId, FirstName, LastName, EmailAddress, Created, WaterTarget, WaterSize, Autosave FROM [User]"},
     @{Name="Plan"; Query="SELECT PlanId, Name, MealCount, FuelingCount FROM [Plan]"},
     @{Name="Fueling"; Query="SELECT FuelingId, Name FROM Fueling"},
     @{Name="UserTracking"; Query="SELECT UserTrackingId, UserId, Title, Description, Occurrences, [Order], UseTime, Disabled FROM UserTracking"},
     @{Name="UserTrackingValue"; Query="SELECT UserTrackingValueId, UserTrackingId, Name, Description, [Order], Type, Disabled FROM UserTrackingValue"},
     @{Name="UserTrackingValueMetadata"; Query="SELECT UserTrackingValueId, [Key], Value FROM UserTrackingValueMetadata"},
-    @{Name="UserDay"; Query="SELECT UserId, Day, Weight FROM UserDay"},
+    @{Name="UserDay"; Query="SELECT UserId, Day, Water, Weight, Notes FROM UserDay"},
     @{Name="UserFueling"; Query="SELECT UserFuelingId, UserId, Day, Name, [When] FROM UserFueling"},
     @{Name="UserMeal"; Query="SELECT UserMealId, UserId, Day, Name, [When] FROM UserMeal"},
     @{Name="UserPlan"; Query="SELECT UserId, PlanId, Start FROM UserPlan"},
