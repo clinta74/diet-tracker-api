@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using diet_tracker_api.DataLayer;
@@ -11,9 +12,11 @@ using diet_tracker_api.DataLayer;
 namespace diet_tracker_api.Migrations
 {
     [DbContext(typeof(DietTrackerDbContext))]
-    partial class DietTrackerDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251127015820_InitialPostgreSQL")]
+    partial class InitialPostgreSQL
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

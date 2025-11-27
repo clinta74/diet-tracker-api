@@ -14,7 +14,6 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
-using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -46,25 +45,18 @@ builder.Services.AddMediator(options =>
 });
 
 // Database configuration
-var dataSource = builder.Configuration["DATA_SOURCE"];
-var initialCatalog = builder.Configuration["INITIAL_CATALOG"];
-var dbPassword = builder.Configuration["DB_PASSWORD"];
-var userID = builder.Configuration["DB_USERNAME"];
+var host = builder.Configuration["DB_HOST"];
+var port = builder.Configuration["DB_PORT"] ?? "5432";
+var database = builder.Configuration["DB_NAME"];
+var username = builder.Configuration["DB_USERNAME"];
+var password = builder.Configuration["DB_PASSWORD"];
 
-var sqlBuilder = new SqlConnectionStringBuilder()
-{
-    DataSource = dataSource,
-    InitialCatalog = initialCatalog,
-    Password = dbPassword,
-    UserID = userID,
-    IntegratedSecurity = false,
-    TrustServerCertificate = true,
-};
+var connectionString = $"Host={host};Port={port};Database={database};Username={username};Password={password};";
 
 builder.Services.AddDbContext<DietTrackerDbContext>(options =>
 {
-    options.UseSqlServer(sqlBuilder.ConnectionString, 
-        sqlOptions => sqlOptions.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery));
+    options.UseNpgsql(connectionString, 
+        npgsqlOptions => npgsqlOptions.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery));
 }, ServiceLifetime.Transient);
 
 builder.Services.AddSwaggerGen(c =>
