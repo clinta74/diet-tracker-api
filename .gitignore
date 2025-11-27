@@ -3,6 +3,17 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
+# Secrets and sensitive configuration files
+docker-compose.yaml
+docker-compose.yml
+docker-compose.override.yaml
+docker-compose.override.yml
+scripts/import-postgresql-data.ps1
+scripts/export-mssql-data.ps1
+scripts/export-mssql-data.sql
+scripts/psql.exe
+scripts/export/
+
 # User-specific files
 *.rsuser
 *.suo

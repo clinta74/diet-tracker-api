@@ -1,0 +1,42 @@
+services:
+  postgres:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: your-db-username
+      POSTGRES_PASSWORD: your-db-password
+      POSTGRES_DB: DietTracker
+    ports:
+      - 5433:5432  # Exposed on host port 5433 for data import/export
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U your-db-username -d DietTracker"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  diet-tracker-api:
+    image: candrews74/diet-tracker-api
+    environment:
+      - Auth0:ClientSecret=your-auth0-client-secret
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=DietTracker
+      - DB_USERNAME=your-db-username
+      - DB_PASSWORD=your-db-password
+    ports:
+      - 5001:80
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  diet-tracker-ui:
+    image: candrews74/diet-tracker-ui
+    ports:
+      - 3001:80
+    restart: unless-stopped
+
+volumes:
+  postgres-data:

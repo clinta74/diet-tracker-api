@@ -116,9 +116,19 @@ namespace diet_tracker_api.DataLayer
                 .Property(v => v.Type)
                 .HasConversion<string>();
 
-            // Configure Code First to ignore PluralizingTableName convention
-            // If you keep this convention then the generated tables will have pluralized names.
-            modelBuilder.RemovePluralizingTableNameConvention();
+            // Configure table names to follow PostgreSQL conventions (lowercase snake_case)
+            modelBuilder.Entity<User>().ToTable("users");
+            modelBuilder.Entity<Plan>().ToTable("plans");
+            modelBuilder.Entity<Fueling>().ToTable("fuelings");
+            modelBuilder.Entity<UserDay>().ToTable("user_days");
+            modelBuilder.Entity<UserFueling>().ToTable("user_fuelings");
+            modelBuilder.Entity<UserMeal>().ToTable("user_meals");
+            modelBuilder.Entity<UserPlan>().ToTable("user_plans");
+            modelBuilder.Entity<UserTracking>().ToTable("user_trackings");
+            modelBuilder.Entity<UserTrackingValue>().ToTable("user_tracking_values");
+            modelBuilder.Entity<UserTrackingValueMetadata>().ToTable("user_tracking_value_metadata");
+            modelBuilder.Entity<UserDailyTrackingValue>().ToTable("user_daily_tracking_values");
+            modelBuilder.Entity<Victory>().ToTable("victories");
         }
     }
 

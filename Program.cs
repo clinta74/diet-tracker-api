@@ -12,13 +12,13 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Npgsql;
 using Swashbuckle.AspNetCore.SwaggerUI;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -51,11 +51,18 @@ var database = builder.Configuration["DB_NAME"];
 var username = builder.Configuration["DB_USERNAME"];
 var password = builder.Configuration["DB_PASSWORD"];
 
-var connectionString = $"Host={host};Port={port};Database={database};Username={username};Password={password};";
+var connectionBuilder = new NpgsqlConnectionStringBuilder
+{
+    Host = host,
+    Port = int.Parse(port),
+    Database = database,
+    Username = username,
+    Password = password
+};
 
 builder.Services.AddDbContext<DietTrackerDbContext>(options =>
 {
-    options.UseNpgsql(connectionString, 
+    options.UseNpgsql(connectionBuilder.ConnectionString, 
         npgsqlOptions => npgsqlOptions.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery));
 }, ServiceLifetime.Transient);
 

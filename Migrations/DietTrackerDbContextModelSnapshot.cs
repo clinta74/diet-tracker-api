@@ -35,7 +35,7 @@ namespace diet_tracker_api.Migrations
 
                     b.HasKey("FuelingId");
 
-                    b.ToTable("Fueling");
+                    b.ToTable("fuelings", (string)null);
                 });
 
             modelBuilder.Entity("diet_tracker_api.DataLayer.Models.Plan", b =>
@@ -57,7 +57,7 @@ namespace diet_tracker_api.Migrations
 
                     b.HasKey("PlanId");
 
-                    b.ToTable("Plan");
+                    b.ToTable("plans", (string)null);
                 });
 
             modelBuilder.Entity("diet_tracker_api.DataLayer.Models.User", b =>
@@ -95,7 +95,7 @@ namespace diet_tracker_api.Migrations
 
                     b.HasKey("UserId");
 
-                    b.ToTable("User");
+                    b.ToTable("users", (string)null);
                 });
 
             modelBuilder.Entity("diet_tracker_api.DataLayer.Models.UserDailyTrackingValue", b =>
@@ -122,7 +122,7 @@ namespace diet_tracker_api.Migrations
 
                     b.HasIndex("UserTrackingValueId");
 
-                    b.ToTable("UserDailyTrackingValue");
+                    b.ToTable("user_daily_tracking_values", (string)null);
                 });
 
             modelBuilder.Entity("diet_tracker_api.DataLayer.Models.UserDay", b =>
@@ -144,7 +144,7 @@ namespace diet_tracker_api.Migrations
 
                     b.HasKey("UserId", "Day");
 
-                    b.ToTable("UserDay");
+                    b.ToTable("user_days", (string)null);
                 });
 
             modelBuilder.Entity("diet_tracker_api.DataLayer.Models.UserFueling", b =>
@@ -171,7 +171,7 @@ namespace diet_tracker_api.Migrations
 
                     b.HasIndex("UserId", "Day");
 
-                    b.ToTable("UserFueling");
+                    b.ToTable("user_fuelings", (string)null);
                 });
 
             modelBuilder.Entity("diet_tracker_api.DataLayer.Models.UserMeal", b =>
@@ -198,7 +198,7 @@ namespace diet_tracker_api.Migrations
 
                     b.HasIndex("UserId", "Day");
 
-                    b.ToTable("UserMeal");
+                    b.ToTable("user_meals", (string)null);
                 });
 
             modelBuilder.Entity("diet_tracker_api.DataLayer.Models.UserPlan", b =>
@@ -216,7 +216,7 @@ namespace diet_tracker_api.Migrations
 
                     b.HasIndex("PlanId");
 
-                    b.ToTable("UserPlan");
+                    b.ToTable("user_plans", (string)null);
                 });
 
             modelBuilder.Entity("diet_tracker_api.DataLayer.Models.UserTracking", b =>
@@ -252,7 +252,7 @@ namespace diet_tracker_api.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("UserTracking");
+                    b.ToTable("user_trackings", (string)null);
                 });
 
             modelBuilder.Entity("diet_tracker_api.DataLayer.Models.UserTrackingValue", b =>
@@ -286,7 +286,7 @@ namespace diet_tracker_api.Migrations
 
                     b.HasIndex("UserTrackingId");
 
-                    b.ToTable("UserTrackingValue");
+                    b.ToTable("user_tracking_values", (string)null);
                 });
 
             modelBuilder.Entity("diet_tracker_api.DataLayer.Models.UserTrackingValueMetadata", b =>
@@ -302,7 +302,7 @@ namespace diet_tracker_api.Migrations
 
                     b.HasKey("UserTrackingValueId", "Key");
 
-                    b.ToTable("UserTrackingValueMetadata");
+                    b.ToTable("user_tracking_value_metadata", (string)null);
                 });
 
             modelBuilder.Entity("diet_tracker_api.DataLayer.Models.Victory", b =>
@@ -330,7 +330,7 @@ namespace diet_tracker_api.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Victory");
+                    b.ToTable("victories", (string)null);
                 });
 
             modelBuilder.Entity("diet_tracker_api.DataLayer.Models.UserDailyTrackingValue", b =>
