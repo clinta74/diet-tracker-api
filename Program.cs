@@ -23,10 +23,6 @@ using Swashbuckle.AspNetCore.SwaggerUI;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Configure Npgsql to handle DateTime without timezone info (legacy behavior)
-// This allows the app to work with DateTime values that don't have Kind set to UTC
-AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
-
 var domain = $"https://{builder.Configuration["Auth0:Domain"]}/";
 var audience = builder.Configuration["Auth0:Audience"];
 
