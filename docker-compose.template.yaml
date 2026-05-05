@@ -20,7 +20,9 @@ services:
     image: candrews74/diet-tracker-api
     pull_policy: always
     environment:
-      - Auth0:ClientSecret=your-auth0-client-secret
+      - Jwt__Issuer=https://your-domain.com
+      - Jwt__Audience=https://your-domain.com
+      - Jwt__SecretKey=your-jwt-secret-key-min-32-chars
       - DB_HOST=postgres
       - DB_PORT=5432
       - DB_NAME=DietTracker

@@ -27,5 +27,8 @@ namespace diet_tracker_api.DataLayer.Models
         public virtual ICollection<UserPlan> UserPlans { get; init; }
         public virtual ICollection<UserTracking> UserTrackings { get; init; }
         public virtual ICollection<Victory> Victories { get; init; }
+        public virtual UserCredentials Credentials { get; init; }
+        public virtual ICollection<UserPermission> Permissions { get; init; }
+        public virtual ICollection<RefreshToken> RefreshTokens { get; init; }
     }
 }
