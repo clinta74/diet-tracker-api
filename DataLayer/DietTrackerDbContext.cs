@@ -15,6 +15,9 @@ namespace diet_tracker_api.DataLayer
         public DbSet<Fueling> Fuelings { get; set; }
         public DbSet<Plan> Plans { get; set; }
         public DbSet<User> Users { get; set; }
+        public DbSet<UserCredentials> UserCredentials { get; set; }
+        public DbSet<UserPermission> UserPermissions { get; set; }
+        public DbSet<RefreshToken> RefreshTokens { get; set; }
         public DbSet<UserDay> UserDays { get; set; }
         public DbSet<UserFueling> UserFuelings { get; set; }
         public DbSet<UserMeal> UserMeals { get; set; }
@@ -116,6 +119,31 @@ namespace diet_tracker_api.DataLayer
                 .Property(v => v.Type)
                 .HasConversion<string>();
 
+            // UserCredentials — one-to-one with User
+            modelBuilder.Entity<UserCredentials>()
+                .HasOne(uc => uc.User)
+                .WithOne(u => u.Credentials)
+                .HasForeignKey<UserCredentials>(uc => uc.UserId);
+
+            modelBuilder.Entity<UserCredentials>()
+                .HasIndex(uc => uc.Email)
+                .IsUnique();
+
+            // UserPermission — composite PK
+            modelBuilder.Entity<UserPermission>()
+                .HasKey(up => new { up.UserId, up.Permission });
+
+            modelBuilder.Entity<UserPermission>()
+                .HasOne(up => up.User)
+                .WithMany(u => u.Permissions)
+                .HasForeignKey(up => up.UserId);
+
+            // RefreshToken
+            modelBuilder.Entity<RefreshToken>()
+                .HasOne(rt => rt.User)
+                .WithMany(u => u.RefreshTokens)
+                .HasForeignKey(rt => rt.UserId);
+
             // Configure table names to follow PostgreSQL conventions (lowercase snake_case)
             modelBuilder.Entity<User>().ToTable("users");
             modelBuilder.Entity<Plan>().ToTable("plans");
@@ -129,6 +157,9 @@ namespace diet_tracker_api.DataLayer
             modelBuilder.Entity<UserTrackingValueMetadata>().ToTable("user_tracking_value_metadata");
             modelBuilder.Entity<UserDailyTrackingValue>().ToTable("user_daily_tracking_values");
             modelBuilder.Entity<Victory>().ToTable("victories");
+            modelBuilder.Entity<UserCredentials>().ToTable("user_credentials");
+            modelBuilder.Entity<UserPermission>().ToTable("user_permissions");
+            modelBuilder.Entity<RefreshToken>().ToTable("refresh_tokens");
         }
     }
 }

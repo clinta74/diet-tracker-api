@@ -3,12 +3,9 @@ using System.Threading.Tasks;
 using diet_tracker_api.BusinessLayer.Users;
 using diet_tracker_api.DataLayer.Models;
 using diet_tracker_api.Extensions;
-using diet_tracker_api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore.Query.Internal;
-using Microsoft.Extensions.Logging;
 
 namespace diet_tracker_api.Controllers
 {
@@ -26,29 +23,13 @@ namespace diet_tracker_api.Controllers
     [Produces("application/json")]
     public class NewUserController
     {
-        private readonly IAuth0ManagementApiClient _managementApiClient;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IMediator _mediator;
 
-        public NewUserController(IAuth0ManagementApiClient managementApiClient, IHttpContextAccessor httpContextAccessor, IMediator mediator)
+        public NewUserController(IHttpContextAccessor httpContextAccessor, IMediator mediator)
         {
-            _managementApiClient = managementApiClient;
             _httpContextAccessor = httpContextAccessor;
             _mediator = mediator;
-        }
-
-        [HttpPost("create")]
-        public async Task<User> CreateNewUser(CancellationToken cancellationToken)
-        {
-            var userId = _httpContextAccessor.HttpContext.GetUserId();
-            var userData = await _managementApiClient.Client.Users.GetAsync(userId);
-
-            var data = await _mediator.Send(
-                new CreateNewUser(userId, userData.FirstName, userData.LastName, userData.Email),
-                cancellationToken
-            );
-
-            return data;
         }
 
         [HttpPost]
@@ -63,18 +44,10 @@ namespace diet_tracker_api.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<NewUser>> GetNewUser(CancellationToken cancellationToken)
+        public ActionResult<NewUser> GetNewUser()
         {
             var userId = _httpContextAccessor.HttpContext.GetUserId();
-            var userData = await _managementApiClient.Client.Users.GetAsync(userId, null, true, cancellationToken);
-
-            return new NewUser
-            {
-                UserId = userId,
-                FirstName = userData.FirstName,
-                LastName = userData.LastName,
-                EmailAddress = userData.Email
-            };
+            return new NewUser { UserId = userId };
         }
     }
 }

@@ -60,6 +60,46 @@ namespace diet_tracker_api.Migrations
                     b.ToTable("plans", (string)null);
                 });
 
+            modelBuilder.Entity("diet_tracker_api.DataLayer.Models.RefreshToken", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("CreatedByIp")
+                        .HasMaxLength(45)
+                        .HasColumnType("character varying(45)");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int?>("ReplacedByTokenId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("RevokedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("TokenHash")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("character varying(250)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("refresh_tokens", (string)null);
+                });
+
             modelBuilder.Entity("diet_tracker_api.DataLayer.Models.User", b =>
                 {
                     b.Property<string>("UserId")
@@ -70,7 +110,7 @@ namespace diet_tracker_api.Migrations
                         .HasColumnType("boolean");
 
                     b.Property<DateTime>("Created")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("EmailAddress")
                         .HasColumnType("text");
@@ -98,6 +138,29 @@ namespace diet_tracker_api.Migrations
                     b.ToTable("users", (string)null);
                 });
 
+            modelBuilder.Entity("diet_tracker_api.DataLayer.Models.UserCredentials", b =>
+                {
+                    b.Property<string>("UserId")
+                        .HasMaxLength(250)
+                        .HasColumnType("character varying(250)");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(254)
+                        .HasColumnType("character varying(254)");
+
+                    b.Property<string>("PasswordHash")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("UserId");
+
+                    b.HasIndex("Email")
+                        .IsUnique();
+
+                    b.ToTable("user_credentials", (string)null);
+                });
+
             modelBuilder.Entity("diet_tracker_api.DataLayer.Models.UserDailyTrackingValue", b =>
                 {
                     b.Property<string>("UserId")
@@ -116,7 +179,7 @@ namespace diet_tracker_api.Migrations
                         .HasColumnType("decimal(10, 2)");
 
                     b.Property<DateTime?>("When")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("UserId", "Day", "UserTrackingValueId", "Occurrence");
 
@@ -201,6 +264,21 @@ namespace diet_tracker_api.Migrations
                     b.ToTable("user_meals", (string)null);
                 });
 
+            modelBuilder.Entity("diet_tracker_api.DataLayer.Models.UserPermission", b =>
+                {
+                    b.Property<string>("UserId")
+                        .HasMaxLength(250)
+                        .HasColumnType("character varying(250)");
+
+                    b.Property<string>("Permission")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.HasKey("UserId", "Permission");
+
+                    b.ToTable("user_permissions", (string)null);
+                });
+
             modelBuilder.Entity("diet_tracker_api.DataLayer.Models.UserPlan", b =>
                 {
                     b.Property<string>("UserId")
@@ -210,7 +288,7 @@ namespace diet_tracker_api.Migrations
                         .HasColumnType("integer");
 
                     b.Property<DateTime>("Start")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("UserId", "PlanId", "Start");
 
@@ -333,6 +411,28 @@ namespace diet_tracker_api.Migrations
                     b.ToTable("victories", (string)null);
                 });
 
+            modelBuilder.Entity("diet_tracker_api.DataLayer.Models.RefreshToken", b =>
+                {
+                    b.HasOne("diet_tracker_api.DataLayer.Models.User", "User")
+                        .WithMany("RefreshTokens")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("diet_tracker_api.DataLayer.Models.UserCredentials", b =>
+                {
+                    b.HasOne("diet_tracker_api.DataLayer.Models.User", "User")
+                        .WithOne("Credentials")
+                        .HasForeignKey("diet_tracker_api.DataLayer.Models.UserCredentials", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("diet_tracker_api.DataLayer.Models.UserDailyTrackingValue", b =>
                 {
                     b.HasOne("diet_tracker_api.DataLayer.Models.UserTrackingValue", "TrackingValue")
@@ -387,6 +487,17 @@ namespace diet_tracker_api.Migrations
                         .HasForeignKey("UserId", "Day");
 
                     b.Navigation("UserDay");
+                });
+
+            modelBuilder.Entity("diet_tracker_api.DataLayer.Models.UserPermission", b =>
+                {
+                    b.HasOne("diet_tracker_api.DataLayer.Models.User", "User")
+                        .WithMany("Permissions")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("diet_tracker_api.DataLayer.Models.UserPlan", b =>
@@ -455,6 +566,12 @@ namespace diet_tracker_api.Migrations
 
             modelBuilder.Entity("diet_tracker_api.DataLayer.Models.User", b =>
                 {
+                    b.Navigation("Credentials");
+
+                    b.Navigation("Permissions");
+
+                    b.Navigation("RefreshTokens");
+
                     b.Navigation("UserDays");
 
                     b.Navigation("UserFuelings");

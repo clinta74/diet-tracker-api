@@ -3,6 +3,7 @@ global using System.Collections.Generic;
 global using Mediator;
 
 using System.Security.Claims;
+using System.Text;
 using System.Text.Json.Serialization;
 using diet_tracker_api.Authorization;
 using diet_tracker_api.DataLayer;
@@ -24,8 +25,9 @@ using Swashbuckle.AspNetCore.SwaggerUI;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var domain = $"https://{builder.Configuration["Auth0:Domain"]}/";
-var audience = builder.Configuration["Auth0:Audience"];
+var jwtIssuer = builder.Configuration["Jwt:Issuer"] ?? throw new InvalidOperationException("Jwt:Issuer is required");
+var jwtAudience = builder.Configuration["Jwt:Audience"] ?? throw new InvalidOperationException("Jwt:Audience is required");
+var jwtSecretKey = builder.Configuration["Jwt:SecretKey"] ?? throw new InvalidOperationException("Jwt:SecretKey is required");
 
 builder.Services.AddControllers(config =>
 {
@@ -79,18 +81,9 @@ builder.Services.AddSwaggerGen(c =>
     {
         Name = "Authorization",
         In = ParameterLocation.Header,
-        Type = SecuritySchemeType.OAuth2,
-        Flows = new OpenApiOAuthFlows
-        {
-            Implicit = new OpenApiOAuthFlow
-            {
-                Scopes = new Dictionary<string, string>
-                {
-                    { "openid", "Open Id" }
-                },
-                AuthorizationUrl = new Uri(domain + "authorize?audience=" + audience)
-            }
-        }
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT"
     });
     c.OperationFilter<SecurityRequirementsOperationFilter>();
 });
@@ -102,11 +95,15 @@ builder.Services.AddAuthentication(options =>
 })
 .AddJwtBearer(options =>
 {
-    options.Authority = domain;
-    options.Audience = audience;
     options.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = jwtIssuer,
+        ValidAudience = jwtAudience,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecretKey)),
         ClockSkew = TimeSpan.FromSeconds(5),
         NameClaimType = ClaimTypes.NameIdentifier
     };
@@ -114,22 +111,22 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddSingleton<IAuthorizationHandler, HasScopeHandler>();
 
-var permissions = new string[] { "write:fuelings", "write:plans", "write:lean-and-greens", "write:user", "read:user:fuelings", "read:user:lean-and-green" };
+var permissions = new string[]
+{
+    "write:fuelings", "write:plans", "write:lean-and-greens", "write:user",
+    "read:user", "read:user:fuelings", "read:user:lean-and-green",
+    "admin:users"
+};
 
 builder.Services.AddAuthorization(options =>
 {
     foreach (var permission in permissions)
     {
-        options.AddPolicy(permission, policy => policy.Requirements.Add(new HasScopeRequirement(permission, domain)));
+        options.AddPolicy(permission, policy => policy.Requirements.Add(new HasScopeRequirement(permission, jwtIssuer)));
     }
 });
 
-var clientSecret = builder.Configuration["Auth0:ClientSecret"];
-var apiClientId = builder.Configuration["Auth0:ApiClientId"];
-var auth0Domain = builder.Configuration["Auth0:Domain"];
-
-builder.Services.AddTransient<IAuth0ManagementApiClient>(provider => 
-    Auth0ManagementApiClient.CreateAsync(apiClientId, clientSecret, auth0Domain).GetAwaiter().GetResult());
+builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 
 builder.Services.AddScoped<UserExistsFilter>();
 
@@ -157,7 +154,6 @@ app.UseSwagger();
 app.UseSwaggerUI(c =>
 {
     c.SwaggerEndpoint("/swagger/v1/swagger.json", "diet_tracker_api v1");
-    c.OAuthClientId(builder.Configuration["Auth0:ClientId"]);
     c.DefaultModelRendering(ModelRendering.Example);
     c.DefaultModelExpandDepth(1);
 });
