@@ -2,6 +2,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using diet_tracker_api.BusinessLayer.Admin;
 using diet_tracker_api.BusinessLayer.Auth;
+using diet_tracker_api.BusinessLayer.Users;
 using diet_tracker_api.Extensions;
 using diet_tracker_api.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -79,7 +80,9 @@ namespace diet_tracker_api.Controllers
                 return Unauthorized(new { message = "Invalid or expired refresh token." });
 
             var permissions = await _mediator.Send(new GetUserPermissions(rotateResult.UserId), cancellationToken);
-            var accessToken = _jwtTokenService.GenerateAccessToken(rotateResult.UserId, permissions);
+            var rotateUser = await _mediator.Send(new GetUserById(rotateResult.UserId), cancellationToken);
+            var rotateName = rotateUser != null ? $"{rotateUser.FirstName} {rotateUser.LastName}".Trim() : rotateResult.UserId;
+            var accessToken = _jwtTokenService.GenerateAccessToken(rotateResult.UserId, rotateName, permissions);
 
             return Ok(new AuthResponse(accessToken, newRaw, _jwtTokenService.AccessTokenExpiryMinutes * 60));
         }
@@ -119,7 +122,9 @@ namespace diet_tracker_api.Controllers
             IReadOnlyList<string> permissions,
             CancellationToken cancellationToken)
         {
-            var accessToken = _jwtTokenService.GenerateAccessToken(userId, permissions);
+            var buildUser = await _mediator.Send(new GetUserById(userId), cancellationToken);
+            var buildName = buildUser != null ? $"{buildUser.FirstName} {buildUser.LastName}".Trim() : userId;
+            var accessToken = _jwtTokenService.GenerateAccessToken(userId, buildName, permissions);
             var refreshTokenRaw = _jwtTokenService.GenerateRefreshToken();
             var refreshTokenHash = _jwtTokenService.HashToken(refreshTokenRaw);
             var expiry = DateTime.UtcNow.AddDays(_jwtTokenService.RefreshTokenExpiryDays);

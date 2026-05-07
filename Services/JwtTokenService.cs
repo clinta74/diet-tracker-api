@@ -9,7 +9,7 @@ namespace diet_tracker_api.Services
 {
     public interface IJwtTokenService
     {
-        string GenerateAccessToken(string userId, IEnumerable<string> permissions);
+        string GenerateAccessToken(string userId, string name, IEnumerable<string> permissions);
         string GenerateRefreshToken();
         string HashToken(string token);
         int AccessTokenExpiryMinutes { get; }
@@ -31,7 +31,7 @@ namespace diet_tracker_api.Services
         public int RefreshTokenExpiryDays =>
             int.TryParse(_configuration["Jwt:RefreshTokenExpiryDays"], out var d) ? d : 7;
 
-        public string GenerateAccessToken(string userId, IEnumerable<string> permissions)
+        public string GenerateAccessToken(string userId, string name, IEnumerable<string> permissions)
         {
             var secretKey = _configuration["Jwt:SecretKey"]
                 ?? throw new InvalidOperationException("Jwt:SecretKey is not configured.");
@@ -46,6 +46,7 @@ namespace diet_tracker_api.Services
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, userId),
+                new Claim(JwtRegisteredClaimNames.Name, name),
             };
 
             foreach (var permission in permissions)
