@@ -3,47 +3,46 @@ using diet_tracker_api.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace diet_tracker_api.Controllers
+namespace diet_tracker_api.Controllers;
+
+public record NewUser
 {
-    public record NewUser
+    public string UserId { get; init; }
+    public string FirstName { get; init; }
+    public string LastName { get; init; }
+    public string EmailAddress { get; init; }
+    public int PlanId { get; init; }
+}
+[Authorize]
+[ApiController]
+[Route("api/[controller]")]
+[Produces("application/json")]
+public class NewUserController
+{
+    private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly IMediator _mediator;
+
+    public NewUserController(IHttpContextAccessor httpContextAccessor, IMediator mediator)
     {
-        public string UserId { get; init; }
-        public string FirstName { get; init; }
-        public string LastName { get; init; }
-        public string EmailAddress { get; init; }
-        public int PlanId { get; init; }
+        _httpContextAccessor = httpContextAccessor;
+        _mediator = mediator;
     }
-    [Authorize]
-    [ApiController]
-    [Route("api/[controller]")]
-    [Produces("application/json")]
-    public class NewUserController
+
+    [HttpPost]
+    public async Task<ActionResult<string>> AddNewUser(NewUser userData, CancellationToken cancellationToken)
     {
-        private readonly IHttpContextAccessor _httpContextAccessor;
-        private readonly IMediator _mediator;
+        var userId = _httpContextAccessor.HttpContext.GetUserId();
 
-        public NewUserController(IHttpContextAccessor httpContextAccessor, IMediator mediator)
-        {
-            _httpContextAccessor = httpContextAccessor;
-            _mediator = mediator;
-        }
+        return await _mediator.Send(
+            new AddNewUser(userId, userData.FirstName, userData.LastName, userData.EmailAddress, userData.PlanId),
+            cancellationToken
+        );
+    }
 
-        [HttpPost]
-        public async Task<ActionResult<string>> AddNewUser(NewUser userData, CancellationToken cancellationToken)
-        {
-            var userId = _httpContextAccessor.HttpContext.GetUserId();
-
-            return await _mediator.Send(
-                new AddNewUser(userId, userData.FirstName, userData.LastName, userData.EmailAddress, userData.PlanId),
-                cancellationToken
-            );
-        }
-
-        [HttpGet]
-        public ActionResult<NewUser> GetNewUser()
-        {
-            var userId = _httpContextAccessor.HttpContext.GetUserId();
-            return new NewUser { UserId = userId };
-        }
+    [HttpGet]
+    public ActionResult<NewUser> GetNewUser()
+    {
+        var userId = _httpContextAccessor.HttpContext.GetUserId();
+        return new NewUser { UserId = userId };
     }
 }

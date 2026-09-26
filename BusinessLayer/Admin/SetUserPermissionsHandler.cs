@@ -2,38 +2,37 @@ using diet_tracker_api.DataLayer;
 using diet_tracker_api.DataLayer.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace diet_tracker_api.BusinessLayer.Admin
+namespace diet_tracker_api.BusinessLayer.Admin;
+
+public record SetUserPermissions(string UserId, IReadOnlyList<string> Permissions) : IRequest<Unit>;
+
+public class SetUserPermissionsHandler : IRequestHandler<SetUserPermissions, Unit>
 {
-    public record SetUserPermissions(string UserId, IReadOnlyList<string> Permissions) : IRequest<Unit>;
+    private readonly DietTrackerDbContext _dbContext;
 
-    public class SetUserPermissionsHandler : IRequestHandler<SetUserPermissions, Unit>
+    public SetUserPermissionsHandler(DietTrackerDbContext dbContext)
     {
-        private readonly DietTrackerDbContext _dbContext;
+        _dbContext = dbContext;
+    }
 
-        public SetUserPermissionsHandler(DietTrackerDbContext dbContext)
+    public async ValueTask<Unit> Handle(SetUserPermissions request, CancellationToken cancellationToken)
+    {
+        var existing = await _dbContext.UserPermissions
+            .Where(p => p.UserId == request.UserId)
+            .ToListAsync(cancellationToken);
+
+        _dbContext.UserPermissions.RemoveRange(existing);
+
+        var newPermissions = request.Permissions.Select(p => new UserPermission
         {
-            _dbContext = dbContext;
-        }
+            UserId = request.UserId,
+            Permission = p
+        });
 
-        public async ValueTask<Unit> Handle(SetUserPermissions request, CancellationToken cancellationToken)
-        {
-            var existing = await _dbContext.UserPermissions
-                .Where(p => p.UserId == request.UserId)
-                .ToListAsync(cancellationToken);
+        _dbContext.UserPermissions.AddRange(newPermissions);
 
-            _dbContext.UserPermissions.RemoveRange(existing);
+        await _dbContext.SaveChangesAsync(cancellationToken);
 
-            var newPermissions = request.Permissions.Select(p => new UserPermission
-            {
-                UserId = request.UserId,
-                Permission = p
-            });
-
-            _dbContext.UserPermissions.AddRange(newPermissions);
-
-            await _dbContext.SaveChangesAsync(cancellationToken);
-
-            return Unit.Value;
-        }
+        return Unit.Value;
     }
 }

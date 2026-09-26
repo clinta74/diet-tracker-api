@@ -2,38 +2,37 @@
 using diet_tracker_api.DataLayer;
 using diet_tracker_api.DataLayer.Models;
 
-namespace diet_tracker_api.BusinessLayer.Auth
+namespace diet_tracker_api.BusinessLayer.Auth;
+
+public record CreateRefreshToken(
+    string UserId,
+    string TokenHash,
+    DateTime ExpiresAt,
+    string? CreatedByIp
+) : IRequest<int>;
+
+public class CreateRefreshTokenHandler : IRequestHandler<CreateRefreshToken, int>
 {
-    public record CreateRefreshToken(
-        string UserId,
-        string TokenHash,
-        DateTime ExpiresAt,
-        string? CreatedByIp
-    ) : IRequest<int>;
+    private readonly DietTrackerDbContext _dbContext;
 
-    public class CreateRefreshTokenHandler : IRequestHandler<CreateRefreshToken, int>
+    public CreateRefreshTokenHandler(DietTrackerDbContext dbContext)
     {
-        private readonly DietTrackerDbContext _dbContext;
+        _dbContext = dbContext;
+    }
 
-        public CreateRefreshTokenHandler(DietTrackerDbContext dbContext)
+    public async ValueTask<int> Handle(CreateRefreshToken request, CancellationToken cancellationToken)
+    {
+        var entry = _dbContext.RefreshTokens.Add(new RefreshToken
         {
-            _dbContext = dbContext;
-        }
+            UserId = request.UserId,
+            TokenHash = request.TokenHash,
+            ExpiresAt = request.ExpiresAt,
+            CreatedAt = DateTime.UtcNow,
+            CreatedByIp = request.CreatedByIp,
+        });
 
-        public async ValueTask<int> Handle(CreateRefreshToken request, CancellationToken cancellationToken)
-        {
-            var entry = _dbContext.RefreshTokens.Add(new RefreshToken
-            {
-                UserId = request.UserId,
-                TokenHash = request.TokenHash,
-                ExpiresAt = request.ExpiresAt,
-                CreatedAt = DateTime.UtcNow,
-                CreatedByIp = request.CreatedByIp,
-            });
+        await _dbContext.SaveChangesAsync(cancellationToken);
 
-            await _dbContext.SaveChangesAsync(cancellationToken);
-
-            return entry.Entity.Id;
-        }
+        return entry.Entity.Id;
     }
 }

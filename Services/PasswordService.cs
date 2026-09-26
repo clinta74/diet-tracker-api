@@ -2,55 +2,54 @@
 using diet_tracker_api.DataLayer.Models;
 using Microsoft.AspNetCore.Identity;
 
-namespace diet_tracker_api.Services
-{
-    public interface IPasswordService
-    {
-        string Hash(string password);
+namespace diet_tracker_api.Services;
 
-        /// <summary>
-        /// Verifies a password against a stored hash. Pass a null hash when the account does not
-        /// exist so the response takes as long as a real check and does not reveal which emails exist.
-        /// </summary>
-        PasswordVerificationResult Verify(string? passwordHash, string password);
-    }
+public interface IPasswordService
+{
+    string Hash(string password);
 
     /// <summary>
-    /// Hashes passwords with ASP.NET Core Identity's PBKDF2 hasher. Hashes created with BCrypt before
-    /// the switch still verify and report <see cref="PasswordVerificationResult.SuccessRehashNeeded"/>
-    /// so they are upgraded on the next successful login.
+    /// Verifies a password against a stored hash. Pass a null hash when the account does not
+    /// exist so the response takes as long as a real check and does not reveal which emails exist.
     /// </summary>
-    public class PasswordService : IPasswordService
+    PasswordVerificationResult Verify(string? passwordHash, string password);
+}
+
+/// <summary>
+/// Hashes passwords with ASP.NET Core Identity's PBKDF2 hasher. Hashes created with BCrypt before
+/// the switch still verify and report <see cref="PasswordVerificationResult.SuccessRehashNeeded"/>
+/// so they are upgraded on the next successful login.
+/// </summary>
+public class PasswordService : IPasswordService
+{
+    private const string LegacyBcryptPrefix = "$2";
+
+    private readonly IPasswordHasher<UserCredentials> _hasher;
+    private readonly string _dummyHash;
+
+    public PasswordService(IPasswordHasher<UserCredentials> hasher)
     {
-        private const string LegacyBcryptPrefix = "$2";
+        _hasher = hasher;
+        _dummyHash = hasher.HashPassword(null!, Guid.NewGuid().ToString());
+    }
 
-        private readonly IPasswordHasher<UserCredentials> _hasher;
-        private readonly string _dummyHash;
+    public string Hash(string password) => _hasher.HashPassword(null!, password);
 
-        public PasswordService(IPasswordHasher<UserCredentials> hasher)
+    public PasswordVerificationResult Verify(string? passwordHash, string password)
+    {
+        if (passwordHash == null)
         {
-            _hasher = hasher;
-            _dummyHash = hasher.HashPassword(null!, Guid.NewGuid().ToString());
+            _hasher.VerifyHashedPassword(null!, _dummyHash, password);
+            return PasswordVerificationResult.Failed;
         }
 
-        public string Hash(string password) => _hasher.HashPassword(null!, password);
-
-        public PasswordVerificationResult Verify(string? passwordHash, string password)
+        if (passwordHash.StartsWith(LegacyBcryptPrefix, StringComparison.Ordinal))
         {
-            if (passwordHash == null)
-            {
-                _hasher.VerifyHashedPassword(null!, _dummyHash, password);
-                return PasswordVerificationResult.Failed;
-            }
-
-            if (passwordHash.StartsWith(LegacyBcryptPrefix, StringComparison.Ordinal))
-            {
-                return BCrypt.Net.BCrypt.Verify(password, passwordHash)
-                    ? PasswordVerificationResult.SuccessRehashNeeded
-                    : PasswordVerificationResult.Failed;
-            }
-
-            return _hasher.VerifyHashedPassword(null!, passwordHash, password);
+            return BCrypt.Net.BCrypt.Verify(password, passwordHash)
+                ? PasswordVerificationResult.SuccessRehashNeeded
+                : PasswordVerificationResult.Failed;
         }
+
+        return _hasher.VerifyHashedPassword(null!, passwordHash, password);
     }
 }

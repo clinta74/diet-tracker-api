@@ -1,30 +1,29 @@
 using diet_tracker_api.DataLayer;
 using diet_tracker_api.DataLayer.Models;
 
-namespace diet_tracker_api.BusinessLayer.Plans
+namespace diet_tracker_api.BusinessLayer.Plans;
+
+public record ChangeUserPlan(string UserId, int PlanId) : IRequest<int>;
+
+public class ChangeUserPlanHandler : IRequestHandler<ChangeUserPlan, int>
 {
-    public record ChangeUserPlan(string UserId, int PlanId) : IRequest<int>;
-
-    public class ChangeUserPlanHandler : IRequestHandler<ChangeUserPlan, int>
+    private readonly DietTrackerDbContext ctx;
+    public ChangeUserPlanHandler(DietTrackerDbContext context)
     {
-        private readonly DietTrackerDbContext ctx;
-        public ChangeUserPlanHandler(DietTrackerDbContext context)
+        ctx = context;
+    }
+
+    public async ValueTask<int> Handle(ChangeUserPlan request, CancellationToken cancellationToken)
+    {
+        ctx.UserPlans.Add(new UserPlan
         {
-            ctx = context;
-        }
+            UserId = request.UserId,
+            PlanId = request.PlanId,
+            Start = DateTime.UtcNow,
+        });
 
-        public async ValueTask<int> Handle(ChangeUserPlan request, CancellationToken cancellationToken)
-        {
-            ctx.UserPlans.Add(new UserPlan
-            {
-                UserId = request.UserId,
-                PlanId = request.PlanId,
-                Start = DateTime.UtcNow,
-            });
+        await ctx.SaveChangesAsync(cancellationToken);
 
-            await ctx.SaveChangesAsync(cancellationToken);
-
-            return request.PlanId;
-        }
+        return request.PlanId;
     }
 }

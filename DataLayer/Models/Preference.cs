@@ -1,10 +1,9 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace diet_tracker_api.DataLayer.Models
+namespace diet_tracker_api.DataLayer.Models;
+
+public record Preference
 {
-    public record Preference
-    {
-        [Key]
-        public string UserId { get; init; }
-    }
+    [Key]
+    public string UserId { get; init; }
 }

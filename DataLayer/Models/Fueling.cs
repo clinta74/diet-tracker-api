@@ -1,11 +1,10 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace diet_tracker_api.DataLayer.Models
+namespace diet_tracker_api.DataLayer.Models;
+
+public record Fueling
 {
-    public record Fueling
-    {
-        [Key]
-        public int FuelingId { get; init; }
-        public string Name { get; init; }
-    }
+    [Key]
+    public int FuelingId { get; init; }
+    public string Name { get; init; }
 }

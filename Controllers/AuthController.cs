@@ -5,116 +5,115 @@ using diet_tracker_api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace diet_tracker_api.Controllers
+namespace diet_tracker_api.Controllers;
+
+public record LoginRequest(string Email, string Password);
+public record RegisterRequest(string FirstName, string LastName, string Email, string Password, int PlanId);
+public record RefreshRequest(string RefreshToken);
+public record RevokeRequest(string RefreshToken);
+
+public record AuthResponse(string AccessToken, string RefreshToken, int ExpiresIn);
+
+[ApiController]
+[Route("api/[controller]")]
+[Produces("application/json")]
+public class AuthController : ControllerBase
 {
-    public record LoginRequest(string Email, string Password);
-    public record RegisterRequest(string FirstName, string LastName, string Email, string Password, int PlanId);
-    public record RefreshRequest(string RefreshToken);
-    public record RevokeRequest(string RefreshToken);
+    private readonly IMediator _mediator;
+    private readonly IJwtTokenService _jwtTokenService;
+    private readonly IPasswordService _passwordService;
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
-    public record AuthResponse(string AccessToken, string RefreshToken, int ExpiresIn);
-
-    [ApiController]
-    [Route("api/[controller]")]
-    [Produces("application/json")]
-    public class AuthController : ControllerBase
+    public AuthController(IMediator mediator, IJwtTokenService jwtTokenService, IPasswordService passwordService, IHttpContextAccessor httpContextAccessor)
     {
-        private readonly IMediator _mediator;
-        private readonly IJwtTokenService _jwtTokenService;
-        private readonly IPasswordService _passwordService;
-        private readonly IHttpContextAccessor _httpContextAccessor;
+        _mediator = mediator;
+        _jwtTokenService = jwtTokenService;
+        _passwordService = passwordService;
+        _httpContextAccessor = httpContextAccessor;
+    }
 
-        public AuthController(IMediator mediator, IJwtTokenService jwtTokenService, IPasswordService passwordService, IHttpContextAccessor httpContextAccessor)
-        {
-            _mediator = mediator;
-            _jwtTokenService = jwtTokenService;
-            _passwordService = passwordService;
-            _httpContextAccessor = httpContextAccessor;
-        }
+    [HttpPost("register")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    public async Task<ActionResult<AuthResponse>> Register([FromBody] RegisterRequest request, CancellationToken cancellationToken)
+    {
+        var passwordHash = _passwordService.Hash(request.Password);
 
-        [HttpPost("register")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status409Conflict)]
-        public async Task<ActionResult<AuthResponse>> Register([FromBody] RegisterRequest request, CancellationToken cancellationToken)
-        {
-            var passwordHash = _passwordService.Hash(request.Password);
+        var result = await _mediator.Send(
+            new RegisterUser(request.FirstName, request.LastName, request.Email, passwordHash, request.PlanId),
+            cancellationToken);
 
-            var result = await _mediator.Send(
-                new RegisterUser(request.FirstName, request.LastName, request.Email, passwordHash, request.PlanId),
-                cancellationToken);
+        return await BuildAuthResponseAsync(result.UserId, result.Permissions, cancellationToken);
+    }
 
-            return await BuildAuthResponseAsync(result.UserId, result.Permissions, cancellationToken);
-        }
+    [HttpPost("login")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<ActionResult<AuthResponse>> Login([FromBody] LoginRequest request, CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(new LoginUser(request.Email, request.Password), cancellationToken);
 
-        [HttpPost("login")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        public async Task<ActionResult<AuthResponse>> Login([FromBody] LoginRequest request, CancellationToken cancellationToken)
-        {
-            var result = await _mediator.Send(new LoginUser(request.Email, request.Password), cancellationToken);
+        if (result == null)
+            return Unauthorized(new { message = "Invalid email or password." });
 
-            if (result == null)
-                return Unauthorized(new { message = "Invalid email or password." });
+        return await BuildAuthResponseAsync(result.UserId, result.Permissions, cancellationToken);
+    }
 
-            return await BuildAuthResponseAsync(result.UserId, result.Permissions, cancellationToken);
-        }
+    [HttpPost("refresh")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<ActionResult<AuthResponse>> Refresh([FromBody] RefreshRequest request, CancellationToken cancellationToken)
+    {
+        var oldHash = _jwtTokenService.HashToken(request.RefreshToken);
+        var newRaw = _jwtTokenService.GenerateRefreshToken();
+        var newHash = _jwtTokenService.HashToken(newRaw);
+        var newExpiry = DateTime.UtcNow.AddDays(_jwtTokenService.RefreshTokenExpiryDays);
+        var ip = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString();
 
-        [HttpPost("refresh")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        public async Task<ActionResult<AuthResponse>> Refresh([FromBody] RefreshRequest request, CancellationToken cancellationToken)
-        {
-            var oldHash = _jwtTokenService.HashToken(request.RefreshToken);
-            var newRaw = _jwtTokenService.GenerateRefreshToken();
-            var newHash = _jwtTokenService.HashToken(newRaw);
-            var newExpiry = DateTime.UtcNow.AddDays(_jwtTokenService.RefreshTokenExpiryDays);
-            var ip = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString();
+        var rotateResult = await _mediator.Send(
+            new RotateRefreshToken(oldHash, newHash, newExpiry, ip), cancellationToken);
 
-            var rotateResult = await _mediator.Send(
-                new RotateRefreshToken(oldHash, newHash, newExpiry, ip), cancellationToken);
+        if (rotateResult == null)
+            return Unauthorized(new { message = "Invalid or expired refresh token." });
 
-            if (rotateResult == null)
-                return Unauthorized(new { message = "Invalid or expired refresh token." });
+        var permissions = await _mediator.Send(new GetUserPermissions(rotateResult.UserId), cancellationToken);
+        var rotateUser = await _mediator.Send(new GetUserById(rotateResult.UserId), cancellationToken);
+        var rotateName = rotateUser != null ? $"{rotateUser.FirstName} {rotateUser.LastName}".Trim() : rotateResult.UserId;
+        var accessToken = _jwtTokenService.GenerateAccessToken(rotateResult.UserId, rotateName, permissions);
 
-            var permissions = await _mediator.Send(new GetUserPermissions(rotateResult.UserId), cancellationToken);
-            var rotateUser = await _mediator.Send(new GetUserById(rotateResult.UserId), cancellationToken);
-            var rotateName = rotateUser != null ? $"{rotateUser.FirstName} {rotateUser.LastName}".Trim() : rotateResult.UserId;
-            var accessToken = _jwtTokenService.GenerateAccessToken(rotateResult.UserId, rotateName, permissions);
+        return Ok(new AuthResponse(accessToken, newRaw, _jwtTokenService.AccessTokenExpiryMinutes * 60));
+    }
 
-            return Ok(new AuthResponse(accessToken, newRaw, _jwtTokenService.AccessTokenExpiryMinutes * 60));
-        }
+    [Authorize]
+    [HttpPost("revoke")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult> Revoke([FromBody] RevokeRequest request, CancellationToken cancellationToken)
+    {
+        var hash = _jwtTokenService.HashToken(request.RefreshToken);
+        var revoked = await _mediator.Send(new RevokeRefreshToken(hash), cancellationToken);
 
-        [Authorize]
-        [HttpPost("revoke")]
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult> Revoke([FromBody] RevokeRequest request, CancellationToken cancellationToken)
-        {
-            var hash = _jwtTokenService.HashToken(request.RefreshToken);
-            var revoked = await _mediator.Send(new RevokeRefreshToken(hash), cancellationToken);
+        if (!revoked)
+            return BadRequest(new { message = "Token not found or already revoked." });
 
-            if (!revoked)
-                return BadRequest(new { message = "Token not found or already revoked." });
+        return NoContent();
+    }
 
-            return NoContent();
-        }
+    private async Task<ActionResult<AuthResponse>> BuildAuthResponseAsync(
+        string userId,
+        IReadOnlyList<string> permissions,
+        CancellationToken cancellationToken)
+    {
+        var buildUser = await _mediator.Send(new GetUserById(userId), cancellationToken);
+        var buildName = buildUser != null ? $"{buildUser.FirstName} {buildUser.LastName}".Trim() : userId;
+        var accessToken = _jwtTokenService.GenerateAccessToken(userId, buildName, permissions);
+        var refreshTokenRaw = _jwtTokenService.GenerateRefreshToken();
+        var refreshTokenHash = _jwtTokenService.HashToken(refreshTokenRaw);
+        var expiry = DateTime.UtcNow.AddDays(_jwtTokenService.RefreshTokenExpiryDays);
+        var ip = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString();
 
-        private async Task<ActionResult<AuthResponse>> BuildAuthResponseAsync(
-            string userId,
-            IReadOnlyList<string> permissions,
-            CancellationToken cancellationToken)
-        {
-            var buildUser = await _mediator.Send(new GetUserById(userId), cancellationToken);
-            var buildName = buildUser != null ? $"{buildUser.FirstName} {buildUser.LastName}".Trim() : userId;
-            var accessToken = _jwtTokenService.GenerateAccessToken(userId, buildName, permissions);
-            var refreshTokenRaw = _jwtTokenService.GenerateRefreshToken();
-            var refreshTokenHash = _jwtTokenService.HashToken(refreshTokenRaw);
-            var expiry = DateTime.UtcNow.AddDays(_jwtTokenService.RefreshTokenExpiryDays);
-            var ip = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString();
+        await _mediator.Send(new CreateRefreshToken(userId, refreshTokenHash, expiry, ip), cancellationToken);
 
-            await _mediator.Send(new CreateRefreshToken(userId, refreshTokenHash, expiry, ip), cancellationToken);
-
-            return Ok(new AuthResponse(accessToken, refreshTokenRaw, _jwtTokenService.AccessTokenExpiryMinutes * 60));
-        }
+        return Ok(new AuthResponse(accessToken, refreshTokenRaw, _jwtTokenService.AccessTokenExpiryMinutes * 60));
     }
 }

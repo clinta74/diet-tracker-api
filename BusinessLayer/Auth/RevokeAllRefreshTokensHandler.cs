@@ -1,33 +1,32 @@
 using diet_tracker_api.DataLayer;
 using Microsoft.EntityFrameworkCore;
 
-namespace diet_tracker_api.BusinessLayer.Auth
+namespace diet_tracker_api.BusinessLayer.Auth;
+
+public record RevokeAllRefreshTokens(string UserId) : IRequest<Unit>;
+
+public class RevokeAllRefreshTokensHandler : IRequestHandler<RevokeAllRefreshTokens, Unit>
 {
-    public record RevokeAllRefreshTokens(string UserId) : IRequest<Unit>;
+    private readonly DietTrackerDbContext _dbContext;
 
-    public class RevokeAllRefreshTokensHandler : IRequestHandler<RevokeAllRefreshTokens, Unit>
+    public RevokeAllRefreshTokensHandler(DietTrackerDbContext dbContext)
     {
-        private readonly DietTrackerDbContext _dbContext;
+        _dbContext = dbContext;
+    }
 
-        public RevokeAllRefreshTokensHandler(DietTrackerDbContext dbContext)
+    public async ValueTask<Unit> Handle(RevokeAllRefreshTokens request, CancellationToken cancellationToken)
+    {
+        var tokens = await _dbContext.RefreshTokens
+            .Where(rt => rt.UserId == request.UserId && rt.RevokedAt == null)
+            .ToListAsync(cancellationToken);
+
+        var now = DateTime.UtcNow;
+        foreach (var token in tokens)
         {
-            _dbContext = dbContext;
+            _dbContext.Entry(token).CurrentValues.SetValues(token with { RevokedAt = now });
         }
 
-        public async ValueTask<Unit> Handle(RevokeAllRefreshTokens request, CancellationToken cancellationToken)
-        {
-            var tokens = await _dbContext.RefreshTokens
-                .Where(rt => rt.UserId == request.UserId && rt.RevokedAt == null)
-                .ToListAsync(cancellationToken);
-
-            var now = DateTime.UtcNow;
-            foreach (var token in tokens)
-            {
-                _dbContext.Entry(token).CurrentValues.SetValues(token with { RevokedAt = now });
-            }
-
-            await _dbContext.SaveChangesAsync(cancellationToken);
-            return Unit.Value;
-        }
+        await _dbContext.SaveChangesAsync(cancellationToken);
+        return Unit.Value;
     }
 }

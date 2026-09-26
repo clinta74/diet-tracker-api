@@ -5,56 +5,55 @@ using diet_tracker_api.Filters;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace diet_tracker_api.Controllers
+namespace diet_tracker_api.Controllers;
+
+[ServiceFilter(typeof(UserExistsFilter))]
+public record UserDailyTrackingValueRequest(int Occurrence, int UserTrackingValueId, decimal Value, DateTime? When);
+
+[Authorize]
+[ApiController]
+[Route("api/[controller]")]
+[Produces("application/json")]
+public class DayTrackingValuesController
 {
-    [ServiceFilter(typeof(UserExistsFilter))]
-    public record UserDailyTrackingValueRequest(int Occurrence, int UserTrackingValueId, decimal Value, DateTime? When);
+    private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly IMediator _mediator;
 
-    [Authorize]
-    [ApiController]
-    [Route("api/[controller]")]
-    [Produces("application/json")]
-    public class DayTrackingValuesController
+    public DayTrackingValuesController(IHttpContextAccessor httpContextAccessor, IMediator mediator)
     {
-        private readonly IHttpContextAccessor _httpContextAccessor;
-        private readonly IMediator _mediator;
+        _httpContextAccessor = httpContextAccessor;
+        _mediator = mediator;
+    }
 
-        public DayTrackingValuesController(IHttpContextAccessor httpContextAccessor, IMediator mediator)
-        {
-            _httpContextAccessor = httpContextAccessor;
-            _mediator = mediator;
-        }
+    [HttpGet("{day}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<IEnumerable<UserDailyTrackingValue>>> GetCurrentUserDayTrackingValues(DateTime day, CancellationToken cancellationToken)
+    {
+        var userId = _httpContextAccessor.HttpContext.GetUserId();
+        var data = await _mediator.Send(new GetCurrentUserDailyTrackingValues(day, userId), cancellationToken);
 
-        [HttpGet("{day}")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<IEnumerable<UserDailyTrackingValue>>> GetCurrentUserDayTrackingValues(DateTime day, CancellationToken cancellationToken)
-        {
-            var userId = _httpContextAccessor.HttpContext.GetUserId();
-            var data = await _mediator.Send(new GetCurrentUserDailyTrackingValues(day, userId), cancellationToken);
+        return new OkObjectResult(data);
+    }
 
-            return new OkObjectResult(data);
-        }
+    [HttpPut("{day}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<UserDailyTrackingValue>> UpdateCurrentUserDayTrackingValue(DateTime day, UserDailyTrackingValueRequest[] values, CancellationToken cancellationToken)
+    {
+        var userId = _httpContextAccessor.HttpContext.GetUserId();
+        var data = await _mediator.Send(new UpdateUserDailyTrackingValues(day, userId, values.Select(value =>
+            new UpdateUserDailyTrackingValue(value.UserTrackingValueId, value.Occurrence, value.Value, value.When)).ToArray()));
 
-        [HttpPut("{day}")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<UserDailyTrackingValue>> UpdateCurrentUserDayTrackingValue(DateTime day, UserDailyTrackingValueRequest[] values, CancellationToken cancellationToken)
-        {
-            var userId = _httpContextAccessor.HttpContext.GetUserId();
-            var data = await _mediator.Send(new UpdateUserDailyTrackingValues(day, userId, values.Select(value =>
-                new UpdateUserDailyTrackingValue(value.UserTrackingValueId, value.Occurrence, value.Value, value.When)).ToArray()));
+        return new OkObjectResult(data);
+    }
 
-            return new OkObjectResult(data);
-        }
-
-        [HttpGet("{userTrackingId}/history")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult<IAsyncEnumerable<UserDailyTrackingValue>> GetHistory(int userTrackingId, DateTime startDate, DateTime? endDate = null)
-        {
-            var userId = _httpContextAccessor.HttpContext.GetUserId();
-            return new OkObjectResult(_mediator.CreateStream(new GetCurrentUserDailyTrackingValuesHistory(userId, userTrackingId, startDate, endDate)));
-        }
+    [HttpGet("{userTrackingId}/history")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public ActionResult<IAsyncEnumerable<UserDailyTrackingValue>> GetHistory(int userTrackingId, DateTime startDate, DateTime? endDate = null)
+    {
+        var userId = _httpContextAccessor.HttpContext.GetUserId();
+        return new OkObjectResult(_mediator.CreateStream(new GetCurrentUserDailyTrackingValuesHistory(userId, userTrackingId, startDate, endDate)));
     }
 }
