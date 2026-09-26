@@ -42,7 +42,7 @@ public class UserTrackingValueController(IHttpContextAccessor httpContextAccesso
             userTrackingValue.Order,
             userTrackingValue.Type,
             userTrackingValue.Disabled,
-            userTrackingValue.Metadata
+            userTrackingValue.Metadata ?? []
         ));
     }
 
@@ -64,7 +64,7 @@ public class UserTrackingValueController(IHttpContextAccessor httpContextAccesso
             userTrackingValue.Order,
             userTrackingValue.Type,
             userTrackingValue.Disabled,
-            userTrackingValue.Metadata
+            userTrackingValue.Metadata ?? []
         ));
 
         if (data == false) return new NotFoundResult();

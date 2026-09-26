@@ -1,11 +1,10 @@
-#nullable enable
 using diet_tracker_api.DataLayer;
 using diet_tracker_api.DataLayer.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace diet_tracker_api.BusinessLayer.Plans;
 
-public record UpdatePlan(int PlanId, string Name, int FuelingCount, int MealCount) : IRequest<Plan?>;
+public record UpdatePlan(int PlanId, string? Name, int FuelingCount, int MealCount) : IRequest<Plan?>;
 public class UpdatePlanHandler(DietTrackerDbContext dbContext) : IRequestHandler<UpdatePlan, Plan?>
 {
     private readonly DietTrackerDbContext _dbContext = dbContext;

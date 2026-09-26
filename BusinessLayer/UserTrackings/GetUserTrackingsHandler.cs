@@ -22,7 +22,7 @@ public class GetUserTrackingsHandler(DietTrackerDbContext dbContext) : IRequestH
                 Occurrences = userTracking.Occurrences,
                 Order = userTracking.Order,
                 Disabled = userTracking.Disabled,
-                Values = userTracking.Values
+                Values = userTracking.Values!
                     .Select(v => new UserTrackingValue
                     {
                         UserTrackingValueId = v.UserTrackingValueId,

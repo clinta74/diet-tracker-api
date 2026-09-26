@@ -5,7 +5,7 @@ using diet_tracker_api.DataLayer.Models;
 namespace diet_tracker_api.BusinessLayer.Days.Victories;
 
 public record GetDayVictories(DateTime Day, string UserId) : IRequest<IEnumerable<UserDayVictory>>;
-public record UserDayVictory(int VictoryId, string UserId, DateTime Day, string Name, DateTime? When);
+public record UserDayVictory(int VictoryId, string? UserId, DateTime Day, string? Name, DateTime? When);
 public class GetDayVictoriesHandler(DietTrackerDbContext dbContext, IMediator mediator) : IRequestHandler<GetDayVictories, IEnumerable<UserDayVictory>>
 {
     private readonly DietTrackerDbContext _dbContext = dbContext;

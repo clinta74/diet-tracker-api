@@ -6,5 +6,5 @@ public record Fueling
 {
     [Key]
     public int FuelingId { get; init; }
-    public string Name { get; init; }
+    public string? Name { get; init; }
 }

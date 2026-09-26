@@ -6,10 +6,10 @@ public record UserTrackingValueRequest
 {
     public int UserTrackingValueId { get; init; }
     public int UserTrackingId { get; init; }
-    public string Name { get; init; }
-    public string Description { get; init; }
+    public string? Name { get; init; }
+    public string? Description { get; init; }
     public UserTrackingType Type { get; init; }
     public int Order { get; init; }
     public bool Disabled { get; init; }
-    public IEnumerable<UserTrackingValueMetadata> Metadata { get; init; }
+    public IEnumerable<UserTrackingValueMetadata>? Metadata { get; init; }
 }

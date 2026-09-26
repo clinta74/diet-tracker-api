@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace diet_tracker_api.BusinessLayer.Fuelings;
 
-public record UpdateFueling(int FuelingId, string Name) : IRequest<bool>;
+public record UpdateFueling(int FuelingId, string? Name) : IRequest<bool>;
 
 public class UpdateFuelingHandler(DietTrackerDbContext dbContext) : IRequestHandler<UpdateFueling, bool>
 {

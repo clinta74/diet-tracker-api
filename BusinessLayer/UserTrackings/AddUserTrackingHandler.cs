@@ -13,7 +13,7 @@ public class AddUserTrackingHandler(DietTrackerDbContext dbContext, IMediator me
     public async ValueTask<UserTracking> Handle(AddUserTracking request, CancellationToken cancellationToken)
     {
         var order = await _dbContext.UserTrackings
-            .Where(t => t.UserId.Equals(request.UserId))
+            .Where(t => t.UserId == request.UserId)
             .OrderByDescending(t => t.Order)
             .Select(t => t.Order)
             .FirstOrDefaultAsync(cancellationToken);
@@ -33,6 +33,7 @@ public class AddUserTrackingHandler(DietTrackerDbContext dbContext, IMediator me
 
         await _dbContext.SaveChangesAsync(cancellationToken);
 
-        return await _mediator.Send(new GetUserTracking(request.UserId, result.Entity.UserTrackingId));
+        return await _mediator.Send(new GetUserTracking(request.UserId, result.Entity.UserTrackingId))
+            ?? throw new InvalidOperationException($"User Tracking Id ({result.Entity.UserTrackingId}) was not found after it was added.");
     }
 }

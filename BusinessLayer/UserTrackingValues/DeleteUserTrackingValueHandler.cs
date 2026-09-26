@@ -13,7 +13,7 @@ public class DeleteUserTrackingValueHandler(DietTrackerDbContext dbContext) : IR
         var data = await _dbContext.UserTrackingValues
             .AsNoTracking()
             .Where(p => p.UserTrackingValueId == request.UserTrackingValueId)
-            .Where(p => p.Tracking.UserId == request.UserId)
+            .Where(p => p.Tracking!.UserId == request.UserId)
             .FirstOrDefaultAsync(cancellationToken);
 
         if (data == null)

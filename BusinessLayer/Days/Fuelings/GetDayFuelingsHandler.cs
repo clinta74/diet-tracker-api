@@ -5,7 +5,7 @@ namespace diet_tracker_api.BusinessLayer.Days.Fuelings;
 
 public record GetDayFuelings(DateTime Date, string UserId) : IRequest<IEnumerable<UserDayFueling>>;
 
-public record UserDayFueling(int UserFuelingId, string UserId, DateTime Day, string Name, DateTime? When);
+public record UserDayFueling(int UserFuelingId, string? UserId, DateTime Day, string? Name, DateTime? When);
 
 public class GetDayFuelingsHandler(DietTrackerDbContext dbContext, IMediator mediator) : IRequestHandler<GetDayFuelings, IEnumerable<UserDayFueling>>
 {

@@ -3,7 +3,7 @@ using diet_tracker_api.DataLayer.Models;
 
 namespace diet_tracker_api.BusinessLayer.Plans;
 
-public record AddPlan(string Name, int FuelingCount, int MealCount) : IRequest<int>;
+public record AddPlan(string? Name, int FuelingCount, int MealCount) : IRequest<int>;
 public class AddPlanHandler(DietTrackerDbContext dbContext) : IRequestHandler<AddPlan, int>
 {
     private readonly DietTrackerDbContext _dbContext = dbContext;

@@ -5,10 +5,10 @@ namespace diet_tracker_api.DataLayer.Models;
 public record UserPermission
 {
     [MaxLength(250)]
-    public string UserId { get; init; }
+    public string UserId { get; init; } = null!;
 
     [MaxLength(100)]
-    public string Permission { get; init; }
+    public string Permission { get; init; } = null!;
 
-    public virtual User User { get; init; }
+    public virtual User? User { get; init; }
 }

@@ -24,7 +24,7 @@ public class GetActiveUserTrackingsHandler(DietTrackerDbContext dbContext) : IRe
                 Order = userTracking.Order,
                 Disabled = userTracking.Disabled,
                 UseTime = userTracking.UseTime,
-                Values = userTracking.Values
+                Values = userTracking.Values!
                     .Where(values => !values.Disabled)
                     .Select(v => new UserTrackingValue
                     {

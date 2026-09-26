@@ -1,4 +1,3 @@
-#nullable enable
 using diet_tracker_api.BusinessLayer.Account;
 using diet_tracker_api.BusinessLayer.Admin;
 using diet_tracker_api.BusinessLayer.Auth;
@@ -45,7 +44,7 @@ public class AdminController(IMediator mediator, IPasswordService passwordServic
                 u.FirstName,
                 u.LastName,
                 u.Credentials != null ? u.Credentials.Email : null,
-                u.Permissions.Select(p => p.Permission).ToList(),
+                u.Permissions!.Select(p => p.Permission).ToList(),
                 u.Credentials != null
             ))
             .ToListAsync(cancellationToken);

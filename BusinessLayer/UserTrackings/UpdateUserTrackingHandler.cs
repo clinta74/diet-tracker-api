@@ -22,7 +22,7 @@ public class UpdateUserTrackingHandler(DietTrackerDbContext dbContext) : IReques
         // Verify the tracking exists
         var exists = await _dbContext.UserTrackings
             .Where(u => u.UserTrackingId.Equals(request.UserTrackingId))
-            .Where(u => u.UserId.Equals(request.UserId))
+            .Where(u => u.UserId == request.UserId)
             .AnyAsync(cancellationToken);
 
         if (!exists)
@@ -35,7 +35,7 @@ public class UpdateUserTrackingHandler(DietTrackerDbContext dbContext) : IReques
         // Update the main UserTracking
         await _dbContext.UserTrackings
             .Where(u => u.UserTrackingId.Equals(request.UserTrackingId))
-            .Where(u => u.UserId.Equals(request.UserId))
+            .Where(u => u.UserId == request.UserId)
             .ExecuteUpdateAsync(setters => setters
                 .SetProperty(u => u.Title, request.Title)
                 .SetProperty(u => u.Description, request.Description)
@@ -67,7 +67,7 @@ public class UpdateUserTrackingHandler(DietTrackerDbContext dbContext) : IReques
         {
             await _dbContext.UserTrackingValues
                 .Where(p => p.UserTrackingValueId == userTrackingValue.UserTrackingValueId)
-                .Where(p => p.Tracking.UserId == request.UserId)
+                .Where(p => p.Tracking!.UserId == request.UserId)
                 .ExecuteUpdateAsync(setters => setters
                     .SetProperty(v => v.Name, userTrackingValue.Name)
                     .SetProperty(v => v.Description, userTrackingValue.Description)
@@ -82,7 +82,7 @@ public class UpdateUserTrackingHandler(DietTrackerDbContext dbContext) : IReques
                 .ExecuteDeleteAsync(cancellationToken);
             
             _dbContext.UserTrackingValueMetadata
-                .AddRange(userTrackingValue.Metadata
+                .AddRange((userTrackingValue.Metadata ?? [])
                     .Select(m => new UserTrackingValueMetadata
                     {
                         Key = m.Key,
@@ -96,7 +96,7 @@ public class UpdateUserTrackingHandler(DietTrackerDbContext dbContext) : IReques
         // Remove tracking values that are no longer in the request
         var removeTrackingValueIds = request.Values.Where(value => value.UserTrackingValueId != 0).Select(value => value.UserTrackingValueId);
         await _dbContext.UserTrackingValues
-            .Where(userTrackingValue => userTrackingValue.Tracking.UserId == request.UserId)
+            .Where(userTrackingValue => userTrackingValue.Tracking!.UserId == request.UserId)
             .Where(userTrackingValue => userTrackingValue.UserTrackingId == request.UserTrackingId)
             .Where(userTrackingValue => !removeTrackingValueIds.Contains(userTrackingValue.UserTrackingValueId))
             .ExecuteDeleteAsync(cancellationToken);

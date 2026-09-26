@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace diet_tracker_api.BusinessLayer.Victories;
 
-public record UpdateVictory(int VictoryId, string UserId, string Name, DateTime? When, VictoryType Type) : IRequest<bool>;
+public record UpdateVictory(int VictoryId, string UserId, string? Name, DateTime? When, VictoryType Type) : IRequest<bool>;
 
 public class UpdateVictoryHandler(DietTrackerDbContext context) : IRequestHandler<UpdateVictory, bool>
 {

@@ -74,7 +74,7 @@ public class UserTrackingController(IHttpContextAccessor httpContextAccessor, IM
                 Order = value.Order,
                 Type = value.Type,
                 Disabled = value.Disabled,
-                Metadata = value.Metadata.Select(metadata => new UserTrackingValueMetadata
+                Metadata = (value.Metadata ?? []).Select(metadata => new UserTrackingValueMetadata
                 {
                     Key = metadata.Key,
                     UserTrackingValueId = value.UserTrackingValueId,
@@ -114,7 +114,7 @@ public class UserTrackingController(IHttpContextAccessor httpContextAccessor, IM
                     Order = value.Order,
                     Type = value.Type,
                     Disabled = value.Disabled,
-                    Metadata = value.Metadata.Select(metadata => new UserTrackingValueMetadata
+                    Metadata = (value.Metadata ?? []).Select(metadata => new UserTrackingValueMetadata
                     {
                         Key = metadata.Key,
                         UserTrackingValueId = value.UserTrackingValueId,

@@ -1,4 +1,3 @@
-#nullable enable
 using diet_tracker_api.DataLayer;
 using Microsoft.EntityFrameworkCore;
 

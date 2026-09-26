@@ -7,10 +7,10 @@ namespace diet_tracker_api.Controllers;
 
 public record NewUser
 {
-    public string UserId { get; init; }
-    public string FirstName { get; init; }
-    public string LastName { get; init; }
-    public string EmailAddress { get; init; }
+    public string? UserId { get; init; }
+    public string? FirstName { get; init; }
+    public string? LastName { get; init; }
+    public string? EmailAddress { get; init; }
     public int PlanId { get; init; }
 }
 [Authorize]
@@ -26,6 +26,12 @@ public class NewUserController(IHttpContextAccessor httpContextAccessor, IMediat
     public async Task<ActionResult<string>> AddNewUser(NewUser userData, CancellationToken cancellationToken)
     {
         var userId = _httpContextAccessor.HttpContext.GetUserId();
+
+        // Both columns are NOT NULL; this used to surface as a database error.
+        if (userData.FirstName is null || userData.LastName is null)
+        {
+            return new BadRequestObjectResult("First and last name are required.");
+        }
 
         return await _mediator.Send(
             new AddNewUser(userId, userData.FirstName, userData.LastName, userData.EmailAddress, userData.PlanId),

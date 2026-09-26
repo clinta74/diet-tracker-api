@@ -3,7 +3,7 @@ using diet_tracker_api.DataLayer.Models;
 
 namespace diet_tracker_api.BusinessLayer.Fuelings;
 
-public record AddFueling(string Name) : IRequest<Fueling>;
+public record AddFueling(string? Name) : IRequest<Fueling>;
 
 public class AddFuelingHandler(DietTrackerDbContext dbContext) : IRequestHandler<AddFueling, Fueling>
 {

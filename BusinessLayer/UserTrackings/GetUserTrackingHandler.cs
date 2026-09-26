@@ -4,12 +4,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace diet_tracker_api.BusinessLayer.UserTrackings;
 
-public record GetUserTracking(string UserId, int UserTrackingId) : IRequest<UserTracking>;
-public class GetUserTrackingHandler(DietTrackerDbContext dbContext) : IRequestHandler<GetUserTracking, UserTracking>
+public record GetUserTracking(string UserId, int UserTrackingId) : IRequest<UserTracking?>;
+public class GetUserTrackingHandler(DietTrackerDbContext dbContext) : IRequestHandler<GetUserTracking, UserTracking?>
 {
     private readonly DietTrackerDbContext _dbContext = dbContext;
 
-    public async ValueTask<UserTracking> Handle(GetUserTracking request, CancellationToken cancellationToken)
+    public async ValueTask<UserTracking?> Handle(GetUserTracking request, CancellationToken cancellationToken)
     {
         return await _dbContext.UserTrackings
             .Where(userTracking => userTracking.UserId == request.UserId)
@@ -24,7 +24,7 @@ public class GetUserTrackingHandler(DietTrackerDbContext dbContext) : IRequestHa
                 Order = userTracking.Order,
                 Disabled = userTracking.Disabled,
                 UseTime = userTracking.UseTime,
-                Values = userTracking.Values
+                Values = userTracking.Values!
                     .Select(v => new UserTrackingValue
                     {
                         UserTrackingValueId = v.UserTrackingValueId,

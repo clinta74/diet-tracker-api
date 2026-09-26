@@ -4,17 +4,17 @@ using Microsoft.EntityFrameworkCore;
 
 namespace diet_tracker_api.BusinessLayer.UserTrackingValues;
 
-public record GetUserTrackingValue(int UserTrackingValueId, string UserId) : IRequest<UserTrackingValue>;
-public class GetUserTrackingValueHandler(DietTrackerDbContext dbContext) : IRequestHandler<GetUserTrackingValue, UserTrackingValue>
+public record GetUserTrackingValue(int UserTrackingValueId, string UserId) : IRequest<UserTrackingValue?>;
+public class GetUserTrackingValueHandler(DietTrackerDbContext dbContext) : IRequestHandler<GetUserTrackingValue, UserTrackingValue?>
 {
     private readonly DietTrackerDbContext _dbContext = dbContext;
 
-    public async ValueTask<UserTrackingValue> Handle(GetUserTrackingValue request, CancellationToken cancellationToken)
+    public async ValueTask<UserTrackingValue?> Handle(GetUserTrackingValue request, CancellationToken cancellationToken)
     {
         var data = await _dbContext.UserTrackingValues
             .AsNoTracking()
             .Where(p => p.UserTrackingValueId == request.UserTrackingValueId)
-            .Where(p => p.Tracking.UserId == request.UserId)
+            .Where(p => p.Tracking!.UserId == request.UserId)
             .Select(p => new UserTrackingValue
             {
                 UserTrackingValueId = p.UserTrackingValueId,

@@ -7,12 +7,12 @@ public record Victory
 {
     [Key]
     public int VictoryId { get; init; }
-    public string UserId { get; init; }
-    public string Name { get; init; }
+    public string? UserId { get; init; }
+    public string? Name { get; init; }
     [Column(TypeName = "timestamp without time zone")]
     public DateTime? When { get; init; }
     public VictoryType Type { get; init; }
-    public virtual User User { get; init; }
+    public virtual User? User { get; init; }
 }
 
 public enum VictoryType

@@ -17,7 +17,7 @@ public class UpdateDayMealsHandler(DietTrackerDbContext dbContext) : IRequestHan
         _dbContext.UserMeals
             .AddRange(request.Meals
                 .Where(m => m.UserMealId == 0)
-                .Where(m => m.Name.Trim().Length > 0 || m.When != null)
+                .Where(m => !string.IsNullOrWhiteSpace(m.Name) || m.When != null)
                 .Select(m => m with
                 {
                     UserId = request.UserId,

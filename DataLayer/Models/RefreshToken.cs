@@ -9,10 +9,10 @@ public record RefreshToken
 
     [Required]
     [MaxLength(250)]
-    public string UserId { get; init; }
+    public string UserId { get; init; } = null!;
 
     [Required]
-    public string TokenHash { get; init; }
+    public string TokenHash { get; init; } = null!;
 
     public DateTime ExpiresAt { get; init; }
     public DateTime CreatedAt { get; init; }
@@ -20,7 +20,7 @@ public record RefreshToken
     public int? ReplacedByTokenId { get; init; }
 
     [MaxLength(45)]
-    public string CreatedByIp { get; init; }
+    public string? CreatedByIp { get; init; }
 
-    public virtual User User { get; init; }
+    public virtual User? User { get; init; }
 }

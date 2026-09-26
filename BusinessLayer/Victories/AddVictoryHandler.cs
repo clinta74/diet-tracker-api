@@ -3,7 +3,7 @@ using diet_tracker_api.DataLayer.Models;
 
 namespace diet_tracker_api.BusinessLayer.Victories;
 
-public record AddVictory(string UserId, string Name, DateTime? When, VictoryType Type) : IRequest<Victory>;
+public record AddVictory(string UserId, string? Name, DateTime? When, VictoryType Type) : IRequest<Victory>;
 
 public class AddVictoryHandler(DietTrackerDbContext context) : IRequestHandler<AddVictory, Victory>
 {
