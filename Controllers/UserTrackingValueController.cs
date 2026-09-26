@@ -34,8 +34,9 @@ public class UserTrackingValueController(IHttpContextAccessor httpContextAccesso
         if (userTrackingValue == null) return new BadRequestResult();
 
         var userId = _httpContextAccessor.HttpContext.GetUserId();
-        return await _mediator.Send(new AddUserTrackingValue
+        var userTrackingValueId = await _mediator.Send(new AddUserTrackingValue
         (
+            userId,
             userTrackingValue.UserTrackingId,
             userTrackingValue.Name,
             userTrackingValue.Description,
@@ -44,6 +45,10 @@ public class UserTrackingValueController(IHttpContextAccessor httpContextAccesso
             userTrackingValue.Disabled,
             userTrackingValue.Metadata ?? []
         ));
+
+        if (userTrackingValueId == null) return new NotFoundResult();
+
+        return userTrackingValueId.Value;
     }
 
     [HttpPut("{userTrackingValueId}")]

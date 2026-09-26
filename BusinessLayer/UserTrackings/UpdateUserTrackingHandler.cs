@@ -13,9 +13,10 @@ public record UpdateUserTracking(
     bool Disabled,
     bool UseTime,
     IEnumerable<UserTrackingValue> Values) : IRequest<UserTracking>;
-public class UpdateUserTrackingHandler(DietTrackerDbContext dbContext) : IRequestHandler<UpdateUserTracking, UserTracking>
+public class UpdateUserTrackingHandler(DietTrackerDbContext dbContext, ILogger<UpdateUserTrackingHandler> logger) : IRequestHandler<UpdateUserTracking, UserTracking>
 {
     private readonly DietTrackerDbContext _dbContext = dbContext;
+    private readonly ILogger<UpdateUserTrackingHandler> _logger = logger;
 
     public async ValueTask<UserTracking> Handle(UpdateUserTracking request, CancellationToken cancellationToken)
     {
@@ -29,6 +30,27 @@ public class UpdateUserTrackingHandler(DietTrackerDbContext dbContext) : IReques
         {
             throw new ArgumentException($"UserTrackingId ({request.UserTrackingId}) not found.");
         }
+
+        // Only this tracking's values can change; ids from other trackings (or users) are pruned.
+        var ownedValueIds = (await _dbContext.UserTrackingValues
+            .Where(value => value.UserTrackingId == request.UserTrackingId)
+            .Select(value => value.UserTrackingValueId)
+            .ToListAsync(cancellationToken))
+            .ToHashSet();
+
+        var ignoredIds = request.Values
+            .Select(value => value.UserTrackingValueId)
+            .Where(id => id != 0 && !ownedValueIds.Contains(id))
+            .Distinct()
+            .ToList();
+
+        if (ignoredIds.Count > 0)
+        {
+            _logger.LogWarning("Ignored tracking value ids not belonging to user {UserId}'s tracking {UserTrackingId}: {UserTrackingValueIds}",
+                request.UserId, request.UserTrackingId, ignoredIds);
+        }
+
+        var existingValues = request.Values.Where(value => ownedValueIds.Contains(value.UserTrackingValueId)).ToList();
 
         using var transaction = _dbContext.Database.BeginTransaction();
         
@@ -63,7 +85,7 @@ public class UpdateUserTrackingHandler(DietTrackerDbContext dbContext) : IReques
         await _dbContext.SaveChangesAsync(cancellationToken);
 
         // Update existing tracking values
-        foreach (var userTrackingValue in request.Values.Where(v => v.UserTrackingValueId != 0))
+        foreach (var userTrackingValue in existingValues)
         {
             await _dbContext.UserTrackingValues
                 .Where(p => p.UserTrackingValueId == userTrackingValue.UserTrackingValueId)
@@ -94,7 +116,7 @@ public class UpdateUserTrackingHandler(DietTrackerDbContext dbContext) : IReques
         await _dbContext.SaveChangesAsync(cancellationToken);
 
         // Remove tracking values that are no longer in the request
-        var removeTrackingValueIds = request.Values.Where(value => value.UserTrackingValueId != 0).Select(value => value.UserTrackingValueId);
+        var removeTrackingValueIds = existingValues.Select(value => value.UserTrackingValueId).ToList();
         await _dbContext.UserTrackingValues
             .Where(userTrackingValue => userTrackingValue.Tracking!.UserId == request.UserId)
             .Where(userTrackingValue => userTrackingValue.UserTrackingId == request.UserTrackingId)
