@@ -1,8 +1,8 @@
-using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 
 namespace diet_tracker_api.Services
@@ -56,30 +56,28 @@ namespace diet_tracker_api.Services
                 claims.Add(new Claim("permissions", permission));
             }
 
-            var token = new JwtSecurityToken(
-                issuer: issuer,
-                audience: audience,
-                claims: claims,
-                expires: DateTime.UtcNow.AddMinutes(AccessTokenExpiryMinutes),
-                signingCredentials: credentials
-            );
+            var descriptor = new SecurityTokenDescriptor
+            {
+                Issuer = issuer,
+                Audience = audience,
+                Subject = new ClaimsIdentity(claims),
+                Expires = DateTime.UtcNow.AddMinutes(AccessTokenExpiryMinutes),
+                SigningCredentials = credentials,
+            };
 
-            return new JwtSecurityTokenHandler().WriteToken(token);
+            return new JsonWebTokenHandler().CreateToken(descriptor);
         }
 
         public string GenerateRefreshToken()
         {
-            var bytes = new byte[64];
-            using var rng = RandomNumberGenerator.Create();
-            rng.GetBytes(bytes);
-            return Convert.ToBase64String(bytes);
+            return Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
         }
 
         public string HashToken(string token)
         {
             var bytes = Encoding.UTF8.GetBytes(token);
             var hash = SHA256.HashData(bytes);
-            return Convert.ToHexString(hash).ToLowerInvariant();
+            return Convert.ToHexStringLower(hash);
         }
     }
 }
