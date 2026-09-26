@@ -21,7 +21,7 @@ namespace diet_tracker_api.BusinessLayer.Plans
             {
                 UserId = request.UserId,
                 PlanId = request.PlanId,
-                Start = DateTime.Now,
+                Start = DateTime.UtcNow,
             });
 
             await ctx.SaveChangesAsync(cancellationToken);

@@ -11,7 +11,7 @@
             "request": "launch",
             "preLaunchTask": "build",
             // If you have changed target frameworks, make sure to update the program path.
-            "program": "${workspaceFolder}/bin/Debug/net6.0/diet-tracker-api.dll",
+            "program": "${workspaceFolder}/bin/Debug/net10.0/diet-tracker-api.dll",
             "args": [],
             "cwd": "${workspaceFolder}",
             "stopAtEntry": false,

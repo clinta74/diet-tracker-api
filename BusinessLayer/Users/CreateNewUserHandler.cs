@@ -25,7 +25,7 @@ namespace diet_tracker_api.BusinessLayer.Users
                     FirstName = request.FirstName,
                     LastName = request.LastName,
                     EmailAddress = request.EmailAddress,
-                    Created = DateTime.Now
+                    Created = DateTime.UtcNow
                 });
 
             await _dbContext.SaveChangesAsync(cancellationToken);

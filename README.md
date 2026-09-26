@@ -4,7 +4,7 @@ ASP.NET Core Web API for the Diet Tracker application. This service provides RES
 
 ## Tech Stack
 
-- .NET 8 / ASP.NET Core Web API
+- .NET 10 / ASP.NET Core Web API
 - Entity Framework Core 8
 - PostgreSQL via Npgsql
 - JWT bearer authentication
@@ -85,6 +85,16 @@ The template includes:
 - `diet-tracker-api`
 - `diet-tracker-ui`
 
+## Testing
+
+Integration tests live in `tests/diet-tracker-api.Tests`. They host the API in memory against a throwaway PostgreSQL container (Testcontainers), so Docker must be running.
+
+```bash
+dotnet test tests/diet-tracker-api.Tests
+```
+
+CI runs the tests before building the Docker image. Pull request builds verify the image but do not publish it.
+
 ## Authentication
 
 The application is configured to use JWT bearer authentication. Tokens are validated using issuer, audience, signing key, and lifetime checks. Authorization policies are registered for permission-based scopes such as:
@@ -108,6 +118,7 @@ The application is configured to use JWT bearer authentication. Tokens are valid
 
 Recent notable changes based on commit history:
 
+- **2026-09-26** - Upgraded to .NET 10, added integration tests to CI, removed the legacy Auth0 `/api/auth/migrate` endpoint, and fixed registration/plan changes failing on non-UTC timestamps.
 - **2026-05-07** - Updated handling for user name data (`handle user name`).
 - **2026-05-05** - Implemented native JWT authentication with refresh tokens, added refresh token and credential models, updated configuration, and removed Auth0 management dependencies.
 - **2025-11-27** - Refactored controllers to remove unused logger dependencies and improved database configuration error handling.
