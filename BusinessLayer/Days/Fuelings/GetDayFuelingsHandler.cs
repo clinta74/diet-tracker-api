@@ -17,6 +17,7 @@ public class GetDayFuelingsHandler(DietTrackerDbContext dbContext, IMediator med
         var data = await _dbContext.UserFuelings
             .Where(userFueling => userFueling.UserId == request.UserId)
             .Where(userFueling => userFueling.Day == request.Date)
+            .OrderBy(userFueling => userFueling.UserFuelingId)
             .Select(userFueling => new UserDayFueling(
                 userFueling.UserFuelingId,
                 userFueling.UserId,
@@ -26,17 +27,13 @@ public class GetDayFuelingsHandler(DietTrackerDbContext dbContext, IMediator med
             .AsNoTracking()
             .ToListAsync(cancellationToken);
 
-        var plan = await _mediator.Send(new GetCurrentUserPlan(request.UserId));
+        var plan = await _mediator.Send(new GetCurrentUserPlan(request.UserId), cancellationToken);
 
-        var fuelings = new List<UserDayFueling>(data);
-        if (data.Count < plan.FuelingCount)
-        {
-            var _fuelings = new UserDayFueling[plan.FuelingCount - data.Count];
-            Array.Fill(_fuelings, new UserDayFueling(0, request.UserId, request.Date, "", null));
+        // Always return at least the plan's fuelings per day; unused slots are blank placeholders.
+        var placeholders = Enumerable.Repeat(
+            new UserDayFueling(0, request.UserId, request.Date, "", null),
+            Math.Max(0, plan.FuelingCount - data.Count));
 
-            fuelings.AddRange(_fuelings);
-        }
-
-        return fuelings;
+        return [.. data, .. placeholders];
     }
 }
