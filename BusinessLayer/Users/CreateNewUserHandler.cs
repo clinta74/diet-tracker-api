@@ -33,4 +33,4 @@ namespace diet_tracker_api.BusinessLayer.Users
             return result.Entity;
         }
     }
-}
+}
