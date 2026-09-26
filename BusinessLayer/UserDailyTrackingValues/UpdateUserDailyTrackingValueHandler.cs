@@ -16,11 +16,11 @@ public class UpdateUserDailyTrackingValueHandler(DietTrackerDbContext dbContext,
 
         // Values can only be recorded against the user's own tracking values; other ids are pruned.
         var requestedIds = request.Values.Select(value => value.UserTrackingValueId).Distinct().ToList();
-        var ownedIds = (await _dbContext.UserTrackingValues
+        var occurrencesByValueId = await _dbContext.UserTrackingValues
             .Where(value => requestedIds.Contains(value.UserTrackingValueId) && value.Tracking!.UserId == request.UserId)
-            .Select(value => value.UserTrackingValueId)
-            .ToListAsync(cancellationToken))
-            .ToHashSet();
+            .Select(value => new { value.UserTrackingValueId, value.Tracking!.Occurrences })
+            .ToDictionaryAsync(value => value.UserTrackingValueId, value => value.Occurrences, cancellationToken);
+        var ownedIds = occurrencesByValueId.Keys.ToHashSet();
 
         var ignoredIds = requestedIds.Where(id => !ownedIds.Contains(id)).ToList();
         if (ignoredIds.Count > 0)
@@ -32,7 +32,20 @@ public class UpdateUserDailyTrackingValueHandler(DietTrackerDbContext dbContext,
         var results = new List<UserDailyTrackingValue>();
         using var transaction = _dbContext.Database.BeginTransaction();
 
-        foreach (var value in request.Values.Where(value => ownedIds.Contains(value.UserTrackingValueId)))
+        // Occurrences are numbered 1..the tracking's Occurrences; anything else is pruned.
+        var outOfRange = request.Values
+            .Where(value => ownedIds.Contains(value.UserTrackingValueId))
+            .Where(value => value.Occurance < 1 || value.Occurance > occurrencesByValueId[value.UserTrackingValueId])
+            .Select(value => $"{value.UserTrackingValueId}#{value.Occurance}")
+            .ToList();
+        if (outOfRange.Count > 0)
+        {
+            _logger.LogWarning("Ignored out-of-range tracking value occurrences for user {UserId} on {Day:yyyy-MM-dd}: {Occurrences}",
+                request.UserId, request.Day, outOfRange);
+        }
+
+        foreach (var value in request.Values.Where(value => ownedIds.Contains(value.UserTrackingValueId)
+            && value.Occurance >= 1 && value.Occurance <= occurrencesByValueId[value.UserTrackingValueId]))
         {
             var rowsAffected = await _dbContext.UserDailyTrackingValues
                 .Where(u => u.Day.Equals(request.Day))

@@ -14,6 +14,8 @@ public class GetActiveUserTrackingsHandler(DietTrackerDbContext dbContext) : IRe
         return await _dbContext.UserTrackings
             .Where(userTracking => userTracking.UserId == request.UserId)
             .Where(userTracking => !userTracking.Disabled)
+            .OrderBy(userTracking => userTracking.Order)
+            .ThenBy(userTracking => userTracking.UserTrackingId)
             .Select(userTracking => new UserTracking
             {
                 UserTrackingId = userTracking.UserTrackingId,
@@ -26,6 +28,8 @@ public class GetActiveUserTrackingsHandler(DietTrackerDbContext dbContext) : IRe
                 UseTime = userTracking.UseTime,
                 Values = userTracking.Values!
                     .Where(values => !values.Disabled)
+                    .OrderBy(v => v.Order)
+                    .ThenBy(v => v.UserTrackingValueId)
                     .Select(v => new UserTrackingValue
                     {
                         UserTrackingValueId = v.UserTrackingValueId,
