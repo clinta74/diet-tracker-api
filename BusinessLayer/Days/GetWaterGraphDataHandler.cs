@@ -1,6 +1,3 @@
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
 using diet_tracker_api.DataLayer;
 using Microsoft.EntityFrameworkCore;
 

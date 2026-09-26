@@ -1,11 +1,7 @@
-using System.Threading;
-using System.Threading.Tasks;
 using diet_tracker_api.BusinessLayer.Fuelings;
 using diet_tracker_api.DataLayer.Models;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 
 namespace diet_tracker_api.Controllers
 {

@@ -1,4 +1,3 @@
-using System.Threading.Tasks;
 using diet_tracker_api.BusinessLayer.Users;
 using diet_tracker_api.Extensions;
 using Microsoft.AspNetCore.Mvc;

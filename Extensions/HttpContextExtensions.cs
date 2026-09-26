@@ -1,5 +1,3 @@
-using Microsoft.AspNetCore.Http;
-
 namespace diet_tracker_api.Extensions
 {
     public static class HttpContextExtensions

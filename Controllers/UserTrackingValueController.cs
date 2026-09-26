@@ -1,15 +1,10 @@
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 using diet_tracker_api.BusinessLayer.UserTrackingValues;
 using diet_tracker_api.Controllers.Models;
 using diet_tracker_api.DataLayer.Models;
 using diet_tracker_api.Extensions;
 using diet_tracker_api.Filters;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 
 namespace diet_tracker_api.Controllers
 {

@@ -1,8 +1,4 @@
 #nullable enable
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using diet_tracker_api.DataLayer;
 using diet_tracker_api.Services;
 using Microsoft.AspNetCore.Identity;

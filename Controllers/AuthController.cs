@@ -1,12 +1,8 @@
-using System.Threading;
-using System.Threading.Tasks;
 using diet_tracker_api.BusinessLayer.Admin;
 using diet_tracker_api.BusinessLayer.Auth;
 using diet_tracker_api.BusinessLayer.Users;
-using diet_tracker_api.Extensions;
 using diet_tracker_api.Services;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace diet_tracker_api.Controllers

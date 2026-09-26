@@ -1,14 +1,9 @@
 #nullable enable
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using diet_tracker_api.BusinessLayer.Account;
 using diet_tracker_api.BusinessLayer.Auth;
 using diet_tracker_api.Extensions;
 using diet_tracker_api.Services;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 

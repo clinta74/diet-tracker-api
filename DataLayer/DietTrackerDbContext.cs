@@ -2,7 +2,6 @@
 using System.Diagnostics.CodeAnalysis;
 using diet_tracker_api.DataLayer.Models;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace diet_tracker_api.DataLayer
 {
