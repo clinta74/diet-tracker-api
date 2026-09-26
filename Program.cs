@@ -35,6 +35,8 @@ builder.Services.AddControllers(config =>
 .AddJsonOptions(options =>
 {
     options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+    // Entities are returned directly; EF fix-up can link navigations back to their parent.
+    options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
 });
 
 builder.Services.AddHttpContextAccessor();
