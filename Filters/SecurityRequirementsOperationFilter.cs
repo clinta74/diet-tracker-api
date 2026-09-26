@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace diet_tracker_api.Filters
@@ -9,47 +9,30 @@ namespace diet_tracker_api.Filters
     public class SecurityRequirementsOperationFilter : IOperationFilter
     {
         /// <summary>
-        /// Applies the this filter on swagger documentation generation.
+        /// Marks operations that require authorization with the bearer scheme and documents their 401/403 responses.
         /// </summary>
         /// <param name="operation"></param>
         /// <param name="context"></param>
         public void Apply(OpenApiOperation operation, OperationFilterContext context)
         {
-            // then check if there is a method-level 'AllowAnonymous', as this overrides any controller-level 'Authorize'
-            var anonControllerScope = context
-                    .MethodInfo
-                    .DeclaringType
-                    .GetCustomAttributes(true)
-                    .OfType<AllowAnonymousAttribute>();
+            var metadata = context.ApiDescription.ActionDescriptor.EndpointMetadata;
 
-            var anonMethodScope = context
-                    .MethodInfo
-                    .GetCustomAttributes(true)
-                    .OfType<AllowAnonymousAttribute>();
-
-            // only add authorization specification information if there is at least one 'Authorize' in the chain and NO method-level 'AllowAnonymous'
-            if (!anonMethodScope.Any() && !anonControllerScope.Any())
+            // Only operations with an 'Authorize' in the chain and no 'AllowAnonymous' need a token.
+            if (!metadata.OfType<IAuthorizeData>().Any() || metadata.OfType<IAllowAnonymous>().Any())
             {
-                // add generic message if the controller methods dont already specify the response type
-                if (!operation.Responses.ContainsKey("401"))
-                    operation.Responses.Add("401", new OpenApiResponse { Description = "If Authorization header not present, has no value or no valid jwt bearer token" });
-
-                if (!operation.Responses.ContainsKey("403"))
-                    operation.Responses.Add("403", new OpenApiResponse { Description = "If user not authorized to perform requested action" });
-
-                var jwtAuthScheme = new OpenApiSecurityScheme
-                {
-                    Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" }
-                };
-
-                operation.Security = new List<OpenApiSecurityRequirement>
-            {
-                new OpenApiSecurityRequirement
-                {
-                    [ jwtAuthScheme ] = new List<string>()
-                }
-            };
+                return;
             }
+
+            // add generic message if the controller methods dont already specify the response type
+            operation.Responses ??= new OpenApiResponses();
+            operation.Responses.TryAdd("401", new OpenApiResponse { Description = "If Authorization header not present, has no value or no valid jwt bearer token" });
+            operation.Responses.TryAdd("403", new OpenApiResponse { Description = "If user not authorized to perform requested action" });
+
+            operation.Security ??= new List<OpenApiSecurityRequirement>();
+            operation.Security.Add(new OpenApiSecurityRequirement
+            {
+                [new OpenApiSecuritySchemeReference("Bearer", context.Document)] = new List<string>()
+            });
         }
     }
 }

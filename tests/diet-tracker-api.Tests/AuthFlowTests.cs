@@ -25,9 +25,25 @@ public class AuthFlowTests(ApiFactory factory) : IClassFixture<ApiFactory>
     }
 
     [Fact]
-    public async Task Swagger_document_is_served()
+    public async Task Swagger_document_describes_bearer_security()
     {
-        var response = await _client.GetAsync("/swagger/v1/swagger.json", Ct);
+        var document = await _client.GetFromJsonAsync<JsonElement>("/swagger/v1/swagger.json", Ct);
+
+        Assert.Equal("diet_tracker_api", document.GetProperty("info").GetProperty("title").GetString());
+        var scheme = document.GetProperty("components").GetProperty("securitySchemes").GetProperty("Bearer");
+        Assert.Equal("bearer", scheme.GetProperty("scheme").GetString());
+
+        var paths = document.GetProperty("paths");
+        var getPlans = paths.GetProperty("/api/plans").GetProperty("get");
+        Assert.True(getPlans.GetProperty("security")[0].TryGetProperty("Bearer", out _));
+        Assert.True(getPlans.GetProperty("responses").TryGetProperty("401", out _));
+        Assert.False(paths.GetProperty("/api/auth/login").GetProperty("post").TryGetProperty("security", out _));
+    }
+
+    [Fact]
+    public async Task Swagger_ui_is_served()
+    {
+        var response = await _client.GetAsync("/swagger/index.html", Ct);
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
     }
