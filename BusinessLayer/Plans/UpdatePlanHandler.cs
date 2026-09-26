@@ -1,15 +1,15 @@
+#nullable enable
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using diet_tracker_api.DataLayer;
 using diet_tracker_api.DataLayer.Models;
-using LanguageExt.Common;
 using Microsoft.EntityFrameworkCore;
 
 namespace diet_tracker_api.BusinessLayer.Plans
 {
-    public record UpdatePlan(int PlanId, string Name, int FuelingCount, int MealCount) : IRequest<Result<Plan>>;
-    public class UpdatePlanHandler : IRequestHandler<UpdatePlan, Result<Plan>>
+    public record UpdatePlan(int PlanId, string Name, int FuelingCount, int MealCount) : IRequest<Plan?>;
+    public class UpdatePlanHandler : IRequestHandler<UpdatePlan, Plan?>
     {
         private readonly DietTrackerDbContext _dbContext;
         public UpdatePlanHandler(DietTrackerDbContext dbContext)
@@ -17,7 +17,7 @@ namespace diet_tracker_api.BusinessLayer.Plans
             _dbContext = dbContext;
         }
 
-        public async ValueTask<Result<Plan>> Handle(UpdatePlan request, CancellationToken cancellationToken)
+        public async ValueTask<Plan?> Handle(UpdatePlan request, CancellationToken cancellationToken)
         {
             var rowsAffected = await _dbContext.Plans
                 .Where(plan => plan.PlanId.Equals(request.PlanId))
@@ -29,15 +29,13 @@ namespace diet_tracker_api.BusinessLayer.Plans
 
             if (rowsAffected == 0)
             {
-                var argumentException = new ArgumentException($"Plan Id ({request.PlanId}) not found.");
-                return new Result<Plan>(argumentException);
+                return null;
             }
 
             // Fetch the updated plan to return
-            var updatedPlan = await _dbContext.Plans
+            return await _dbContext.Plans
+                .AsNoTracking()
                 .FirstOrDefaultAsync(p => p.PlanId == request.PlanId, cancellationToken);
-
-            return updatedPlan!;
         }
     }
 }

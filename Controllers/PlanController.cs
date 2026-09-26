@@ -39,9 +39,9 @@ namespace diet_tracker_api.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<Plan>> GetById(int id, CancellationToken cancellationToken)
         {
-            var result = await _mediator.Send(new GetPlanById(id), cancellationToken);
+            var plan = await _mediator.Send(new GetPlanById(id), cancellationToken);
 
-            return result.Match<ActionResult>(r => new OkObjectResult(r as Plan), r => new NotFoundObjectResult(r.Message));
+            return plan == null ? PlanNotFound(id) : new OkObjectResult(plan);
         }
 
         [Authorize("write:plans")]
@@ -70,9 +70,9 @@ namespace diet_tracker_api.Controllers
                 return new BadRequestResult();
             }
 
-            var result = await _mediator.Send(new UpdatePlan(id, plan.Name, plan.FuelingCount, plan.MealCount), cancellationToken);
+            var updated = await _mediator.Send(new UpdatePlan(id, plan.Name, plan.FuelingCount, plan.MealCount), cancellationToken);
 
-            return result.Match<ActionResult>(r => new OkObjectResult(r as Plan), r => new NotFoundObjectResult(r.Message));
+            return updated == null ? PlanNotFound(id) : new OkObjectResult(updated);
         }
 
         [Authorize("write:plans")]
@@ -81,15 +81,9 @@ namespace diet_tracker_api.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult> Remove(int id, CancellationToken cancellationToken)
         {
-            try
-            {
-                var result = await _mediator.Send(new DeletePlan(id), cancellationToken);
-                return new OkResult();
-            }
-            catch (ArgumentException ex)
-            {
-                return new NotFoundObjectResult(ex.Message);
-            }
+            var deleted = await _mediator.Send(new DeletePlan(id), cancellationToken);
+
+            return deleted ? new OkResult() : PlanNotFound(id);
         }
 
         [HttpPut("change")]
@@ -108,5 +102,7 @@ namespace diet_tracker_api.Controllers
 
             return new NotFoundObjectResult($"User not found.");
         }
+
+        private static NotFoundObjectResult PlanNotFound(int id) => new($"Plan Id ({id}) not found.");
     }
 }

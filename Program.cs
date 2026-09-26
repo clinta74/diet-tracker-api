@@ -138,7 +138,7 @@ builder.Services.AddScoped<UserExistsFilter>();
 
 // Add health checks
 builder.Services.AddHealthChecks()
-    .AddNpgSql(connectionBuilder.ConnectionString, name: "database");
+    .AddDbContextCheck<DietTrackerDbContext>("database");
 
 var app = builder.Build();
 

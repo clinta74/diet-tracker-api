@@ -1,13 +1,14 @@
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using diet_tracker_api.DataLayer;
-using LanguageExt.Common;
 using Microsoft.EntityFrameworkCore;
 
 namespace diet_tracker_api.BusinessLayer.Plans
 {
-    public record DeletePlan(int PlanId) : IRequest<Result<bool>>;
-    public class DeletePlanHandler : IRequestHandler<DeletePlan, Result<bool>>
+    /// <returns>False when the plan does not exist.</returns>
+    public record DeletePlan(int PlanId) : IRequest<bool>;
+    public class DeletePlanHandler : IRequestHandler<DeletePlan, bool>
     {
         private readonly DietTrackerDbContext _dbContext;
         public DeletePlanHandler(DietTrackerDbContext dbContext)
@@ -15,21 +16,11 @@ namespace diet_tracker_api.BusinessLayer.Plans
             _dbContext = dbContext;
         }
 
-        public async ValueTask<Result<bool>> Handle(DeletePlan request, CancellationToken cancellationToken)
+        public async ValueTask<bool> Handle(DeletePlan request, CancellationToken cancellationToken)
         {
-            var data = await _dbContext.Plans
-                .AsNoTracking()
-                .SingleOrDefaultAsync(fueling => fueling.PlanId == request.PlanId);
-
-            if (data == null)
-            {
-                var argumentException = new ArgumentException($"Plan Id ({request.PlanId}) not found.");
-                return new Result<bool>(argumentException);
-            }
-            
-            _dbContext.Plans.Remove(data);
-
-            return await _dbContext.SaveChangesAsync(cancellationToken) == 1;
+            return await _dbContext.Plans
+                .Where(plan => plan.PlanId == request.PlanId)
+                .ExecuteDeleteAsync(cancellationToken) == 1;
         }
     }
 }
