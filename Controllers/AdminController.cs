@@ -1,105 +1,92 @@
 #nullable enable
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using diet_tracker_api.BusinessLayer.Account;
 using diet_tracker_api.BusinessLayer.Admin;
 using diet_tracker_api.BusinessLayer.Auth;
 using diet_tracker_api.DataLayer;
 using diet_tracker_api.Services;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace diet_tracker_api.Controllers
+namespace diet_tracker_api.Controllers;
+
+public record AdminUserDto(
+    string UserId,
+    string FirstName,
+    string LastName,
+    string? Email,
+    IReadOnlyList<string> Permissions,
+    bool HasCredentials
+);
+
+public record SetUserPermissionsRequest(IReadOnlyList<string> Permissions);
+public record SetUserCredentialsRequest(string Email, string Password);
+
+[Authorize("admin:users")]
+[ApiController]
+[Route("api/[controller]")]
+[Produces("application/json")]
+public class AdminController(IMediator mediator, IPasswordService passwordService, DietTrackerDbContext dbContext) : ControllerBase
 {
-    public record AdminUserDto(
-        string UserId,
-        string FirstName,
-        string LastName,
-        string? Email,
-        IReadOnlyList<string> Permissions,
-        bool HasCredentials
-    );
+    private readonly IMediator _mediator = mediator;
+    private readonly IPasswordService _passwordService = passwordService;
+    private readonly DietTrackerDbContext _dbContext = dbContext;
 
-    public record SetUserPermissionsRequest(IReadOnlyList<string> Permissions);
-    public record SetUserCredentialsRequest(string Email, string Password);
-
-    [Authorize("admin:users")]
-    [ApiController]
-    [Route("api/[controller]")]
-    [Produces("application/json")]
-    public class AdminController : ControllerBase
+    [HttpGet("users")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<ActionResult<IReadOnlyList<AdminUserDto>>> GetUsers(CancellationToken cancellationToken)
     {
-        private readonly IMediator _mediator;
-        private readonly IPasswordService _passwordService;
-        private readonly DietTrackerDbContext _dbContext;
+        var users = await _dbContext.Users
+            .AsNoTracking()
+            .Include(u => u.Credentials)
+            .Include(u => u.Permissions)
+            .Select(u => new AdminUserDto(
+                u.UserId,
+                u.FirstName,
+                u.LastName,
+                u.Credentials != null ? u.Credentials.Email : null,
+                u.Permissions.Select(p => p.Permission).ToList(),
+                u.Credentials != null
+            ))
+            .ToListAsync(cancellationToken);
 
-        public AdminController(IMediator mediator, IPasswordService passwordService, DietTrackerDbContext dbContext)
-        {
-            _mediator = mediator;
-            _passwordService = passwordService;
-            _dbContext = dbContext;
-        }
+        return Ok(users);
+    }
 
-        [HttpGet("users")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<IReadOnlyList<AdminUserDto>>> GetUsers(CancellationToken cancellationToken)
-        {
-            var users = await _dbContext.Users
-                .AsNoTracking()
-                .Include(u => u.Credentials)
-                .Include(u => u.Permissions)
-                .Select(u => new AdminUserDto(
-                    u.UserId,
-                    u.FirstName,
-                    u.LastName,
-                    u.Credentials != null ? u.Credentials.Email : null,
-                    u.Permissions.Select(p => p.Permission).ToList(),
-                    u.Credentials != null
-                ))
-                .ToListAsync(cancellationToken);
+    [HttpPut("users/{userId}/permissions")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult> SetPermissions(string userId, [FromBody] SetUserPermissionsRequest request, CancellationToken cancellationToken)
+    {
+        var exists = await _dbContext.Users.AnyAsync(u => u.UserId == userId, cancellationToken);
+        if (!exists) return NotFound();
 
-            return Ok(users);
-        }
+        await _mediator.Send(new SetUserPermissions(userId, request.Permissions), cancellationToken);
+        return NoContent();
+    }
 
-        [HttpPut("users/{userId}/permissions")]
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult> SetPermissions(string userId, [FromBody] SetUserPermissionsRequest request, CancellationToken cancellationToken)
-        {
-            var exists = await _dbContext.Users.AnyAsync(u => u.UserId == userId, cancellationToken);
-            if (!exists) return NotFound();
+    [HttpPost("users/{userId}/credentials")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult> SetCredentials(string userId, [FromBody] SetUserCredentialsRequest request, CancellationToken cancellationToken)
+    {
+        var exists = await _dbContext.Users.AnyAsync(u => u.UserId == userId, cancellationToken);
+        if (!exists) return NotFound();
 
-            await _mediator.Send(new SetUserPermissions(userId, request.Permissions), cancellationToken);
-            return NoContent();
-        }
+        var passwordHash = _passwordService.Hash(request.Password);
+        await _mediator.Send(new SetUserCredentials(userId, request.Email, passwordHash), cancellationToken);
+        return NoContent();
+    }
 
-        [HttpPost("users/{userId}/credentials")]
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult> SetCredentials(string userId, [FromBody] SetUserCredentialsRequest request, CancellationToken cancellationToken)
-        {
-            var exists = await _dbContext.Users.AnyAsync(u => u.UserId == userId, cancellationToken);
-            if (!exists) return NotFound();
+    [HttpDelete("users/{userId}/sessions")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult> RevokeUserSessions(string userId, CancellationToken cancellationToken)
+    {
+        var exists = await _dbContext.Users.AnyAsync(u => u.UserId == userId, cancellationToken);
+        if (!exists) return NotFound();
 
-            var passwordHash = _passwordService.Hash(request.Password);
-            await _mediator.Send(new SetUserCredentials(userId, request.Email, passwordHash), cancellationToken);
-            return NoContent();
-        }
-
-        [HttpDelete("users/{userId}/sessions")]
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult> RevokeUserSessions(string userId, CancellationToken cancellationToken)
-        {
-            var exists = await _dbContext.Users.AnyAsync(u => u.UserId == userId, cancellationToken);
-            if (!exists) return NotFound();
-
-            await _mediator.Send(new RevokeAllRefreshTokens(userId), cancellationToken);
-            return NoContent();
-        }
+        await _mediator.Send(new RevokeAllRefreshTokens(userId), cancellationToken);
+        return NoContent();
     }
 }

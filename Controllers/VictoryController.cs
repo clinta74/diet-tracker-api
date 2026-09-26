@@ -1,74 +1,63 @@
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using diet_tracker_api.BusinessLayer.Victories;
 using diet_tracker_api.DataLayer.Models;
 using diet_tracker_api.Extensions;
 using diet_tracker_api.Filters;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 
-namespace diet_tracker_api.Controllers
+namespace diet_tracker_api.Controllers;
+
+[Authorize]
+[ApiController]
+[Route("api/[controller]")]
+[Produces("application/json")]
+[ServiceFilter(typeof(UserExistsFilter))]
+public class VictoryController(IHttpContextAccessor httpContextAccessor, IMediator mediator)
 {
-    [Authorize]
-    [ApiController]
-    [Route("api/[controller]")]
-    [Produces("application/json")]
-    [ServiceFilter(typeof(UserExistsFilter))]
-    public class VictoryController
+    private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
+    private readonly IMediator _mediator = mediator;
+
+    [HttpGet("/api/victories")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<IEnumerable<Victory>> GetAll([FromQuery] VictoryType? type)
     {
-        private readonly IHttpContextAccessor _httpContextAccessor;
-        private readonly IMediator _mediator;
+        var userId = _httpContextAccessor.HttpContext.GetUserId();
+        return await _mediator.Send(new GetVictories(userId, type, null));
+    }
 
-        public VictoryController(IHttpContextAccessor httpContextAccessor, IMediator mediator)
-        {
-            _httpContextAccessor = httpContextAccessor;
-            _mediator = mediator;
-        }
+    [HttpPost]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<Victory> Add(Victory victory)
+    {
+        var userId = _httpContextAccessor.HttpContext.GetUserId();            
+        return await _mediator.Send(new AddVictory(userId, victory.Name, victory.When, victory.Type));
+    }
 
-        [HttpGet("/api/victories")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<IEnumerable<Victory>> GetAll([FromQuery] VictoryType? type)
-        {
-            var userId = _httpContextAccessor.HttpContext.GetUserId();
-            return await _mediator.Send(new GetVictories(userId, type, null));
-        }
+    [HttpPut("{id}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult> Update(int id, Victory victory)
+    {
+        if (victory == null) return new BadRequestResult();
+        var userId = _httpContextAccessor.HttpContext.GetUserId();
+        var data = await _mediator.Send(new UpdateVictory(id, userId, victory.Name, victory.When, victory.Type));
 
-        [HttpPost]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<Victory> Add(Victory victory)
-        {
-            var userId = _httpContextAccessor.HttpContext.GetUserId();            
-            return await _mediator.Send(new AddVictory(userId, victory.Name, victory.When, victory.Type));
-        }
+        if (data == false) return new NotFoundResult();
 
-        [HttpPut("{id}")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult> Update(int id, Victory victory)
-        {
-            if (victory == null) return new BadRequestResult();
-            var userId = _httpContextAccessor.HttpContext.GetUserId();
-            var data = await _mediator.Send(new UpdateVictory(id, userId, victory.Name, victory.When, victory.Type));
+        return new OkResult();
+    }
 
-            if (data == false) return new NotFoundResult();
+    [HttpDelete("{id}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult> Delete(int id)
+    {
+        var data = await _mediator.Send(new DeleteVictory(id));
 
-            return new OkResult();
-        }
+        if (data == false) return new NotFoundResult();
 
-        [HttpDelete("{id}")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult> Delete(int id)
-        {
-            var data = await _mediator.Send(new DeleteVictory(id));
-
-            if (data == false) return new NotFoundResult();
-
-            return new OkResult();
-        }
+        return new OkResult();
     }
 }

@@ -1,106 +1,94 @@
 #nullable enable
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using diet_tracker_api.BusinessLayer.Account;
 using diet_tracker_api.BusinessLayer.Auth;
 using diet_tracker_api.Extensions;
 using diet_tracker_api.Services;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
-namespace diet_tracker_api.Controllers
+namespace diet_tracker_api.Controllers;
+
+public record ChangePasswordRequest(string CurrentPassword, string NewPassword);
+public record ChangeEmailRequest(string NewEmail);
+
+public record SessionInfo(int Id, DateTime CreatedAt, DateTime ExpiresAt, string? CreatedByIp);
+
+[Authorize]
+[ApiController]
+[Route("api/[controller]")]
+[Produces("application/json")]
+public class AccountController(IMediator mediator, IPasswordService passwordService) : ControllerBase
 {
-    public record ChangePasswordRequest(string CurrentPassword, string NewPassword);
-    public record ChangeEmailRequest(string NewEmail);
+    private readonly IMediator _mediator = mediator;
+    private readonly IPasswordService _passwordService = passwordService;
 
-    public record SessionInfo(int Id, DateTime CreatedAt, DateTime ExpiresAt, string? CreatedByIp);
-
-    [Authorize]
-    [ApiController]
-    [Route("api/[controller]")]
-    [Produces("application/json")]
-    public class AccountController : ControllerBase
+    [HttpPut("password")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<ActionResult> ChangePassword([FromBody] ChangePasswordRequest request, CancellationToken cancellationToken)
     {
-        private readonly IMediator _mediator;
-        private readonly IPasswordService _passwordService;
+        var userId = HttpContext.GetUserId();
+        var credentials = await _mediator.Send(new GetCredentialsByUserId(userId), cancellationToken);
 
-        public AccountController(IMediator mediator, IPasswordService passwordService)
-        {
-            _mediator = mediator;
-            _passwordService = passwordService;
-        }
+        if (_passwordService.Verify(credentials?.PasswordHash, request.CurrentPassword) == PasswordVerificationResult.Failed)
+            return Unauthorized(new { message = "Current password is incorrect." });
 
-        [HttpPut("password")]
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        public async Task<ActionResult> ChangePassword([FromBody] ChangePasswordRequest request, CancellationToken cancellationToken)
-        {
-            var userId = HttpContext.GetUserId();
-            var credentials = await _mediator.Send(new GetCredentialsByUserId(userId), cancellationToken);
+        var newHash = _passwordService.Hash(request.NewPassword);
+        var success = await _mediator.Send(new ChangePassword(userId, newHash), cancellationToken);
 
-            if (_passwordService.Verify(credentials?.PasswordHash, request.CurrentPassword) == PasswordVerificationResult.Failed)
-                return Unauthorized(new { message = "Current password is incorrect." });
+        if (!success)
+            return BadRequest(new { message = "Could not update password." });
 
-            var newHash = _passwordService.Hash(request.NewPassword);
-            var success = await _mediator.Send(new ChangePassword(userId, newHash), cancellationToken);
+        return NoContent();
+    }
 
-            if (!success)
-                return BadRequest(new { message = "Could not update password." });
+    [HttpPut("email")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult> ChangeEmail([FromBody] ChangeEmailRequest request, CancellationToken cancellationToken)
+    {
+        var userId = HttpContext.GetUserId();
+        var result = await _mediator.Send(new ChangeEmail(userId, request.NewEmail), cancellationToken);
 
-            return NoContent();
-        }
+        if (!result.Success)
+            return BadRequest(new { message = result.Error });
 
-        [HttpPut("email")]
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult> ChangeEmail([FromBody] ChangeEmailRequest request, CancellationToken cancellationToken)
-        {
-            var userId = HttpContext.GetUserId();
-            var result = await _mediator.Send(new ChangeEmail(userId, request.NewEmail), cancellationToken);
+        return NoContent();
+    }
 
-            if (!result.Success)
-                return BadRequest(new { message = result.Error });
+    [HttpGet("sessions")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<ActionResult<IReadOnlyList<SessionInfo>>> GetSessions(CancellationToken cancellationToken)
+    {
+        var userId = HttpContext.GetUserId();
+        var tokens = await _mediator.Send(new GetActiveRefreshTokens(userId), cancellationToken);
 
-            return NoContent();
-        }
+        var sessions = tokens.Select(t => new SessionInfo(t.Id, t.CreatedAt, t.ExpiresAt, t.CreatedByIp)).ToList();
+        return Ok(sessions);
+    }
 
-        [HttpGet("sessions")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<IReadOnlyList<SessionInfo>>> GetSessions(CancellationToken cancellationToken)
-        {
-            var userId = HttpContext.GetUserId();
-            var tokens = await _mediator.Send(new GetActiveRefreshTokens(userId), cancellationToken);
+    [HttpDelete("sessions/{id:int}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult> RevokeSession(int id, CancellationToken cancellationToken)
+    {
+        var userId = HttpContext.GetUserId();
+        var success = await _mediator.Send(new RevokeRefreshTokenById(id, userId), cancellationToken);
 
-            var sessions = tokens.Select(t => new SessionInfo(t.Id, t.CreatedAt, t.ExpiresAt, t.CreatedByIp)).ToList();
-            return Ok(sessions);
-        }
+        if (!success)
+            return NotFound();
 
-        [HttpDelete("sessions/{id:int}")]
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult> RevokeSession(int id, CancellationToken cancellationToken)
-        {
-            var userId = HttpContext.GetUserId();
-            var success = await _mediator.Send(new RevokeRefreshTokenById(id, userId), cancellationToken);
+        return NoContent();
+    }
 
-            if (!success)
-                return NotFound();
-
-            return NoContent();
-        }
-
-        [HttpDelete("sessions")]
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
-        public async Task<ActionResult> RevokeAllSessions(CancellationToken cancellationToken)
-        {
-            var userId = HttpContext.GetUserId();
-            await _mediator.Send(new RevokeAllRefreshTokens(userId), cancellationToken);
-            return NoContent();
-        }
+    [HttpDelete("sessions")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    public async Task<ActionResult> RevokeAllSessions(CancellationToken cancellationToken)
+    {
+        var userId = HttpContext.GetUserId();
+        await _mediator.Send(new RevokeAllRefreshTokens(userId), cancellationToken);
+        return NoContent();
     }
 }

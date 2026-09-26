@@ -1,33 +1,26 @@
-using System.Threading;
-using System.Threading.Tasks;
 using diet_tracker_api.DataLayer;
 using diet_tracker_api.DataLayer.Models;
 
-namespace diet_tracker_api.BusinessLayer.Victories
+namespace diet_tracker_api.BusinessLayer.Victories;
+
+public record AddVictory(string UserId, string Name, DateTime? When, VictoryType Type) : IRequest<Victory>;
+
+public class AddVictoryHandler(DietTrackerDbContext context) : IRequestHandler<AddVictory, Victory>
 {
-    public record AddVictory(string UserId, string Name, DateTime? When, VictoryType Type) : IRequest<Victory>;
+    private readonly DietTrackerDbContext ctx = context;
 
-    public class AddVictoryHandler : IRequestHandler<AddVictory, Victory>
+    public async ValueTask<Victory> Handle(AddVictory request, CancellationToken cancellationToken)
     {
-        private readonly DietTrackerDbContext ctx;
-        public AddVictoryHandler(DietTrackerDbContext context)
+        var data = ctx.Add(new Victory
         {
-            ctx = context;
-        }
+            UserId = request.UserId,
+            Name = request.Name,
+            When = request.When,
+            Type = request.Type,
+        });
 
-        public async ValueTask<Victory> Handle(AddVictory request, CancellationToken cancellationToken)
-        {
-            var data = ctx.Add(new Victory
-            {
-                UserId = request.UserId,
-                Name = request.Name,
-                When = request.When,
-                Type = request.Type,
-            });
+        await ctx.SaveChangesAsync(cancellationToken);
 
-            await ctx.SaveChangesAsync(cancellationToken);
-
-            return data.Entity;
-        }
+        return data.Entity;
     }
 }

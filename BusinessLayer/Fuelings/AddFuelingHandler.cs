@@ -1,31 +1,24 @@
-using System.Threading;
-using System.Threading.Tasks;
 using diet_tracker_api.DataLayer;
 using diet_tracker_api.DataLayer.Models;
 
-namespace diet_tracker_api.BusinessLayer.Fuelings
+namespace diet_tracker_api.BusinessLayer.Fuelings;
+
+public record AddFueling(string Name) : IRequest<Fueling>;
+
+public class AddFuelingHandler(DietTrackerDbContext dbContext) : IRequestHandler<AddFueling, Fueling>
 {
-    public record AddFueling(string Name) : IRequest<Fueling>;
+    private readonly DietTrackerDbContext _dbContext = dbContext;
 
-    public class AddFuelingHandler : IRequestHandler<AddFueling, Fueling>
+    public async ValueTask<Fueling> Handle(AddFueling request, CancellationToken cancellationToken)
     {
-        private readonly DietTrackerDbContext _dbContext;
-        public AddFuelingHandler(DietTrackerDbContext dbContext)
-        {
-            _dbContext = dbContext;
-        }
+        var data = _dbContext.Fuelings
+            .Add(new Fueling
+            {
+                Name = request.Name
+            });
 
-        public async ValueTask<Fueling> Handle(AddFueling request, CancellationToken cancellationToken)
-        {
-            var data = _dbContext.Fuelings
-                .Add(new Fueling
-                {
-                    Name = request.Name
-                });
+        await _dbContext.SaveChangesAsync(cancellationToken);
 
-            await _dbContext.SaveChangesAsync(cancellationToken);
-
-            return data.Entity;
-        }
+        return data.Entity;
     }
 }

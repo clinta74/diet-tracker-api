@@ -1,33 +1,26 @@
-using System.Threading;
-using System.Threading.Tasks;
 using diet_tracker_api.DataLayer;
 using Microsoft.EntityFrameworkCore;
 
-namespace diet_tracker_api.BusinessLayer.Victories
+namespace diet_tracker_api.BusinessLayer.Victories;
+
+public record DeleteVictory(int VictoryId) : IRequest<bool>;
+
+public class DeleteVictoryHandler(DietTrackerDbContext context) : IRequestHandler<DeleteVictory, bool>
 {
-    public record DeleteVictory(int VictoryId) : IRequest<bool>;
+    private readonly DietTrackerDbContext ctx = context;
 
-    public class DeleteVictoryHandler : IRequestHandler<DeleteVictory, bool>
+    public async ValueTask<bool> Handle(DeleteVictory request, CancellationToken cancellationToken)
     {
-        private readonly DietTrackerDbContext ctx;
-        public DeleteVictoryHandler(DietTrackerDbContext context)
-        {
-            ctx = context;
-        }
+        var data = await ctx.Victories
+            .AsNoTracking()
+            .FirstOrDefaultAsync(v => v.VictoryId == request.VictoryId, cancellationToken);
 
-        public async ValueTask<bool> Handle(DeleteVictory request, CancellationToken cancellationToken)
-        {
-            var data = await ctx.Victories
-                .AsNoTracking()
-                .FirstOrDefaultAsync(v => v.VictoryId == request.VictoryId, cancellationToken);
+        if (data == null) return false;
 
-            if (data == null) return false;
+        ctx.Victories.Remove(data);
 
-            ctx.Victories.Remove(data);
+        await ctx.SaveChangesAsync(cancellationToken);
 
-            await ctx.SaveChangesAsync(cancellationToken);
-
-            return true;
-        }
+        return true;
     }
 }

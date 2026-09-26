@@ -1,33 +1,25 @@
-using System.Threading;
-using System.Threading.Tasks;
 using diet_tracker_api.DataLayer;
 using Microsoft.EntityFrameworkCore;
 
-namespace diet_tracker_api.BusinessLayer.Account
+namespace diet_tracker_api.BusinessLayer.Account;
+
+public record ChangePassword(string UserId, string NewPasswordHash) : IRequest<bool>;
+
+public class ChangePasswordHandler(DietTrackerDbContext dbContext) : IRequestHandler<ChangePassword, bool>
 {
-    public record ChangePassword(string UserId, string NewPasswordHash) : IRequest<bool>;
+    private readonly DietTrackerDbContext _dbContext = dbContext;
 
-    public class ChangePasswordHandler : IRequestHandler<ChangePassword, bool>
+    public async ValueTask<bool> Handle(ChangePassword request, CancellationToken cancellationToken)
     {
-        private readonly DietTrackerDbContext _dbContext;
+        var credentials = await _dbContext.UserCredentials
+            .FirstOrDefaultAsync(c => c.UserId == request.UserId, cancellationToken);
 
-        public ChangePasswordHandler(DietTrackerDbContext dbContext)
-        {
-            _dbContext = dbContext;
-        }
+        if (credentials == null) return false;
 
-        public async ValueTask<bool> Handle(ChangePassword request, CancellationToken cancellationToken)
-        {
-            var credentials = await _dbContext.UserCredentials
-                .FirstOrDefaultAsync(c => c.UserId == request.UserId, cancellationToken);
+        _dbContext.Entry(credentials).CurrentValues.SetValues(
+            credentials with { PasswordHash = request.NewPasswordHash });
 
-            if (credentials == null) return false;
-
-            _dbContext.Entry(credentials).CurrentValues.SetValues(
-                credentials with { PasswordHash = request.NewPasswordHash });
-
-            await _dbContext.SaveChangesAsync(cancellationToken);
-            return true;
-        }
+        await _dbContext.SaveChangesAsync(cancellationToken);
+        return true;
     }
 }

@@ -1,41 +1,33 @@
 #nullable enable
-using System.Threading;
-using System.Threading.Tasks;
 using diet_tracker_api.DataLayer;
 using diet_tracker_api.DataLayer.Models;
 
-namespace diet_tracker_api.BusinessLayer.Auth
+namespace diet_tracker_api.BusinessLayer.Auth;
+
+public record CreateRefreshToken(
+    string UserId,
+    string TokenHash,
+    DateTime ExpiresAt,
+    string? CreatedByIp
+) : IRequest<int>;
+
+public class CreateRefreshTokenHandler(DietTrackerDbContext dbContext) : IRequestHandler<CreateRefreshToken, int>
 {
-    public record CreateRefreshToken(
-        string UserId,
-        string TokenHash,
-        DateTime ExpiresAt,
-        string? CreatedByIp
-    ) : IRequest<int>;
+    private readonly DietTrackerDbContext _dbContext = dbContext;
 
-    public class CreateRefreshTokenHandler : IRequestHandler<CreateRefreshToken, int>
+    public async ValueTask<int> Handle(CreateRefreshToken request, CancellationToken cancellationToken)
     {
-        private readonly DietTrackerDbContext _dbContext;
-
-        public CreateRefreshTokenHandler(DietTrackerDbContext dbContext)
+        var entry = _dbContext.RefreshTokens.Add(new RefreshToken
         {
-            _dbContext = dbContext;
-        }
+            UserId = request.UserId,
+            TokenHash = request.TokenHash,
+            ExpiresAt = request.ExpiresAt,
+            CreatedAt = DateTime.UtcNow,
+            CreatedByIp = request.CreatedByIp,
+        });
 
-        public async ValueTask<int> Handle(CreateRefreshToken request, CancellationToken cancellationToken)
-        {
-            var entry = _dbContext.RefreshTokens.Add(new RefreshToken
-            {
-                UserId = request.UserId,
-                TokenHash = request.TokenHash,
-                ExpiresAt = request.ExpiresAt,
-                CreatedAt = DateTime.UtcNow,
-                CreatedByIp = request.CreatedByIp,
-            });
+        await _dbContext.SaveChangesAsync(cancellationToken);
 
-            await _dbContext.SaveChangesAsync(cancellationToken);
-
-            return entry.Entity.Id;
-        }
+        return entry.Entity.Id;
     }
 }

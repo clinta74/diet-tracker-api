@@ -1,54 +1,44 @@
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using diet_tracker_api.DataLayer;
 using diet_tracker_api.DataLayer.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace diet_tracker_api.BusinessLayer.UserTrackings
+namespace diet_tracker_api.BusinessLayer.UserTrackings;
+
+public record GetActiveUserTrackings(string UserId) : IRequest<IEnumerable<UserTracking>>;
+public class GetActiveUserTrackingsHandler(DietTrackerDbContext dbContext) : IRequestHandler<GetActiveUserTrackings, IEnumerable<UserTracking>>
 {
-    public record GetActiveUserTrackings(string UserId) : IRequest<IEnumerable<UserTracking>>;
-    public class GetActiveUserTrackingsHandler : IRequestHandler<GetActiveUserTrackings, IEnumerable<UserTracking>>
+    private readonly DietTrackerDbContext _dbContext = dbContext;
+
+    public async ValueTask<IEnumerable<UserTracking>> Handle(GetActiveUserTrackings request, CancellationToken cancellationToken)
     {
-        private readonly DietTrackerDbContext _dbContext;
-
-        public GetActiveUserTrackingsHandler(DietTrackerDbContext dbContext)
-        {
-            _dbContext = dbContext;
-        }
-
-        public async ValueTask<IEnumerable<UserTracking>> Handle(GetActiveUserTrackings request, CancellationToken cancellationToken)
-        {
-            return await _dbContext.UserTrackings
-                .Where(userTracking => userTracking.UserId == request.UserId)
-                .Where(userTracking => !userTracking.Disabled)
-                .Select(userTracking => new UserTracking
-                {
-                    UserTrackingId = userTracking.UserTrackingId,
-                    UserId = userTracking.UserId,
-                    Title = userTracking.Title,
-                    Description = userTracking.Description,
-                    Occurrences = userTracking.Occurrences,
-                    Order = userTracking.Order,
-                    Disabled = userTracking.Disabled,
-                    UseTime = userTracking.UseTime,
-                    Values = userTracking.Values
-                        .Where(values => !values.Disabled)
-                        .Select(v => new UserTrackingValue
-                        {
-                            UserTrackingValueId = v.UserTrackingValueId,
-                            UserTrackingId = v.UserTrackingId,
-                            Name = v.Name,
-                            Description = v.Description,
-                            Order = v.Order,
-                            Type = v.Type,
-                            Disabled = v.Disabled,
-                            Metadata = v.Metadata,
-                        })
-                        .ToList()
-                })
-                .ToListAsync(cancellationToken);
-        }
+        return await _dbContext.UserTrackings
+            .Where(userTracking => userTracking.UserId == request.UserId)
+            .Where(userTracking => !userTracking.Disabled)
+            .Select(userTracking => new UserTracking
+            {
+                UserTrackingId = userTracking.UserTrackingId,
+                UserId = userTracking.UserId,
+                Title = userTracking.Title,
+                Description = userTracking.Description,
+                Occurrences = userTracking.Occurrences,
+                Order = userTracking.Order,
+                Disabled = userTracking.Disabled,
+                UseTime = userTracking.UseTime,
+                Values = userTracking.Values
+                    .Where(values => !values.Disabled)
+                    .Select(v => new UserTrackingValue
+                    {
+                        UserTrackingValueId = v.UserTrackingValueId,
+                        UserTrackingId = v.UserTrackingId,
+                        Name = v.Name,
+                        Description = v.Description,
+                        Order = v.Order,
+                        Type = v.Type,
+                        Disabled = v.Disabled,
+                        Metadata = v.Metadata,
+                    })
+                    .ToList()
+            })
+            .ToListAsync(cancellationToken);
     }
 }

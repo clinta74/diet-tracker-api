@@ -1,37 +1,30 @@
-using System.Threading;
-using System.Threading.Tasks;
 using diet_tracker_api.DataLayer;
 using diet_tracker_api.DataLayer.Models;
 
-namespace diet_tracker_api.BusinessLayer.Users
+namespace diet_tracker_api.BusinessLayer.Users;
+
+public record AddNewUser(string UserId, string FirstName, string LastName, string EmailAddress, int PlanId) : IRequest<string>;
+public class AddNewUserHandler(DietTrackerDbContext dbContext) : IRequestHandler<AddNewUser, string>
 {
-    public record AddNewUser(string UserId, string FirstName, string LastName, string EmailAddress, int PlanId) : IRequest<string>;
-    public class AddNewUserHandler : IRequestHandler<AddNewUser, string>
+    private readonly DietTrackerDbContext _dbContext = dbContext;
+
+    public async ValueTask<string> Handle(AddNewUser request, CancellationToken cancellationToken)
     {
-        private readonly DietTrackerDbContext _dbContext;
-        public AddNewUserHandler(DietTrackerDbContext dbContext)
+
+        var userPlans = new UserPlan[] { new UserPlan { PlanId = request.PlanId, Start = DateTime.UtcNow }};
+
+        var result = _dbContext.Users.Add(new User
         {
-            _dbContext = dbContext;
-        }
+            UserId = request.UserId,
+            FirstName = request.FirstName,
+            LastName = request.LastName,
+            EmailAddress = request.EmailAddress,
+            Created = DateTime.UtcNow,
+            UserPlans = userPlans,
+        });
 
-        public async ValueTask<string> Handle(AddNewUser request, CancellationToken cancellationToken)
-        {
+        await _dbContext.SaveChangesAsync(cancellationToken);
 
-            var userPlans = new UserPlan[] { new UserPlan { PlanId = request.PlanId, Start = DateTime.UtcNow }};
-
-            var result = _dbContext.Users.Add(new User
-            {
-                UserId = request.UserId,
-                FirstName = request.FirstName,
-                LastName = request.LastName,
-                EmailAddress = request.EmailAddress,
-                Created = DateTime.UtcNow,
-                UserPlans = userPlans,
-            });
-
-            await _dbContext.SaveChangesAsync(cancellationToken);
-
-            return result.Entity.UserId;
-        }
+        return result.Entity.UserId;
     }
 }

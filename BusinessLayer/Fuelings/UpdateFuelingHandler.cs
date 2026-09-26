@@ -1,35 +1,27 @@
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using diet_tracker_api.DataLayer;
 using Microsoft.EntityFrameworkCore;
 
-namespace diet_tracker_api.BusinessLayer.Fuelings
+namespace diet_tracker_api.BusinessLayer.Fuelings;
+
+public record UpdateFueling(int FuelingId, string Name) : IRequest<bool>;
+
+public class UpdateFuelingHandler(DietTrackerDbContext dbContext) : IRequestHandler<UpdateFueling, bool>
 {
-    public record UpdateFueling(int FuelingId, string Name) : IRequest<bool>;
+    private readonly DietTrackerDbContext _dbContext = dbContext;
 
-    public class UpdateFuelingHandler : IRequestHandler<UpdateFueling, bool>
+    public async ValueTask<bool> Handle(UpdateFueling request, CancellationToken cancellationToken)
     {
-        private readonly DietTrackerDbContext _dbContext;
-        public UpdateFuelingHandler(DietTrackerDbContext dbContext)
+        var rowsAffected = await _dbContext.Fuelings
+            .Where(fueling => fueling.FuelingId == request.FuelingId)
+            .ExecuteUpdateAsync(setters => setters
+                .SetProperty(f => f.Name, request.Name),
+                cancellationToken);
+
+        if (rowsAffected == 0)
         {
-            _dbContext = dbContext;
+            throw new ArgumentException($"Fueling Id ({request.FuelingId}) not found.");
         }
 
-        public async ValueTask<bool> Handle(UpdateFueling request, CancellationToken cancellationToken)
-        {
-            var rowsAffected = await _dbContext.Fuelings
-                .Where(fueling => fueling.FuelingId == request.FuelingId)
-                .ExecuteUpdateAsync(setters => setters
-                    .SetProperty(f => f.Name, request.Name),
-                    cancellationToken);
-
-            if (rowsAffected == 0)
-            {
-                throw new ArgumentException($"Fueling Id ({request.FuelingId}) not found.");
-            }
-
-            return rowsAffected == 1;
-        }
+        return rowsAffected == 1;
     }
 }

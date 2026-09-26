@@ -2,164 +2,158 @@
 using System.Diagnostics.CodeAnalysis;
 using diet_tracker_api.DataLayer.Models;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata;
 
-namespace diet_tracker_api.DataLayer
+namespace diet_tracker_api.DataLayer;
+
+public class DietTrackerDbContext([NotNull] DbContextOptions options) : DbContext(options)
 {
-    public class DietTrackerDbContext : DbContext
+    public DbSet<Fueling> Fuelings { get; set; }
+    public DbSet<Plan> Plans { get; set; }
+    public DbSet<User> Users { get; set; }
+    public DbSet<UserCredentials> UserCredentials { get; set; }
+    public DbSet<UserPermission> UserPermissions { get; set; }
+    public DbSet<RefreshToken> RefreshTokens { get; set; }
+    public DbSet<UserDay> UserDays { get; set; }
+    public DbSet<UserFueling> UserFuelings { get; set; }
+    public DbSet<UserMeal> UserMeals { get; set; }
+    public DbSet<UserPlan> UserPlans { get; set; }
+    public DbSet<UserDailyTrackingValue> UserDailyTrackingValues { get; set; }
+    public DbSet<UserTracking> UserTrackings { get; set; }
+    public DbSet<UserTrackingValue> UserTrackingValues { get; set; }
+    public DbSet<UserTrackingValueMetadata> UserTrackingValueMetadata {get; set;}
+    public DbSet<Victory> Victories { get; set; }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        public DietTrackerDbContext([NotNull] DbContextOptions options) : base(options)
-        {
-        }
+        modelBuilder.Entity<Plan>()
+            .HasMany(plan => plan.UserPlans)
+            .WithOne(userPlan => userPlan.Plan)
+            .HasForeignKey(userPlan => userPlan.PlanId);
 
-        public DbSet<Fueling> Fuelings { get; set; }
-        public DbSet<Plan> Plans { get; set; }
-        public DbSet<User> Users { get; set; }
-        public DbSet<UserCredentials> UserCredentials { get; set; }
-        public DbSet<UserPermission> UserPermissions { get; set; }
-        public DbSet<RefreshToken> RefreshTokens { get; set; }
-        public DbSet<UserDay> UserDays { get; set; }
-        public DbSet<UserFueling> UserFuelings { get; set; }
-        public DbSet<UserMeal> UserMeals { get; set; }
-        public DbSet<UserPlan> UserPlans { get; set; }
-        public DbSet<UserDailyTrackingValue> UserDailyTrackingValues { get; set; }
-        public DbSet<UserTracking> UserTrackings { get; set; }
-        public DbSet<UserTrackingValue> UserTrackingValues { get; set; }
-        public DbSet<UserTrackingValueMetadata> UserTrackingValueMetadata {get; set;}
-        public DbSet<Victory> Victories { get; set; }
+        modelBuilder.Entity<User>()
+            .HasMany(user => user.UserDays)
+            .WithOne(userDay => userDay.User)
+            .HasForeignKey(userDay => userDay.UserId);
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            modelBuilder.Entity<Plan>()
-                .HasMany(plan => plan.UserPlans)
-                .WithOne(userPlan => userPlan.Plan)
-                .HasForeignKey(userPlan => userPlan.PlanId);
+        modelBuilder.Entity<User>()
+            .HasMany(user => user.UserPlans)
+            .WithOne(userPlan => userPlan.User)
+            .HasForeignKey(userPlan => userPlan.UserId);
 
-            modelBuilder.Entity<User>()
-                .HasMany(user => user.UserDays)
-                .WithOne(userDay => userDay.User)
-                .HasForeignKey(userDay => userDay.UserId);
+        modelBuilder.Entity<User>()
+            .HasMany(user => user.UserTrackings)
+            .WithOne(userTracking => userTracking.User)
+            .HasForeignKey(userTracking => userTracking.UserId);
 
-            modelBuilder.Entity<User>()
-                .HasMany(user => user.UserPlans)
-                .WithOne(userPlan => userPlan.User)
-                .HasForeignKey(userPlan => userPlan.UserId);
+        modelBuilder.Entity<User>()
+            .HasMany(user => user.Victories)
+            .WithOne(victory => victory.User)
+            .HasForeignKey(victory => victory.UserId);
 
-            modelBuilder.Entity<User>()
-                .HasMany(user => user.UserTrackings)
-                .WithOne(userTracking => userTracking.User)
-                .HasForeignKey(userTracking => userTracking.UserId);
+        modelBuilder.Entity<User>()
+            .Property(p => p.WaterSize)
+            .HasDefaultValue(8);
 
-            modelBuilder.Entity<User>()
-                .HasMany(user => user.Victories)
-                .WithOne(victory => victory.User)
-                .HasForeignKey(victory => victory.UserId);
+        modelBuilder.Entity<User>()
+            .Property(p => p.WaterTarget)
+            .HasDefaultValue(64);
 
-            modelBuilder.Entity<User>()
-                .Property(p => p.WaterSize)
-                .HasDefaultValue(8);
+        modelBuilder.Entity<UserDailyTrackingValue>()
+            .HasKey(userDailyTracking => new
+            {
+                userDailyTracking.UserId,
+                userDailyTracking.Day,
+                userDailyTracking.UserTrackingValueId,
+                userDailyTracking.Occurrence
+            });
 
-            modelBuilder.Entity<User>()
-                .Property(p => p.WaterTarget)
-                .HasDefaultValue(64);
+        modelBuilder.Entity<UserDay>()
+            .HasKey(userDay => new { userDay.UserId, userDay.Day });
 
-            modelBuilder.Entity<UserDailyTrackingValue>()
-                .HasKey(userDailyTracking => new
-                {
-                    userDailyTracking.UserId,
-                    userDailyTracking.Day,
-                    userDailyTracking.UserTrackingValueId,
-                    userDailyTracking.Occurrence
-                });
+        modelBuilder.Entity<UserDay>()
+            .HasMany(userDay => userDay.Fuelings)
+            .WithOne(userFueling => userFueling.UserDay)
+            .HasForeignKey(userFueling => new { userFueling.UserId, userFueling.Day });
 
-            modelBuilder.Entity<UserDay>()
-                .HasKey(userDay => new { userDay.UserId, userDay.Day });
+        modelBuilder.Entity<UserDay>()
+            .HasMany(user => user.Meals)
+            .WithOne(userMeal => userMeal.UserDay)
+            .HasForeignKey(userMeal => new { userMeal.UserId, userMeal.Day });
 
-            modelBuilder.Entity<UserDay>()
-                .HasMany(userDay => userDay.Fuelings)
-                .WithOne(userFueling => userFueling.UserDay)
-                .HasForeignKey(userFueling => new { userFueling.UserId, userFueling.Day });
+        modelBuilder.Entity<UserDay>()
+            .HasMany(user => user.TrackingValues)
+            .WithOne(userTrackingValue => userTrackingValue.UserDay)
+            .HasForeignKey(userTrackingValue => new { userTrackingValue.UserId, userTrackingValue.Day });
 
-            modelBuilder.Entity<UserDay>()
-                .HasMany(user => user.Meals)
-                .WithOne(userMeal => userMeal.UserDay)
-                .HasForeignKey(userMeal => new { userMeal.UserId, userMeal.Day });
+        modelBuilder.Entity<UserPlan>()
+            .HasKey(userPlan => new { userPlan.UserId, userPlan.PlanId, userPlan.Start });
 
-            modelBuilder.Entity<UserDay>()
-                .HasMany(user => user.TrackingValues)
-                .WithOne(userTrackingValue => userTrackingValue.UserDay)
-                .HasForeignKey(userTrackingValue => new { userTrackingValue.UserId, userTrackingValue.Day });
+        modelBuilder.Entity<UserTracking>()
+            .HasMany(userTracking => userTracking.Values)
+            .WithOne(userTrackingValue => userTrackingValue.Tracking)
+            .HasForeignKey(userTrackingValue => userTrackingValue.UserTrackingId);
 
-            modelBuilder.Entity<UserPlan>()
-                .HasKey(userPlan => new { userPlan.UserId, userPlan.PlanId, userPlan.Start });
+        modelBuilder.Entity<UserTrackingValue>()
+            .Property(v => v.Type)
+            .HasConversion<string>();
 
-            modelBuilder.Entity<UserTracking>()
-                .HasMany(userTracking => userTracking.Values)
-                .WithOne(userTrackingValue => userTrackingValue.Tracking)
-                .HasForeignKey(userTrackingValue => userTrackingValue.UserTrackingId);
+        modelBuilder.Entity<UserTrackingValue>()
+            .HasMany(v => v.DailyTrackingValues)
+            .WithOne(v => v.TrackingValue)
+            .HasForeignKey(v => v.UserTrackingValueId);
 
-            modelBuilder.Entity<UserTrackingValue>()
-                .Property(v => v.Type)
-                .HasConversion<string>();
+        modelBuilder.Entity<UserTrackingValue>()
+            .HasMany(userTrackingValue => userTrackingValue.Metadata)
+            .WithOne(userTrackingValueMetadata => userTrackingValueMetadata.UserTrackingValue)
+            .HasForeignKey(userTrackingValue => userTrackingValue.UserTrackingValueId);
 
-            modelBuilder.Entity<UserTrackingValue>()
-                .HasMany(v => v.DailyTrackingValues)
-                .WithOne(v => v.TrackingValue)
-                .HasForeignKey(v => v.UserTrackingValueId);
+        modelBuilder.Entity<UserTrackingValueMetadata>()
+            .HasKey(userTrackingValueMetadata => new { userTrackingValueMetadata.UserTrackingValueId, userTrackingValueMetadata.Key });
 
-            modelBuilder.Entity<UserTrackingValue>()
-                .HasMany(userTrackingValue => userTrackingValue.Metadata)
-                .WithOne(userTrackingValueMetadata => userTrackingValueMetadata.UserTrackingValue)
-                .HasForeignKey(userTrackingValue => userTrackingValue.UserTrackingValueId);
+        modelBuilder.Entity<Victory>()
+            .Property(v => v.Type)
+            .HasConversion<string>();
 
-            modelBuilder.Entity<UserTrackingValueMetadata>()
-                .HasKey(userTrackingValueMetadata => new { userTrackingValueMetadata.UserTrackingValueId, userTrackingValueMetadata.Key });
+        // UserCredentials — one-to-one with User
+        modelBuilder.Entity<UserCredentials>()
+            .HasOne(uc => uc.User)
+            .WithOne(u => u.Credentials)
+            .HasForeignKey<UserCredentials>(uc => uc.UserId);
 
-            modelBuilder.Entity<Victory>()
-                .Property(v => v.Type)
-                .HasConversion<string>();
+        modelBuilder.Entity<UserCredentials>()
+            .HasIndex(uc => uc.Email)
+            .IsUnique();
 
-            // UserCredentials — one-to-one with User
-            modelBuilder.Entity<UserCredentials>()
-                .HasOne(uc => uc.User)
-                .WithOne(u => u.Credentials)
-                .HasForeignKey<UserCredentials>(uc => uc.UserId);
+        // UserPermission — composite PK
+        modelBuilder.Entity<UserPermission>()
+            .HasKey(up => new { up.UserId, up.Permission });
 
-            modelBuilder.Entity<UserCredentials>()
-                .HasIndex(uc => uc.Email)
-                .IsUnique();
+        modelBuilder.Entity<UserPermission>()
+            .HasOne(up => up.User)
+            .WithMany(u => u.Permissions)
+            .HasForeignKey(up => up.UserId);
 
-            // UserPermission — composite PK
-            modelBuilder.Entity<UserPermission>()
-                .HasKey(up => new { up.UserId, up.Permission });
+        // RefreshToken
+        modelBuilder.Entity<RefreshToken>()
+            .HasOne(rt => rt.User)
+            .WithMany(u => u.RefreshTokens)
+            .HasForeignKey(rt => rt.UserId);
 
-            modelBuilder.Entity<UserPermission>()
-                .HasOne(up => up.User)
-                .WithMany(u => u.Permissions)
-                .HasForeignKey(up => up.UserId);
-
-            // RefreshToken
-            modelBuilder.Entity<RefreshToken>()
-                .HasOne(rt => rt.User)
-                .WithMany(u => u.RefreshTokens)
-                .HasForeignKey(rt => rt.UserId);
-
-            // Configure table names to follow PostgreSQL conventions (lowercase snake_case)
-            modelBuilder.Entity<User>().ToTable("users");
-            modelBuilder.Entity<Plan>().ToTable("plans");
-            modelBuilder.Entity<Fueling>().ToTable("fuelings");
-            modelBuilder.Entity<UserDay>().ToTable("user_days");
-            modelBuilder.Entity<UserFueling>().ToTable("user_fuelings");
-            modelBuilder.Entity<UserMeal>().ToTable("user_meals");
-            modelBuilder.Entity<UserPlan>().ToTable("user_plans");
-            modelBuilder.Entity<UserTracking>().ToTable("user_trackings");
-            modelBuilder.Entity<UserTrackingValue>().ToTable("user_tracking_values");
-            modelBuilder.Entity<UserTrackingValueMetadata>().ToTable("user_tracking_value_metadata");
-            modelBuilder.Entity<UserDailyTrackingValue>().ToTable("user_daily_tracking_values");
-            modelBuilder.Entity<Victory>().ToTable("victories");
-            modelBuilder.Entity<UserCredentials>().ToTable("user_credentials");
-            modelBuilder.Entity<UserPermission>().ToTable("user_permissions");
-            modelBuilder.Entity<RefreshToken>().ToTable("refresh_tokens");
-        }
+        // Configure table names to follow PostgreSQL conventions (lowercase snake_case)
+        modelBuilder.Entity<User>().ToTable("users");
+        modelBuilder.Entity<Plan>().ToTable("plans");
+        modelBuilder.Entity<Fueling>().ToTable("fuelings");
+        modelBuilder.Entity<UserDay>().ToTable("user_days");
+        modelBuilder.Entity<UserFueling>().ToTable("user_fuelings");
+        modelBuilder.Entity<UserMeal>().ToTable("user_meals");
+        modelBuilder.Entity<UserPlan>().ToTable("user_plans");
+        modelBuilder.Entity<UserTracking>().ToTable("user_trackings");
+        modelBuilder.Entity<UserTrackingValue>().ToTable("user_tracking_values");
+        modelBuilder.Entity<UserTrackingValueMetadata>().ToTable("user_tracking_value_metadata");
+        modelBuilder.Entity<UserDailyTrackingValue>().ToTable("user_daily_tracking_values");
+        modelBuilder.Entity<Victory>().ToTable("victories");
+        modelBuilder.Entity<UserCredentials>().ToTable("user_credentials");
+        modelBuilder.Entity<UserPermission>().ToTable("user_permissions");
+        modelBuilder.Entity<RefreshToken>().ToTable("refresh_tokens");
     }
 }

@@ -1,89 +1,78 @@
-using System.Threading;
-using System.Threading.Tasks;
 using diet_tracker_api.BusinessLayer.Fuelings;
 using diet_tracker_api.DataLayer.Models;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 
-namespace diet_tracker_api.Controllers
+namespace diet_tracker_api.Controllers;
+
+[Authorize]
+[ApiController]
+[Route("api/[controller]")]
+[Produces("application/json")]
+
+public class FuelingController(IHttpContextAccessor httpContextAccessor, IMediator mediator)
 {
-    [Authorize]
-    [ApiController]
-    [Route("api/[controller]")]
-    [Produces("application/json")]
+    private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
+    private readonly IMediator _mediator = mediator;
 
-    public class FuelingController
+    [HttpGet("/api/fuelings")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public IActionResult Get(CancellationToken cancellationToken)
     {
-        private readonly IHttpContextAccessor _httpContextAccessor;
-        private readonly IMediator _mediator;
+        return new OkObjectResult(_mediator.CreateStream(new GetFuelings(), cancellationToken));
+    }
 
-        public FuelingController(IHttpContextAccessor httpContextAccessor, IMediator mediator)
+    [Authorize("write:fuelings")]
+    [HttpPost]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<Fueling>> Add(Fueling fueling, CancellationToken cancellationToken)
+    {
+        if (fueling == null)
         {
-            _httpContextAccessor = httpContextAccessor;
-            _mediator = mediator;
+            return new BadRequestResult();
         }
 
-        [HttpGet("/api/fuelings")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        public IActionResult Get(CancellationToken cancellationToken)
+        return await _mediator.Send(new AddFueling(fueling.Name), cancellationToken);
+    }
+
+    [Authorize("write:fuelings")]
+    [HttpPut("{id}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult> Update(int id, Fueling fueling, CancellationToken cancellationToken)
+    {
+        if (fueling == null)
         {
-            return new OkObjectResult(_mediator.CreateStream(new GetFuelings(), cancellationToken));
+            return new BadRequestResult();
         }
 
-        [Authorize("write:fuelings")]
-        [HttpPost]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<Fueling>> Add(Fueling fueling, CancellationToken cancellationToken)
+        try
         {
-            if (fueling == null)
-            {
-                return new BadRequestResult();
-            }
-
-            return await _mediator.Send(new AddFueling(fueling.Name), cancellationToken);
+            await _mediator.Send(new UpdateFueling(id, fueling.Name), cancellationToken);
+            return new OkResult();
         }
-
-        [Authorize("write:fuelings")]
-        [HttpPut("{id}")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult> Update(int id, Fueling fueling, CancellationToken cancellationToken)
+        catch (ArgumentException ex)
         {
-            if (fueling == null)
-            {
-                return new BadRequestResult();
-            }
-
-            try
-            {
-                await _mediator.Send(new UpdateFueling(id, fueling.Name), cancellationToken);
-                return new OkResult();
-            }
-            catch (ArgumentException ex)
-            {
-                return new NotFoundObjectResult(ex.Message);
-            }
+            return new NotFoundObjectResult(ex.Message);
         }
+    }
 
-        [Authorize("write:fuelings")]
-        [HttpDelete("{id}")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult> Remove(int id, CancellationToken cancellationToken)
+    [Authorize("write:fuelings")]
+    [HttpDelete("{id}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult> Remove(int id, CancellationToken cancellationToken)
+    {
+        try
         {
-            try
-            {
-                var result = await _mediator.Send(new DeleteFueling(id), cancellationToken);
-                return new OkResult();
-            }
-            catch (ArgumentException ex)
-            {
-                return new NotFoundObjectResult(ex.Message);
-            }
+            var result = await _mediator.Send(new DeleteFueling(id), cancellationToken);
+            return new OkResult();
+        }
+        catch (ArgumentException ex)
+        {
+            return new NotFoundObjectResult(ex.Message);
         }
     }
 }

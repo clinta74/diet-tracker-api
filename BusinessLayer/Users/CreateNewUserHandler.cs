@@ -1,36 +1,29 @@
-using System.Threading;
-using System.Threading.Tasks;
 using diet_tracker_api.DataLayer;
 using diet_tracker_api.DataLayer.Models;
 
-namespace diet_tracker_api.BusinessLayer.Users
+namespace diet_tracker_api.BusinessLayer.Users;
+
+public record CreateNewUser(string UserId, string FirstName, string LastName, string EmailAddress) : IRequest<User>;
+public class CreateNewUserHandler(DietTrackerDbContext dbContext) : IRequestHandler<CreateNewUser, User>
 {
-    public record CreateNewUser(string UserId, string FirstName, string LastName, string EmailAddress) : IRequest<User>;
-    public class CreateNewUserHandler : IRequestHandler<CreateNewUser, User>
+    private readonly DietTrackerDbContext _dbContext = dbContext;
+
+    public async ValueTask<User> Handle(CreateNewUser request, CancellationToken cancellationToken)
     {
-        private readonly DietTrackerDbContext _dbContext;
-        public CreateNewUserHandler(DietTrackerDbContext dbContext)
-        {
-            _dbContext = dbContext;
-        }
 
-        public async ValueTask<User> Handle(CreateNewUser request, CancellationToken cancellationToken)
-        {
+        var result = _dbContext
+            .Users
+            .Add(new User
+            {
+                UserId = request.UserId,
+                FirstName = request.FirstName,
+                LastName = request.LastName,
+                EmailAddress = request.EmailAddress,
+                Created = DateTime.UtcNow
+            });
 
-            var result = _dbContext
-                .Users
-                .Add(new User
-                {
-                    UserId = request.UserId,
-                    FirstName = request.FirstName,
-                    LastName = request.LastName,
-                    EmailAddress = request.EmailAddress,
-                    Created = DateTime.UtcNow
-                });
+        await _dbContext.SaveChangesAsync(cancellationToken);
 
-            await _dbContext.SaveChangesAsync(cancellationToken);
-
-            return result.Entity;
-        }
+        return result.Entity;
     }
 }

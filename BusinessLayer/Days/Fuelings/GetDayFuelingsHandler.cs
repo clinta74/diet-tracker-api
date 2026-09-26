@@ -1,53 +1,42 @@
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using diet_tracker_api.DataLayer;
 using Microsoft.EntityFrameworkCore;
 
-namespace diet_tracker_api.BusinessLayer.Days.Fuelings
+namespace diet_tracker_api.BusinessLayer.Days.Fuelings;
+
+public record GetDayFuelings(DateTime Date, string UserId) : IRequest<IEnumerable<UserDayFueling>>;
+
+public record UserDayFueling(int UserFuelingId, string UserId, DateTime Day, string Name, DateTime? When);
+
+public class GetDayFuelingsHandler(DietTrackerDbContext dbContext, IMediator mediator) : IRequestHandler<GetDayFuelings, IEnumerable<UserDayFueling>>
 {
-    public record GetDayFuelings(DateTime Date, string UserId) : IRequest<IEnumerable<UserDayFueling>>;
+    private readonly DietTrackerDbContext _dbContext = dbContext;
+    private readonly IMediator _mediator = mediator;
 
-    public record UserDayFueling(int UserFuelingId, string UserId, DateTime Day, string Name, DateTime? When);
-
-    public class GetDayFuelingsHandler : IRequestHandler<GetDayFuelings, IEnumerable<UserDayFueling>>
+    public async ValueTask<IEnumerable<UserDayFueling>> Handle(GetDayFuelings request, CancellationToken cancellationToken)
     {
-        private readonly DietTrackerDbContext _dbContext;
-        private readonly IMediator _mediator;
+        var data = await _dbContext.UserFuelings
+            .Where(userFueling => userFueling.UserId == request.UserId)
+            .Where(userFueling => userFueling.Day == request.Date)
+            .Select(userFueling => new UserDayFueling(
+                userFueling.UserFuelingId,
+                userFueling.UserId,
+                userFueling.Day,
+                userFueling.Name,
+                userFueling.When))
+            .AsNoTracking()
+            .ToListAsync(cancellationToken);
 
-        public GetDayFuelingsHandler(DietTrackerDbContext dbContext, IMediator mediator)
+        var plan = await _mediator.Send(new GetCurrentUserPlan(request.UserId));
+
+        var fuelings = new List<UserDayFueling>(data);
+        if (data.Count < plan.FuelingCount)
         {
-            _dbContext = dbContext;
-            _mediator = mediator;
+            var _fuelings = new UserDayFueling[plan.FuelingCount - data.Count];
+            Array.Fill(_fuelings, new UserDayFueling(0, request.UserId, request.Date, "", null));
+
+            fuelings.AddRange(_fuelings);
         }
 
-        public async ValueTask<IEnumerable<UserDayFueling>> Handle(GetDayFuelings request, CancellationToken cancellationToken)
-        {
-            var data = await _dbContext.UserFuelings
-                .Where(userFueling => userFueling.UserId == request.UserId)
-                .Where(userFueling => userFueling.Day == request.Date)
-                .Select(userFueling => new UserDayFueling(
-                    userFueling.UserFuelingId,
-                    userFueling.UserId,
-                    userFueling.Day,
-                    userFueling.Name,
-                    userFueling.When))
-                .AsNoTracking()
-                .ToListAsync(cancellationToken);
-
-            var plan = await _mediator.Send(new GetCurrentUserPlan(request.UserId));
-
-            var fuelings = new List<UserDayFueling>(data);
-            if (data.Count < plan.FuelingCount)
-            {
-                var _fuelings = new UserDayFueling[plan.FuelingCount - data.Count];
-                Array.Fill(_fuelings, new UserDayFueling(0, request.UserId, request.Date, "", null));
-
-                fuelings.AddRange(_fuelings);
-            }
-
-            return fuelings;
-        }
+        return fuelings;
     }
 }

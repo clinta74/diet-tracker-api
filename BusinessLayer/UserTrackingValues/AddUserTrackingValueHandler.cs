@@ -1,39 +1,29 @@
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using diet_tracker_api.DataLayer;
 using diet_tracker_api.DataLayer.Models;
 
-namespace diet_tracker_api.BusinessLayer.UserTrackingValues
+namespace diet_tracker_api.BusinessLayer.UserTrackingValues;
+
+public record AddUserTrackingValue(int UserTrackingId, string Name, string Description, int Order, UserTrackingType Type, bool Disabled, IEnumerable<UserTrackingValueMetadata> Metadata) : IRequest<int>;
+public class AddUserTrackingValueHandler(DietTrackerDbContext dbContext) : IRequestHandler<AddUserTrackingValue, int>
 {
-    public record AddUserTrackingValue(int UserTrackingId, string Name, string Description, int Order, UserTrackingType Type, bool Disabled, IEnumerable<UserTrackingValueMetadata> Metadata) : IRequest<int>;
-    public class AddUserTrackingValueHandler : IRequestHandler<AddUserTrackingValue, int>
+    private readonly DietTrackerDbContext _dbContext = dbContext;
+
+    public async ValueTask<int> Handle(AddUserTrackingValue request, CancellationToken cancellationToken)
     {
-        private readonly DietTrackerDbContext _dbContext;
+        var data = _dbContext.UserTrackingValues
+            .Add(new UserTrackingValue
+            {
+                UserTrackingId = request.UserTrackingId,
+                Name = request.Name,
+                Description = request.Description,
+                Order = request.Order,
+                Type = request.Type,
+                Disabled = request.Disabled,
+                Metadata = request.Metadata.ToArray(),
+            });
 
-        public AddUserTrackingValueHandler(DietTrackerDbContext dbContext)
-        {
-            _dbContext = dbContext;
-        }
+        await _dbContext.SaveChangesAsync(cancellationToken);
 
-        public async ValueTask<int> Handle(AddUserTrackingValue request, CancellationToken cancellationToken)
-        {
-            var data = _dbContext.UserTrackingValues
-                .Add(new UserTrackingValue
-                {
-                    UserTrackingId = request.UserTrackingId,
-                    Name = request.Name,
-                    Description = request.Description,
-                    Order = request.Order,
-                    Type = request.Type,
-                    Disabled = request.Disabled,
-                    Metadata = request.Metadata.ToArray(),
-                });
-
-            await _dbContext.SaveChangesAsync(cancellationToken);
-
-            return data.Entity.UserTrackingValueId;
-        }
+        return data.Entity.UserTrackingValueId;
     }
 }

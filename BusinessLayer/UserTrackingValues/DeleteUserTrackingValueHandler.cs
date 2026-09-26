@@ -1,37 +1,28 @@
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using diet_tracker_api.DataLayer;
 using Microsoft.EntityFrameworkCore;
 
-namespace diet_tracker_api.BusinessLayer.UserTrackingValues
+namespace diet_tracker_api.BusinessLayer.UserTrackingValues;
+
+public record DeleteUserTrackingValue(string UserId, int UserTrackingValueId) : IRequest<bool>;
+public class DeleteUserTrackingValueHandler(DietTrackerDbContext dbContext) : IRequestHandler<DeleteUserTrackingValue, bool>
 {
-    public record DeleteUserTrackingValue(string UserId, int UserTrackingValueId) : IRequest<bool>;
-    public class DeleteUserTrackingValueHandler : IRequestHandler<DeleteUserTrackingValue, bool>
+    private readonly DietTrackerDbContext _dbContext = dbContext;
+
+    public async ValueTask<bool> Handle(DeleteUserTrackingValue request, CancellationToken cancellationToken)
     {
-        private readonly DietTrackerDbContext _dbContext;
+        var data = await _dbContext.UserTrackingValues
+            .AsNoTracking()
+            .Where(p => p.UserTrackingValueId == request.UserTrackingValueId)
+            .Where(p => p.Tracking.UserId == request.UserId)
+            .FirstOrDefaultAsync(cancellationToken);
 
-        public DeleteUserTrackingValueHandler(DietTrackerDbContext dbContext)
+        if (data == null)
         {
-            _dbContext = dbContext;
+            throw new ArgumentException($"User Tracking Value Id ({request.UserTrackingValueId}) for User Id ({request.UserId}) not found.");
         }
 
-        public async ValueTask<bool> Handle(DeleteUserTrackingValue request, CancellationToken cancellationToken)
-        {
-            var data = await _dbContext.UserTrackingValues
-                .AsNoTracking()
-                .Where(p => p.UserTrackingValueId == request.UserTrackingValueId)
-                .Where(p => p.Tracking.UserId == request.UserId)
-                .FirstOrDefaultAsync(cancellationToken);
+        _dbContext.Remove(data);
 
-            if (data == null)
-            {
-                throw new ArgumentException($"User Tracking Value Id ({request.UserTrackingValueId}) for User Id ({request.UserId}) not found.");
-            }
-
-            _dbContext.Remove(data);
-
-            return await _dbContext.SaveChangesAsync(cancellationToken) == 1;
-        }
+        return await _dbContext.SaveChangesAsync(cancellationToken) == 1;
     }
 }

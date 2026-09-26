@@ -1,16 +1,9 @@
 using Microsoft.AspNetCore.Authorization;
 
-namespace diet_tracker_api.Authorization
-{
-    public class HasScopeRequirement : IAuthorizationRequirement
-    {
-        public string Issuer { get; }
-        public string Scope { get; }
+namespace diet_tracker_api.Authorization;
 
-        public HasScopeRequirement(string scope, string issuer)
-        {
-            Scope = scope ?? throw new ArgumentNullException(nameof(scope));
-            Issuer = issuer ?? throw new ArgumentNullException(nameof(issuer));
-        }
-    }
+public class HasScopeRequirement(string scope, string issuer) : IAuthorizationRequirement
+{
+    public string Issuer { get; } = issuer ?? throw new ArgumentNullException(nameof(issuer));
+    public string Scope { get; } = scope ?? throw new ArgumentNullException(nameof(scope));
 }

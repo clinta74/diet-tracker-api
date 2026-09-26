@@ -1,5 +1,3 @@
-global using System;
-global using System.Collections.Generic;
 global using Mediator;
 
 using System.Security.Claims;
@@ -12,14 +10,9 @@ using diet_tracker_api.Filters;
 using diet_tracker_api.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
 using Npgsql;
@@ -151,11 +144,6 @@ using (var serviceScope = app.Services.GetRequiredService<IServiceScopeFactory>(
     }
 }
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseDeveloperExceptionPage();
-}
-
 app.UseSwagger();
 app.UseSwaggerUI(c =>
 {
@@ -166,7 +154,7 @@ app.UseSwaggerUI(c =>
 
 app.UseCors(config => config
     .WithExposedHeaders("x-total-count")
-    .WithOrigins(builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? new[] { "http://localhost:4000" })
+    .WithOrigins(builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? ["http://localhost:4000"])
     .AllowAnyMethod()
     .AllowAnyHeader());
 

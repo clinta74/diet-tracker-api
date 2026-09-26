@@ -1,41 +1,33 @@
 #nullable enable
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using diet_tracker_api.DataLayer;
 using diet_tracker_api.DataLayer.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace diet_tracker_api.BusinessLayer.Plans
+namespace diet_tracker_api.BusinessLayer.Plans;
+
+public record UpdatePlan(int PlanId, string Name, int FuelingCount, int MealCount) : IRequest<Plan?>;
+public class UpdatePlanHandler(DietTrackerDbContext dbContext) : IRequestHandler<UpdatePlan, Plan?>
 {
-    public record UpdatePlan(int PlanId, string Name, int FuelingCount, int MealCount) : IRequest<Plan?>;
-    public class UpdatePlanHandler : IRequestHandler<UpdatePlan, Plan?>
+    private readonly DietTrackerDbContext _dbContext = dbContext;
+
+    public async ValueTask<Plan?> Handle(UpdatePlan request, CancellationToken cancellationToken)
     {
-        private readonly DietTrackerDbContext _dbContext;
-        public UpdatePlanHandler(DietTrackerDbContext dbContext)
+        var rowsAffected = await _dbContext.Plans
+            .Where(plan => plan.PlanId.Equals(request.PlanId))
+            .ExecuteUpdateAsync(setters => setters
+                .SetProperty(p => p.Name, request.Name)
+                .SetProperty(p => p.FuelingCount, request.FuelingCount)
+                .SetProperty(p => p.MealCount, request.MealCount),
+                cancellationToken);
+
+        if (rowsAffected == 0)
         {
-            _dbContext = dbContext;
+            return null;
         }
 
-        public async ValueTask<Plan?> Handle(UpdatePlan request, CancellationToken cancellationToken)
-        {
-            var rowsAffected = await _dbContext.Plans
-                .Where(plan => plan.PlanId.Equals(request.PlanId))
-                .ExecuteUpdateAsync(setters => setters
-                    .SetProperty(p => p.Name, request.Name)
-                    .SetProperty(p => p.FuelingCount, request.FuelingCount)
-                    .SetProperty(p => p.MealCount, request.MealCount),
-                    cancellationToken);
-
-            if (rowsAffected == 0)
-            {
-                return null;
-            }
-
-            // Fetch the updated plan to return
-            return await _dbContext.Plans
-                .AsNoTracking()
-                .FirstOrDefaultAsync(p => p.PlanId == request.PlanId, cancellationToken);
-        }
+        // Fetch the updated plan to return
+        return await _dbContext.Plans
+            .AsNoTracking()
+            .FirstOrDefaultAsync(p => p.PlanId == request.PlanId, cancellationToken);
     }
 }
