@@ -65,7 +65,9 @@ var connectionBuilder = new NpgsqlConnectionStringBuilder
     Port = portNumber,
     Database = database,
     Username = username,
-    Password = password
+    Password = password,
+    // The .NET 10 container images no longer ship libgssapi_krb5; we never use Kerberos.
+    GssEncryptionMode = GssEncryptionMode.Disable
 };
 
 builder.Services.AddDbContext<DietTrackerDbContext>(options =>
