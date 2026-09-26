@@ -21,7 +21,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi;
 using Npgsql;
 using Swashbuckle.AspNetCore.SwaggerUI;
 
@@ -138,7 +138,7 @@ builder.Services.AddScoped<UserExistsFilter>();
 
 // Add health checks
 builder.Services.AddHealthChecks()
-    .AddNpgSql(connectionBuilder.ConnectionString, name: "database");
+    .AddDbContextCheck<DietTrackerDbContext>("database");
 
 var app = builder.Build();
 
