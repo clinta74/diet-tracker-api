@@ -42,6 +42,9 @@ public class AuthFlowTests(ApiFactory factory) : IClassFixture<ApiFactory>
         Assert.Equal(15 * 60, auth.ExpiresIn);
 
         var payload = DecodePayload(auth.AccessToken);
+        // The server reads the user id from this claim; keep its name stable across token handler changes.
+        Assert.True(payload.TryGetProperty("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier", out var userId));
+        Assert.False(string.IsNullOrEmpty(userId.GetString()));
         Assert.Equal("Test User", payload.GetProperty("name").GetString());
         Assert.Equal(ApiFactory.Issuer, payload.GetProperty("iss").GetString());
         var permissions = payload.GetProperty("permissions").EnumerateArray().Select(p => p.GetString()).ToList();

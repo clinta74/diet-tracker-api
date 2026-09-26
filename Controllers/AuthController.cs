@@ -25,12 +25,14 @@ namespace diet_tracker_api.Controllers
     {
         private readonly IMediator _mediator;
         private readonly IJwtTokenService _jwtTokenService;
+        private readonly IPasswordService _passwordService;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public AuthController(IMediator mediator, IJwtTokenService jwtTokenService, IHttpContextAccessor httpContextAccessor)
+        public AuthController(IMediator mediator, IJwtTokenService jwtTokenService, IPasswordService passwordService, IHttpContextAccessor httpContextAccessor)
         {
             _mediator = mediator;
             _jwtTokenService = jwtTokenService;
+            _passwordService = passwordService;
             _httpContextAccessor = httpContextAccessor;
         }
 
@@ -39,7 +41,7 @@ namespace diet_tracker_api.Controllers
         [ProducesResponseType(StatusCodes.Status409Conflict)]
         public async Task<ActionResult<AuthResponse>> Register([FromBody] RegisterRequest request, CancellationToken cancellationToken)
         {
-            var passwordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
+            var passwordHash = _passwordService.Hash(request.Password);
 
             var result = await _mediator.Send(
                 new RegisterUser(request.FirstName, request.LastName, request.Email, passwordHash, request.PlanId),
