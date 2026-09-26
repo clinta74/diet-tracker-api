@@ -15,7 +15,6 @@ namespace diet_tracker_api.Controllers
     public record RegisterRequest(string FirstName, string LastName, string Email, string Password, int PlanId);
     public record RefreshRequest(string RefreshToken);
     public record RevokeRequest(string RefreshToken);
-    public record MigrateRequest(string Email, string NewPassword);
 
     public record AuthResponse(string AccessToken, string RefreshToken, int ExpiresIn);
 
@@ -100,21 +99,6 @@ namespace diet_tracker_api.Controllers
                 return BadRequest(new { message = "Token not found or already revoked." });
 
             return NoContent();
-        }
-
-        [HttpPost("migrate")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<AuthResponse>> Migrate([FromBody] MigrateRequest request, CancellationToken cancellationToken)
-        {
-            var passwordHash = BCrypt.Net.BCrypt.HashPassword(request.NewPassword);
-
-            var result = await _mediator.Send(new MigrateUser(request.Email, passwordHash), cancellationToken);
-
-            if (result == null || result.Error != null)
-                return BadRequest(new { message = result?.Error ?? "Migration failed." });
-
-            return await BuildAuthResponseAsync(result.UserId, result.Permissions, cancellationToken);
         }
 
         private async Task<ActionResult<AuthResponse>> BuildAuthResponseAsync(
