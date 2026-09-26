@@ -40,7 +40,7 @@ public class RotateRefreshTokenHandler(DietTrackerDbContext dbContext) : IReques
 
         await _dbContext.SaveChangesAsync(cancellationToken);
 
-        var oldToUpdate = await _dbContext.RefreshTokens.FindAsync(new object[] { old.Id }, cancellationToken);
+        var oldToUpdate = await _dbContext.RefreshTokens.FindAsync([old.Id], cancellationToken);
         _dbContext.Entry(oldToUpdate!).CurrentValues.SetValues(oldToUpdate! with
         {
             RevokedAt = DateTime.UtcNow,

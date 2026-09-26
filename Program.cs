@@ -144,11 +144,6 @@ using (var serviceScope = app.Services.GetRequiredService<IServiceScopeFactory>(
     }
 }
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseDeveloperExceptionPage();
-}
-
 app.UseSwagger();
 app.UseSwaggerUI(c =>
 {
@@ -159,7 +154,7 @@ app.UseSwaggerUI(c =>
 
 app.UseCors(config => config
     .WithExposedHeaders("x-total-count")
-    .WithOrigins(builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? new[] { "http://localhost:4000" })
+    .WithOrigins(builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? ["http://localhost:4000"])
     .AllowAnyMethod()
     .AllowAnyHeader());
 

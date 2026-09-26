@@ -22,14 +22,14 @@ public class SecurityRequirementsOperationFilter : IOperationFilter
         }
 
         // add generic message if the controller methods dont already specify the response type
-        operation.Responses ??= new OpenApiResponses();
+        operation.Responses ??= [];
         operation.Responses.TryAdd("401", new OpenApiResponse { Description = "If Authorization header not present, has no value or no valid jwt bearer token" });
         operation.Responses.TryAdd("403", new OpenApiResponse { Description = "If user not authorized to perform requested action" });
 
-        operation.Security ??= new List<OpenApiSecurityRequirement>();
+        operation.Security ??= [];
         operation.Security.Add(new OpenApiSecurityRequirement
         {
-            [new OpenApiSecuritySchemeReference("Bearer", context.Document)] = new List<string>()
+            [new OpenApiSecuritySchemeReference("Bearer", context.Document)] = []
         });
     }
 }

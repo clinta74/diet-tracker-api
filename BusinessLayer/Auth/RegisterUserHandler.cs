@@ -16,10 +16,10 @@ public record RegisterUserResult(string UserId, IReadOnlyList<string> Permission
 
 public class RegisterUserHandler(DietTrackerDbContext dbContext) : IRequestHandler<RegisterUser, RegisterUserResult>
 {
-    private static readonly string[] DefaultPermissions = new[]
-    {
+    private static readonly string[] DefaultPermissions =
+    [
         "write:user", "write:fuelings", "write:plans", "write:lean-and-greens"
-    };
+    ];
 
     private readonly DietTrackerDbContext _dbContext = dbContext;
 
@@ -30,7 +30,7 @@ public class RegisterUserHandler(DietTrackerDbContext dbContext) : IRequestHandl
         var userId = Guid.NewGuid().ToString();
 
         var permissions = isFirstUser
-            ? DefaultPermissions.Concat(new[] { "admin:users" }).ToArray()
+            ? [.. DefaultPermissions, "admin:users"]
             : DefaultPermissions;
 
         var userPlans = new[] { new UserPlan { PlanId = request.PlanId, Start = DateTime.UtcNow } };

@@ -36,8 +36,8 @@ public class DayTrackingValuesController(IHttpContextAccessor httpContextAccesso
     public async Task<ActionResult<UserDailyTrackingValue>> UpdateCurrentUserDayTrackingValue(DateTime day, UserDailyTrackingValueRequest[] values, CancellationToken cancellationToken)
     {
         var userId = _httpContextAccessor.HttpContext.GetUserId();
-        var data = await _mediator.Send(new UpdateUserDailyTrackingValues(day, userId, values.Select(value =>
-            new UpdateUserDailyTrackingValue(value.UserTrackingValueId, value.Occurrence, value.Value, value.When)).ToArray()));
+        var data = await _mediator.Send(new UpdateUserDailyTrackingValues(day, userId, [.. values.Select(value =>
+            new UpdateUserDailyTrackingValue(value.UserTrackingValueId, value.Occurrence, value.Value, value.When))]));
 
         return new OkObjectResult(data);
     }
