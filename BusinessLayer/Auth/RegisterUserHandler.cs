@@ -42,7 +42,7 @@ namespace diet_tracker_api.BusinessLayer.Auth
                 ? DefaultPermissions.Concat(new[] { "admin:users" }).ToArray()
                 : DefaultPermissions;
 
-            var userPlans = new[] { new UserPlan { PlanId = request.PlanId, Start = DateTime.Now } };
+            var userPlans = new[] { new UserPlan { PlanId = request.PlanId, Start = DateTime.UtcNow } };
             var userPermissions = permissions.Select(p => new UserPermission { UserId = userId, Permission = p }).ToList();
 
             _dbContext.Users.Add(new User
@@ -51,7 +51,7 @@ namespace diet_tracker_api.BusinessLayer.Auth
                 FirstName = request.FirstName,
                 LastName = request.LastName,
                 EmailAddress = request.Email,
-                Created = DateTime.Now,
+                Created = DateTime.UtcNow,
                 UserPlans = userPlans,
             });
 

@@ -17,7 +17,7 @@ namespace diet_tracker_api.BusinessLayer.Users
         public async ValueTask<string> Handle(AddNewUser request, CancellationToken cancellationToken)
         {
 
-            var userPlans = new UserPlan[] { new UserPlan { PlanId = request.PlanId, Start = DateTime.Now }};
+            var userPlans = new UserPlan[] { new UserPlan { PlanId = request.PlanId, Start = DateTime.UtcNow }};
 
             var result = _dbContext.Users.Add(new User
             {
@@ -25,7 +25,7 @@ namespace diet_tracker_api.BusinessLayer.Users
                 FirstName = request.FirstName,
                 LastName = request.LastName,
                 EmailAddress = request.EmailAddress,
-                Created = DateTime.Now,
+                Created = DateTime.UtcNow,
                 UserPlans = userPlans,
             });
 
