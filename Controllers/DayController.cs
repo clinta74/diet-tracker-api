@@ -73,7 +73,12 @@ public class DayController(IHttpContextAccessor httpContextAccessor, IMediator m
     public async Task<ActionResult<IEnumerable<UserDayFueling>>> UpdateDayFuelings(DateTime day, IEnumerable<UserFueling> fuelings, CancellationToken cancellationToken)
     {
         var userId = _httpContextAccessor.HttpContext.GetUserId();
-        await _mediator.Send(new UpdateDayFuelings(day, userId, fuelings), cancellationToken);
+        var rejectedIds = await _mediator.Send(new UpdateDayFuelings(day, userId, fuelings), cancellationToken);
+
+        if (rejectedIds.Count > 0)
+        {
+            return new NotFoundObjectResult($"User Fueling Id(s) ({string.Join(", ", rejectedIds)}) not found for {day:yyyy-MM-dd}.");
+        }
 
         return new OkObjectResult(await _mediator.Send(new GetDayFuelings(day, userId), cancellationToken));
     }

@@ -95,7 +95,7 @@ public class DayFuelingsTests(ApiFactory factory) : IClassFixture<ApiFactory>
     }
 
     [Fact]
-    public async Task Fuelings_of_other_users_cannot_be_changed()
+    public async Task Fuelings_of_other_users_are_rejected()
     {
         var owner = await CreateUserClientAsync();
         var other = await CreateUserClientAsync();
@@ -104,10 +104,50 @@ public class DayFuelingsTests(ApiFactory factory) : IClassFixture<ApiFactory>
         await CreateDayAsync(other, day);
         var ownersFueling = (await SaveAsync(owner, day, new Fueling(0, "Shake"))).Single(f => f.UserFuelingId != 0);
 
-        await SaveAsync(other, day, ownersFueling with { Name = "Hijacked" });
-        await SaveAsync(other, day, ownersFueling with { Name = "" });
+        var rename = await other.PutAsJsonAsync($"/api/day/{day}/fuelings", new[] { ownersFueling with { Name = "Hijacked" } }, Ct);
+        var clear = await other.PutAsJsonAsync($"/api/day/{day}/fuelings", new[] { ownersFueling with { Name = "" } }, Ct);
 
+        Assert.Equal(HttpStatusCode.NotFound, rename.StatusCode);
+        Assert.Equal(HttpStatusCode.NotFound, clear.StatusCode);
         var ownersDay = await owner.GetFromJsonAsync<List<Fueling>>($"/api/day/{day}/fuelings", Ct);
         Assert.Equal(["Shake"], Named(ownersDay!));
+    }
+
+    [Fact]
+    public async Task Request_with_any_foreign_fueling_saves_nothing()
+    {
+        var owner = await CreateUserClientAsync();
+        var other = await CreateUserClientAsync();
+        const string day = "2026-09-07";
+        await CreateDayAsync(owner, day);
+        await CreateDayAsync(other, day);
+        var ownersFueling = (await SaveAsync(owner, day, new Fueling(0, "Shake"))).Single(f => f.UserFuelingId != 0);
+        var othersFueling = (await SaveAsync(other, day, new Fueling(0, "Bar"))).Single(f => f.UserFuelingId != 0);
+
+        var response = await other.PutAsJsonAsync($"/api/day/{day}/fuelings", new[]
+        {
+            othersFueling with { Name = "Renamed" },
+            new Fueling(0, "Added"),
+            ownersFueling with { Name = "Hijacked" },
+        }, Ct);
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        var othersDay = await other.GetFromJsonAsync<List<Fueling>>($"/api/day/{day}/fuelings", Ct);
+        Assert.Equal(["Bar"], Named(othersDay!));
+    }
+
+    [Fact]
+    public async Task Own_fueling_from_another_day_is_rejected()
+    {
+        var client = await CreateUserClientAsync();
+        await CreateDayAsync(client, "2026-09-08");
+        await CreateDayAsync(client, "2026-09-09");
+        var earlier = (await SaveAsync(client, "2026-09-08", new Fueling(0, "Shake"))).Single(f => f.UserFuelingId != 0);
+
+        var response = await client.PutAsJsonAsync("/api/day/2026-09-09/fuelings", new[] { earlier with { Name = "Moved" } }, Ct);
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        var earlierDay = await client.GetFromJsonAsync<List<Fueling>>("/api/day/2026-09-08/fuelings", Ct);
+        Assert.Equal(["Shake"], Named(earlierDay!));
     }
 }

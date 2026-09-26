@@ -4,19 +4,34 @@ using Microsoft.EntityFrameworkCore;
 
 namespace diet_tracker_api.BusinessLayer.Days.Fuelings;
 
-public record UpdateDayFuelings(DateTime Day, string UserId, IEnumerable<UserFueling> Fuelings) : IRequest<Unit>;
-public class UpdateDayFuelingsHandler(DietTrackerDbContext dbContext) : IRequestHandler<UpdateDayFuelings, Unit>
+/// <returns>
+/// The ids in the request that are not the user's fuelings for that day. When any are returned the
+/// request is rejected and nothing is saved.
+/// </returns>
+public record UpdateDayFuelings(DateTime Day, string UserId, IEnumerable<UserFueling> Fuelings) : IRequest<IReadOnlyList<int>>;
+public class UpdateDayFuelingsHandler(DietTrackerDbContext dbContext) : IRequestHandler<UpdateDayFuelings, IReadOnlyList<int>>
 {
     private readonly DietTrackerDbContext _dbContext = dbContext;
 
-    public async ValueTask<Unit> Handle(UpdateDayFuelings request, CancellationToken cancellationToken)
+    public async ValueTask<IReadOnlyList<int>> Handle(UpdateDayFuelings request, CancellationToken cancellationToken)
     {
         var day = request.Day.Date;
 
-        // Only the user's own fuelings for this day can be changed; other ids in the request are ignored.
+        // Only the user's own fuelings for this day can be changed.
         var existing = await _dbContext.UserFuelings
             .Where(fueling => fueling.UserId == request.UserId && fueling.Day == day)
             .ToDictionaryAsync(fueling => fueling.UserFuelingId, cancellationToken);
+
+        var rejectedIds = request.Fuelings
+            .Select(fueling => fueling.UserFuelingId)
+            .Where(id => id != 0 && !existing.ContainsKey(id))
+            .Distinct()
+            .ToList();
+
+        if (rejectedIds.Count > 0)
+        {
+            return rejectedIds;
+        }
 
         foreach (var fueling in request.Fuelings)
         {
@@ -37,8 +52,10 @@ public class UpdateDayFuelingsHandler(DietTrackerDbContext dbContext) : IRequest
                     });
                 }
             }
-            else if (existing.TryGetValue(fueling.UserFuelingId, out var current))
+            else
             {
+                var current = existing[fueling.UserFuelingId];
+
                 if (hasName)
                 {
                     _dbContext.Entry(current).CurrentValues.SetValues(current with { Name = name, When = fueling.When });
@@ -52,6 +69,6 @@ public class UpdateDayFuelingsHandler(DietTrackerDbContext dbContext) : IRequest
 
         await _dbContext.SaveChangesAsync(cancellationToken);
 
-        return Unit.Value;
+        return [];
     }
 }
