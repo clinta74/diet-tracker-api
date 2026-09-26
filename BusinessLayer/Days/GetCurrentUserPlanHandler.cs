@@ -15,7 +15,7 @@ public class GetCurrentUserPlanHandler(DietTrackerDbContext dbContext, IMediator
         var plan = await _dbContext.UserPlans
                 .OrderByDescending(up => up.Start)
                 .Where(up => up.UserId == request.UserId)
-                .Select(up => up.Plan)
+                .Select(up => up.Plan!)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(cancellationToken);
 

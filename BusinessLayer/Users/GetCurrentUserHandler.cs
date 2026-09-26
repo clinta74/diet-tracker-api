@@ -4,25 +4,25 @@ using Microsoft.EntityFrameworkCore;
 
 namespace diet_tracker_api.BusinessLayer.Users;
 
-public record GetCurrentUser(string UserId) : IRequest<CurrentUser>;
+public record GetCurrentUser(string UserId) : IRequest<CurrentUser?>;
 public record CurrentUser
 {
-    public string UserId { get; init; }
-    public string FirstName { get; init; }
-    public string LastName { get; init; }
-    public string EmailAddress { get; init; }
+    public required string UserId { get; init; }
+    public required string FirstName { get; init; }
+    public required string LastName { get; init; }
+    public string? EmailAddress { get; init; }
     public DateTime Created { get; init; }
     public int WaterTarget { get; init; }
     public int WaterSize { get; init; }
-    public Plan CurrentPlan { get; init; }
+    public Plan? CurrentPlan { get; init; }
     public DateTime? Started { get; init; }
 }
 
-public class GetCurrentUserHandler(DietTrackerDbContext dbContext) : IRequestHandler<GetCurrentUser, CurrentUser>
+public class GetCurrentUserHandler(DietTrackerDbContext dbContext) : IRequestHandler<GetCurrentUser, CurrentUser?>
 {
     private readonly DietTrackerDbContext _dbContext = dbContext;
 
-    public async ValueTask<CurrentUser> Handle(GetCurrentUser request, CancellationToken cancellationToken)
+    public async ValueTask<CurrentUser?> Handle(GetCurrentUser request, CancellationToken cancellationToken)
     {
         return await _dbContext.Users
             .Where(user => user.UserId == request.UserId)
@@ -35,8 +35,8 @@ public class GetCurrentUserHandler(DietTrackerDbContext dbContext) : IRequestHan
                 Created = user.Created,
                 WaterSize = user.WaterSize,
                 WaterTarget = user.WaterTarget,
-                CurrentPlan = user.UserPlans.OrderByDescending(up => up.Start).Select(up => up.Plan).FirstOrDefault(),
-                Started = user.UserPlans.OrderBy(up => up.Start).Select(up => (DateTime?)up.Start).FirstOrDefault(),
+                CurrentPlan = user.UserPlans!.OrderByDescending(up => up.Start).Select(up => up.Plan).FirstOrDefault(),
+                Started = user.UserPlans!.OrderBy(up => up.Start).Select(up => (DateTime?)up.Start).FirstOrDefault(),
             })
             .AsNoTracking()
             .FirstOrDefaultAsync(cancellationToken);

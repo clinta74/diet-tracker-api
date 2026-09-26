@@ -6,14 +6,14 @@ public record UserCredentials
 {
     [Key]
     [MaxLength(250)]
-    public string UserId { get; init; }
+    public string UserId { get; init; } = null!;
 
     [Required]
     [MaxLength(254)]
-    public string Email { get; init; }
+    public string Email { get; init; } = null!;
 
     [Required]
-    public string PasswordHash { get; init; }
+    public string PasswordHash { get; init; } = null!;
 
-    public virtual User User { get; init; }
+    public virtual User? User { get; init; }
 }

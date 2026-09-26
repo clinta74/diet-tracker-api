@@ -1,4 +1,3 @@
-#nullable enable
 using diet_tracker_api.BusinessLayer.Account;
 using diet_tracker_api.BusinessLayer.Auth;
 using diet_tracker_api.Extensions;

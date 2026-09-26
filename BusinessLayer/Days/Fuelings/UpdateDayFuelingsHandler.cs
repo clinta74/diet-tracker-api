@@ -16,7 +16,7 @@ public class UpdateDayFuelingsHandler(DietTrackerDbContext dbContext) : IRequest
         _dbContext.UserFuelings
            .AddRange(request.Fuelings
                .Where(f => f.UserFuelingId == 0)
-               .Where(f => f.Name.Trim().Length > 0 || f.When != null)
+               .Where(f => !string.IsNullOrWhiteSpace(f.Name) || f.When != null)
                .Select(f => f with
                {
                    UserId = request.UserId,

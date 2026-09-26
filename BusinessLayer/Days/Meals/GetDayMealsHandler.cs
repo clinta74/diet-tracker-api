@@ -5,7 +5,7 @@ namespace diet_tracker_api.BusinessLayer.Days.Meals;
 
 public record GetDayMeals(DateTime Date, string UserId) : IRequest<IEnumerable<UserDayMeal>>;
 
-public record UserDayMeal(int UserMealId, string UserId, DateTime Day, string Name, DateTime? When);
+public record UserDayMeal(int UserMealId, string? UserId, DateTime Day, string? Name, DateTime? When);
 
 public class GetDayMealsHandler(DietTrackerDbContext dbContext, IMediator mediator) : IRequestHandler<GetDayMeals, IEnumerable<UserDayMeal>>
 {

@@ -15,7 +15,7 @@ public class GetCurrentUserDailyTrackingValuesHistoryHandler(DietTrackerDbContex
         var exp = _dbContext.UserDailyTrackingValues
             .AsNoTracking()
             .Where(u => u.UserId.Equals(request.userId))
-            .Where(u => u.TrackingValue.UserTrackingId.Equals(request.UserTrackingId))
+            .Where(u => u.TrackingValue!.UserTrackingId.Equals(request.UserTrackingId))
             .OrderBy(u => u.Day)
             .Include(u => u.TrackingValue)
             .AsSingleQuery()

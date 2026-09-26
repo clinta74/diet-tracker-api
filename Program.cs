@@ -26,6 +26,8 @@ var jwtSecretKey = builder.Configuration["Jwt:SecretKey"] ?? throw new InvalidOp
 
 builder.Services.AddControllers(config =>
 {
+    // Nullable annotations document intent; they must not change which requests validate.
+    config.SuppressImplicitRequiredAttributeForNonNullableReferenceTypes = true;
     config.Conventions.Add(new RouteTokenTransformerConvention(new SlugifyParameterTransformer()));
     config.Filters.Add<OperationCancelledExceptionFilter>();
 })

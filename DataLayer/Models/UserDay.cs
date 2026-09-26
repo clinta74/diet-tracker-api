@@ -5,7 +5,7 @@ namespace diet_tracker_api.DataLayer.Models;
 
 public record UserDay
 {
-    public string UserId { get; init; }
+    public string UserId { get; init; } = null!;
 
     [Column(TypeName = "date")]
     public DateTime Day { get; init; }
@@ -14,9 +14,9 @@ public record UserDay
     [Column(TypeName = "decimal(5, 2)")]
     [Range(0, 999.99)]
     public decimal Weight { get; init; }
-    public string Notes { get; init; }
-    public virtual User User { get; init; }
-    public virtual ICollection<UserFueling> Fuelings { get; init; }
-    public virtual ICollection<UserMeal> Meals { get; init; }
-    public virtual ICollection<UserDailyTrackingValue> TrackingValues { get; init; }
+    public string? Notes { get; init; }
+    public virtual User? User { get; init; }
+    public virtual ICollection<UserFueling>? Fuelings { get; init; }
+    public virtual ICollection<UserMeal>? Meals { get; init; }
+    public virtual ICollection<UserDailyTrackingValue>? TrackingValues { get; init; }
 }

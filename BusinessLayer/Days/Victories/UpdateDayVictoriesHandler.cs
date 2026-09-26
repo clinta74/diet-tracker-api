@@ -17,7 +17,7 @@ public class UpdateDayVictoriesHandler(DietTrackerDbContext dbContext) : IReques
         _dbContext.Victories
             .AddRange(request.Victories
                 .Where(victory => victory.VictoryId == 0)
-                .Where(victory => victory.Name.Trim().Length > 0 || victory.When != null)
+                .Where(victory => !string.IsNullOrWhiteSpace(victory.Name) || victory.When != null)
                 .Select(victory => victory with
                 {
                     UserId = request.UserId,

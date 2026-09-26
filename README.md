@@ -118,6 +118,7 @@ The application is configured to use JWT bearer authentication. Tokens are valid
 
 Recent notable changes based on commit history:
 
+- **2026-09-26** - Enabled nullable reference types project-wide (no schema change) and fixed crashes on null fuel/meal/victory names and tracking values without metadata; the container now runs on the chiseled non-root image.
 - **2026-09-26** - Upgraded to .NET 10, added integration tests to CI, removed the legacy Auth0 `/api/auth/migrate` endpoint, and fixed registration/plan changes failing on non-UTC timestamps.
 - **2026-09-26** - Replaced BCrypt with the built-in ASP.NET Core Identity password hasher (legacy hashes upgrade on login), moved token creation to `JsonWebTokenHandler`, dropped LanguageExt and the third-party health check, upgraded Swashbuckle to 10, and modernized the code (implicit usings, file-scoped namespaces, primary constructors, collection expressions).
 - **2026-05-07** - Updated handling for user name data (`handle user name`).

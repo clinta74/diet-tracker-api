@@ -4,6 +4,7 @@
     <RootNamespace>diet_tracker_api</RootNamespace>
     <UserSecretsId>1a99beee-f981-4635-9b48-c3b2ae488cbb</UserSecretsId>
     <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
     <DefaultItemExcludes>$(DefaultItemExcludes);tests/**</DefaultItemExcludes>
   </PropertyGroup>
   <ItemGroup>

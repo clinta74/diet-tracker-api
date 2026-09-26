@@ -14,7 +14,7 @@ public class GetUserTrackingValuesHandler(DietTrackerDbContext dbContext) : IReq
         var data = await _dbContext.UserTrackingValues
             .AsNoTracking()
             .Where(p => p.UserTrackingId == request.UserTrackingId)
-            .Where(p => p.Tracking.UserId == request.UserId)
+            .Where(p => p.Tracking!.UserId == request.UserId)
             .Select(p => new UserTrackingValue
             {
                 UserTrackingValueId = p.UserTrackingValueId,

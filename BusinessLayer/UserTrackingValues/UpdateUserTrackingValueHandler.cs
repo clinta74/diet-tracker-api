@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace diet_tracker_api.BusinessLayer.UserTrackingValues;
 
-public record UpdateUserTrackingValue(int UserTrackingValueId, string UserId, string Name, string Description, int Order, UserTrackingType Type, bool Disabled, IEnumerable<UserTrackingValueMetadata> Metadata) : IRequest<bool>;
+public record UpdateUserTrackingValue(int UserTrackingValueId, string UserId, string? Name, string? Description, int Order, UserTrackingType Type, bool Disabled, IEnumerable<UserTrackingValueMetadata> Metadata) : IRequest<bool>;
 public class UpdateUserTrackingValueHandler(DietTrackerDbContext dbContext) : IRequestHandler<UpdateUserTrackingValue, bool>
 {
     private readonly DietTrackerDbContext _dbContext = dbContext;
@@ -13,7 +13,7 @@ public class UpdateUserTrackingValueHandler(DietTrackerDbContext dbContext) : IR
     {
         var rowsAffected = await _dbContext.UserTrackingValues
             .Where(p => p.UserTrackingValueId == request.UserTrackingValueId)
-            .Where(p => p.Tracking.UserId == request.UserId)
+            .Where(p => p.Tracking!.UserId == request.UserId)
             .ExecuteUpdateAsync(setters => setters
                 .SetProperty(v => v.Name, request.Name)
                 .SetProperty(v => v.Description, request.Description)

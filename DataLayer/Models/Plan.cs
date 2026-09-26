@@ -6,8 +6,8 @@ public record Plan
 {
     [Key]
     public int PlanId { get; init; }
-    public string Name { get; init; }
+    public string? Name { get; init; }
     public int FuelingCount { get; init; }
     public int MealCount { get; init; }
-    public virtual ICollection<UserPlan> UserPlans { get; init; }
+    public virtual ICollection<UserPlan>? UserPlans { get; init; }
 }

@@ -5,13 +5,14 @@ namespace diet_tracker_api.BusinessLayer.Days;
 
 public record CurrentUserDay
 {
-    public string UserId { get; init; }
+    // Also bound from PUT /api/day/{day} bodies, so no `required` (System.Text.Json would enforce it).
+    public string UserId { get; init; } = null!;
     public DateTime Day { get; init; }
     public int Water { get; init; }
     public decimal Weight { get; init; }
     public decimal CumulativeWeightChange { get; init; }
     public decimal WeightChange { get; init; }
-    public string Notes { get; init; }
+    public string? Notes { get; init; }
 }
 
 public record GetDay(DateTime Date, string UserId) : IRequest<CurrentUserDay>;

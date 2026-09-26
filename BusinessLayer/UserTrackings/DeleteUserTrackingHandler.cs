@@ -15,7 +15,7 @@ public class DeleteUserTrackingHandler(DietTrackerDbContext dbContext) : IReques
                     .Include(u => u.Values)
                     .AsSplitQuery()
                     .Where(u => u.UserTrackingId.Equals(request.UserTrackingId))
-                    .Where(u => u.UserId.Equals(request.UserId))
+                    .Where(u => u.UserId == request.UserId)
                     .SingleOrDefaultAsync(cancellationToken);
 
         if (data == null)
@@ -23,11 +23,11 @@ public class DeleteUserTrackingHandler(DietTrackerDbContext dbContext) : IReques
             throw new ArgumentException($"User Tracking Id ({request.UserTrackingId}) for User Id ({request.UserId}) not found.");
         }
 
-        var values = data.Values.ToList();
+        var values = data.Values?.ToList() ?? [];
 
         var userValues = await _dbContext.UserDailyTrackingValues
             .AsNoTracking()
-            .Where(v => v.TrackingValue.UserTrackingId.Equals(request.UserTrackingId))
+            .Where(v => v.TrackingValue!.UserTrackingId.Equals(request.UserTrackingId))
             .ToListAsync();
 
         using var transaction = _dbContext.Database.BeginTransaction();

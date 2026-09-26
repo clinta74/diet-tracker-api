@@ -3,7 +3,7 @@ using diet_tracker_api.DataLayer.Models;
 
 namespace diet_tracker_api.BusinessLayer.UserTrackingValues;
 
-public record AddUserTrackingValue(int UserTrackingId, string Name, string Description, int Order, UserTrackingType Type, bool Disabled, IEnumerable<UserTrackingValueMetadata> Metadata) : IRequest<int>;
+public record AddUserTrackingValue(int UserTrackingId, string? Name, string? Description, int Order, UserTrackingType Type, bool Disabled, IEnumerable<UserTrackingValueMetadata> Metadata) : IRequest<int>;
 public class AddUserTrackingValueHandler(DietTrackerDbContext dbContext) : IRequestHandler<AddUserTrackingValue, int>
 {
     private readonly DietTrackerDbContext _dbContext = dbContext;
