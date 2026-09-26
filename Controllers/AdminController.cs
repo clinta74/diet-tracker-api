@@ -34,13 +34,13 @@ namespace diet_tracker_api.Controllers
     public class AdminController : ControllerBase
     {
         private readonly IMediator _mediator;
-        private readonly IJwtTokenService _jwtTokenService;
+        private readonly IPasswordService _passwordService;
         private readonly DietTrackerDbContext _dbContext;
 
-        public AdminController(IMediator mediator, IJwtTokenService jwtTokenService, DietTrackerDbContext dbContext)
+        public AdminController(IMediator mediator, IPasswordService passwordService, DietTrackerDbContext dbContext)
         {
             _mediator = mediator;
-            _jwtTokenService = jwtTokenService;
+            _passwordService = passwordService;
             _dbContext = dbContext;
         }
 
@@ -85,7 +85,7 @@ namespace diet_tracker_api.Controllers
             var exists = await _dbContext.Users.AnyAsync(u => u.UserId == userId, cancellationToken);
             if (!exists) return NotFound();
 
-            var passwordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
+            var passwordHash = _passwordService.Hash(request.Password);
             await _mediator.Send(new SetUserCredentials(userId, request.Email, passwordHash), cancellationToken);
             return NoContent();
         }

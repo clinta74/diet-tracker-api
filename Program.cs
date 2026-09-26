@@ -7,12 +7,14 @@ using System.Text;
 using System.Text.Json.Serialization;
 using diet_tracker_api.Authorization;
 using diet_tracker_api.DataLayer;
+using diet_tracker_api.DataLayer.Models;
 using diet_tracker_api.Filters;
 using diet_tracker_api.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -129,6 +131,8 @@ builder.Services.AddAuthorization(options =>
 });
 
 builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
+builder.Services.AddSingleton<IPasswordHasher<UserCredentials>, PasswordHasher<UserCredentials>>();
+builder.Services.AddSingleton<IPasswordService, PasswordService>();
 
 builder.Services.AddScoped<UserExistsFilter>();
 

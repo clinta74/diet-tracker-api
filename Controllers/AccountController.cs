@@ -6,8 +6,10 @@ using System.Threading.Tasks;
 using diet_tracker_api.BusinessLayer.Account;
 using diet_tracker_api.BusinessLayer.Auth;
 using diet_tracker_api.Extensions;
+using diet_tracker_api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace diet_tracker_api.Controllers
@@ -24,10 +26,12 @@ namespace diet_tracker_api.Controllers
     public class AccountController : ControllerBase
     {
         private readonly IMediator _mediator;
+        private readonly IPasswordService _passwordService;
 
-        public AccountController(IMediator mediator)
+        public AccountController(IMediator mediator, IPasswordService passwordService)
         {
             _mediator = mediator;
+            _passwordService = passwordService;
         }
 
         [HttpPut("password")]
@@ -39,10 +43,10 @@ namespace diet_tracker_api.Controllers
             var userId = HttpContext.GetUserId();
             var credentials = await _mediator.Send(new GetCredentialsByUserId(userId), cancellationToken);
 
-            if (credentials == null || !BCrypt.Net.BCrypt.Verify(request.CurrentPassword, credentials.PasswordHash))
+            if (_passwordService.Verify(credentials?.PasswordHash, request.CurrentPassword) == PasswordVerificationResult.Failed)
                 return Unauthorized(new { message = "Current password is incorrect." });
 
-            var newHash = BCrypt.Net.BCrypt.HashPassword(request.NewPassword);
+            var newHash = _passwordService.Hash(request.NewPassword);
             var success = await _mediator.Send(new ChangePassword(userId, newHash), cancellationToken);
 
             if (!success)
