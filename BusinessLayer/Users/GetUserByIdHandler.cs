@@ -6,13 +6,9 @@ namespace diet_tracker_api.BusinessLayer.Users;
 
 public record GetUserById(string UserId) : IRequest<User>;
 
-public class GetUserByIdHandler : IRequestHandler<GetUserById, User>
+public class GetUserByIdHandler(DietTrackerDbContext dbContext) : IRequestHandler<GetUserById, User>
 {
-    private readonly DietTrackerDbContext _dbContext;
-    public GetUserByIdHandler(DietTrackerDbContext dbContext)
-    {
-        _dbContext = dbContext;
-    }
+    private readonly DietTrackerDbContext _dbContext = dbContext;
 
     public async ValueTask<User> Handle(GetUserById request, CancellationToken cancellationToken)
     {

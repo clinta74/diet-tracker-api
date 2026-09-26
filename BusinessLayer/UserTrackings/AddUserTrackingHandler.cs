@@ -5,16 +5,10 @@ using Microsoft.EntityFrameworkCore;
 namespace diet_tracker_api.BusinessLayer.UserTrackings;
 
 public record AddUserTracking(string UserId, string Title, string Description, int Occurrences, int Order, bool UseTime, IEnumerable<UserTrackingValue> Values) : IRequest<UserTracking>;
-public class AddUserTrackingHandler : IRequestHandler<AddUserTracking, UserTracking>
+public class AddUserTrackingHandler(DietTrackerDbContext dbContext, IMediator mediator) : IRequestHandler<AddUserTracking, UserTracking>
 {
-    private readonly DietTrackerDbContext _dbContext;
-    private readonly IMediator _mediator;
-
-    public AddUserTrackingHandler(DietTrackerDbContext dbContext, IMediator mediator)
-    {
-        _dbContext = dbContext;
-        _mediator = mediator;
-    }
+    private readonly DietTrackerDbContext _dbContext = dbContext;
+    private readonly IMediator _mediator = mediator;
 
     public async ValueTask<UserTracking> Handle(AddUserTracking request, CancellationToken cancellationToken)
     {

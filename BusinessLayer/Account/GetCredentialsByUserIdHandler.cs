@@ -7,14 +7,9 @@ namespace diet_tracker_api.BusinessLayer.Account;
 
 public record GetCredentialsByUserId(string UserId) : IRequest<UserCredentials?>;
 
-public class GetCredentialsByUserIdHandler : IRequestHandler<GetCredentialsByUserId, UserCredentials?>
+public class GetCredentialsByUserIdHandler(DietTrackerDbContext dbContext) : IRequestHandler<GetCredentialsByUserId, UserCredentials?>
 {
-    private readonly DietTrackerDbContext _dbContext;
-
-    public GetCredentialsByUserIdHandler(DietTrackerDbContext dbContext)
-    {
-        _dbContext = dbContext;
-    }
+    private readonly DietTrackerDbContext _dbContext = dbContext;
 
     public async ValueTask<UserCredentials?> Handle(GetCredentialsByUserId request, CancellationToken cancellationToken)
     {

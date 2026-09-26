@@ -5,14 +5,9 @@ namespace diet_tracker_api.BusinessLayer.Account;
 
 public record ChangePassword(string UserId, string NewPasswordHash) : IRequest<bool>;
 
-public class ChangePasswordHandler : IRequestHandler<ChangePassword, bool>
+public class ChangePasswordHandler(DietTrackerDbContext dbContext) : IRequestHandler<ChangePassword, bool>
 {
-    private readonly DietTrackerDbContext _dbContext;
-
-    public ChangePasswordHandler(DietTrackerDbContext dbContext)
-    {
-        _dbContext = dbContext;
-    }
+    private readonly DietTrackerDbContext _dbContext = dbContext;
 
     public async ValueTask<bool> Handle(ChangePassword request, CancellationToken cancellationToken)
     {

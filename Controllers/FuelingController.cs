@@ -10,16 +10,10 @@ namespace diet_tracker_api.Controllers;
 [Route("api/[controller]")]
 [Produces("application/json")]
 
-public class FuelingController
+public class FuelingController(IHttpContextAccessor httpContextAccessor, IMediator mediator)
 {
-    private readonly IHttpContextAccessor _httpContextAccessor;
-    private readonly IMediator _mediator;
-
-    public FuelingController(IHttpContextAccessor httpContextAccessor, IMediator mediator)
-    {
-        _httpContextAccessor = httpContextAccessor;
-        _mediator = mediator;
-    }
+    private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
+    private readonly IMediator _mediator = mediator;
 
     [HttpGet("/api/fuelings")]
     [ProducesResponseType(StatusCodes.Status200OK)]

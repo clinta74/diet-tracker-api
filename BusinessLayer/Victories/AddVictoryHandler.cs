@@ -5,13 +5,9 @@ namespace diet_tracker_api.BusinessLayer.Victories;
 
 public record AddVictory(string UserId, string Name, DateTime? When, VictoryType Type) : IRequest<Victory>;
 
-public class AddVictoryHandler : IRequestHandler<AddVictory, Victory>
+public class AddVictoryHandler(DietTrackerDbContext context) : IRequestHandler<AddVictory, Victory>
 {
-    private readonly DietTrackerDbContext ctx;
-    public AddVictoryHandler(DietTrackerDbContext context)
-    {
-        ctx = context;
-    }
+    private readonly DietTrackerDbContext ctx = context;
 
     public async ValueTask<Victory> Handle(AddVictory request, CancellationToken cancellationToken)
     {

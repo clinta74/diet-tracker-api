@@ -10,16 +10,10 @@ public record LoginUser(string Email, string Password) : IRequest<LoginUserResul
 
 public record LoginUserResult(string UserId, IReadOnlyList<string> Permissions);
 
-public class LoginUserHandler : IRequestHandler<LoginUser, LoginUserResult?>
+public class LoginUserHandler(DietTrackerDbContext dbContext, IPasswordService passwordService) : IRequestHandler<LoginUser, LoginUserResult?>
 {
-    private readonly DietTrackerDbContext _dbContext;
-    private readonly IPasswordService _passwordService;
-
-    public LoginUserHandler(DietTrackerDbContext dbContext, IPasswordService passwordService)
-    {
-        _dbContext = dbContext;
-        _passwordService = passwordService;
-    }
+    private readonly DietTrackerDbContext _dbContext = dbContext;
+    private readonly IPasswordService _passwordService = passwordService;
 
     public async ValueTask<LoginUserResult?> Handle(LoginUser request, CancellationToken cancellationToken)
     {

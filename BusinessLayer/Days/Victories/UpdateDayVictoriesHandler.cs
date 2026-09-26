@@ -5,13 +5,9 @@ using Microsoft.EntityFrameworkCore;
 namespace diet_tracker_api.BusinessLayer.Days.Victories;
 
 public record UpdateDayVictories(DateTime Day, string UserId, IEnumerable<Victory> Victories) : IRequest<Unit>;
-public class UpdateDayVictoriesHandler : IRequestHandler<UpdateDayVictories, Unit>
+public class UpdateDayVictoriesHandler(DietTrackerDbContext dbContext) : IRequestHandler<UpdateDayVictories, Unit>
 {
-    private readonly DietTrackerDbContext _dbContext;
-    public UpdateDayVictoriesHandler(DietTrackerDbContext dbContext)
-    {
-        _dbContext = dbContext;
-    }
+    private readonly DietTrackerDbContext _dbContext = dbContext;
 
     public async ValueTask<Unit> Handle(UpdateDayVictories request, CancellationToken cancellationToken)
     {

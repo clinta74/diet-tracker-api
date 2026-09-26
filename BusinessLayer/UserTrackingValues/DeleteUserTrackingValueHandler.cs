@@ -4,14 +4,9 @@ using Microsoft.EntityFrameworkCore;
 namespace diet_tracker_api.BusinessLayer.UserTrackingValues;
 
 public record DeleteUserTrackingValue(string UserId, int UserTrackingValueId) : IRequest<bool>;
-public class DeleteUserTrackingValueHandler : IRequestHandler<DeleteUserTrackingValue, bool>
+public class DeleteUserTrackingValueHandler(DietTrackerDbContext dbContext) : IRequestHandler<DeleteUserTrackingValue, bool>
 {
-    private readonly DietTrackerDbContext _dbContext;
-
-    public DeleteUserTrackingValueHandler(DietTrackerDbContext dbContext)
-    {
-        _dbContext = dbContext;
-    }
+    private readonly DietTrackerDbContext _dbContext = dbContext;
 
     public async ValueTask<bool> Handle(DeleteUserTrackingValue request, CancellationToken cancellationToken)
     {

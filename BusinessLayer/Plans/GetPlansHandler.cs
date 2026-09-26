@@ -5,13 +5,9 @@ using Microsoft.EntityFrameworkCore;
 namespace diet_tracker_api.BusinessLayer.Plans;
 
 public record GetPlans() : IStreamRequest<Plan>;
-public class GetPlansHandler : IStreamRequestHandler<GetPlans, Plan>
+public class GetPlansHandler(DietTrackerDbContext dbContext) : IStreamRequestHandler<GetPlans, Plan>
 {
-    private readonly DietTrackerDbContext _dbContext;
-    public GetPlansHandler(DietTrackerDbContext dbContext)
-    {
-        _dbContext = dbContext;
-    }
+    private readonly DietTrackerDbContext _dbContext = dbContext;
 
     public IAsyncEnumerable<Plan> Handle(GetPlans request, CancellationToken cancellationToken)
     {

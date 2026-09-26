@@ -14,14 +14,9 @@ public record RotateRefreshToken(
 
 public record RotateRefreshTokenResult(string UserId, int NewTokenId);
 
-public class RotateRefreshTokenHandler : IRequestHandler<RotateRefreshToken, RotateRefreshTokenResult?>
+public class RotateRefreshTokenHandler(DietTrackerDbContext dbContext) : IRequestHandler<RotateRefreshToken, RotateRefreshTokenResult?>
 {
-    private readonly DietTrackerDbContext _dbContext;
-
-    public RotateRefreshTokenHandler(DietTrackerDbContext dbContext)
-    {
-        _dbContext = dbContext;
-    }
+    private readonly DietTrackerDbContext _dbContext = dbContext;
 
     public async ValueTask<RotateRefreshTokenResult?> Handle(RotateRefreshToken request, CancellationToken cancellationToken)
     {

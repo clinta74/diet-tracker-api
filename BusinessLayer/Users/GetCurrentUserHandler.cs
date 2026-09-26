@@ -18,13 +18,9 @@ public record CurrentUser
     public DateTime? Started { get; init; }
 }
 
-public class GetCurrentUserHandler : IRequestHandler<GetCurrentUser, CurrentUser>
+public class GetCurrentUserHandler(DietTrackerDbContext dbContext) : IRequestHandler<GetCurrentUser, CurrentUser>
 {
-    private readonly DietTrackerDbContext _dbContext;
-    public GetCurrentUserHandler(DietTrackerDbContext dbContext)
-    {
-        _dbContext = dbContext;
-    }
+    private readonly DietTrackerDbContext _dbContext = dbContext;
 
     public async ValueTask<CurrentUser> Handle(GetCurrentUser request, CancellationToken cancellationToken)
     {

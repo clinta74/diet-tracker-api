@@ -5,13 +5,9 @@ namespace diet_tracker_api.BusinessLayer.Plans;
 
 /// <returns>False when the plan does not exist.</returns>
 public record DeletePlan(int PlanId) : IRequest<bool>;
-public class DeletePlanHandler : IRequestHandler<DeletePlan, bool>
+public class DeletePlanHandler(DietTrackerDbContext dbContext) : IRequestHandler<DeletePlan, bool>
 {
-    private readonly DietTrackerDbContext _dbContext;
-    public DeletePlanHandler(DietTrackerDbContext dbContext)
-    {
-        _dbContext = dbContext;
-    }
+    private readonly DietTrackerDbContext _dbContext = dbContext;
 
     public async ValueTask<bool> Handle(DeletePlan request, CancellationToken cancellationToken)
     {

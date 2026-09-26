@@ -15,16 +15,10 @@ namespace diet_tracker_api.Controllers;
 [Route("api/[controller]")]
 [Produces("application/json")]
 [ServiceFilter(typeof(UserExistsFilter))]
-public class DayController
+public class DayController(IHttpContextAccessor httpContextAccessor, IMediator mediator)
 {
-    private readonly IHttpContextAccessor _httpContextAccessor;
-    private readonly IMediator _mediator;
-
-    public DayController(IHttpContextAccessor httpContextAccessor, IMediator mediator)
-    {
-        _httpContextAccessor = httpContextAccessor;
-        _mediator = mediator;
-    }
+    private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
+    private readonly IMediator _mediator = mediator;
 
     [HttpGet("{day}")]
     [ProducesResponseType(StatusCodes.Status200OK)]

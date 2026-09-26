@@ -6,13 +6,9 @@ using Microsoft.EntityFrameworkCore;
 namespace diet_tracker_api.BusinessLayer.Plans;
 
 public record GetPlanById(int PlanId) : IRequest<Plan?>;
-public class GetByIdHandler : IRequestHandler<GetPlanById, Plan?>
+public class GetByIdHandler(DietTrackerDbContext dbContext) : IRequestHandler<GetPlanById, Plan?>
 {
-    private readonly DietTrackerDbContext _dbContext;
-    public GetByIdHandler(DietTrackerDbContext dbContext)
-    {
-        _dbContext = dbContext;
-    }
+    private readonly DietTrackerDbContext _dbContext = dbContext;
 
     public async ValueTask<Plan?> Handle(GetPlanById request, CancellationToken cancellationToken)
     {

@@ -20,18 +20,12 @@ public interface IPasswordService
 /// the switch still verify and report <see cref="PasswordVerificationResult.SuccessRehashNeeded"/>
 /// so they are upgraded on the next successful login.
 /// </summary>
-public class PasswordService : IPasswordService
+public class PasswordService(IPasswordHasher<UserCredentials> hasher) : IPasswordService
 {
     private const string LegacyBcryptPrefix = "$2";
 
-    private readonly IPasswordHasher<UserCredentials> _hasher;
-    private readonly string _dummyHash;
-
-    public PasswordService(IPasswordHasher<UserCredentials> hasher)
-    {
-        _hasher = hasher;
-        _dummyHash = hasher.HashPassword(null!, Guid.NewGuid().ToString());
-    }
+    private readonly IPasswordHasher<UserCredentials> _hasher = hasher;
+    private readonly string _dummyHash = hasher.HashPassword(null!, Guid.NewGuid().ToString());
 
     public string Hash(string password) => _hasher.HashPassword(null!, password);
 

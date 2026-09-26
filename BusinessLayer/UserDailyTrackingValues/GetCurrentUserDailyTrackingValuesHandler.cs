@@ -5,14 +5,9 @@ using Microsoft.EntityFrameworkCore;
 namespace diet_tracker_api.BusinessLayer.UserDailyTrackingValues;
 
 public record GetCurrentUserDailyTrackingValues(DateTime day, string userId) : IRequest<IEnumerable<UserDailyTrackingValue>>;
-public class GetCurrentUserDailyTrackingValuesHandler : IRequestHandler<GetCurrentUserDailyTrackingValues, IEnumerable<UserDailyTrackingValue>>
+public class GetCurrentUserDailyTrackingValuesHandler(DietTrackerDbContext dbContext) : IRequestHandler<GetCurrentUserDailyTrackingValues, IEnumerable<UserDailyTrackingValue>>
 {
-    private readonly DietTrackerDbContext _dbContext;
-
-    public GetCurrentUserDailyTrackingValuesHandler(DietTrackerDbContext dbContext)
-    {
-        _dbContext = dbContext;
-    }
+    private readonly DietTrackerDbContext _dbContext = dbContext;
 
     public async ValueTask<IEnumerable<UserDailyTrackingValue>> Handle(GetCurrentUserDailyTrackingValues request, CancellationToken cancellationToken)
     {

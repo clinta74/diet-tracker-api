@@ -5,14 +5,9 @@ namespace diet_tracker_api.BusinessLayer.UserDailyTrackingValues;
 
 public record AddUserDailyTracking(DateTime Day, string UserId, int UserTrackingValueId, int Occurance, decimal Value, DateTime When) : IRequest<bool>;
 
-public class AddUserDailyTrackingHandler: IRequestHandler<AddUserDailyTracking, bool>
+public class AddUserDailyTrackingHandler(DietTrackerDbContext dbContext) : IRequestHandler<AddUserDailyTracking, bool>
 {
-    private readonly DietTrackerDbContext _dbContext;
-
-    public AddUserDailyTrackingHandler(DietTrackerDbContext dbContext)
-    {
-        _dbContext = dbContext;
-    }
+    private readonly DietTrackerDbContext _dbContext = dbContext;
 
     public async ValueTask<bool> Handle(AddUserDailyTracking request, CancellationToken cancellationToken)
     {

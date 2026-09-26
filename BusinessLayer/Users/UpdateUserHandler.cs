@@ -4,13 +4,9 @@ using Microsoft.EntityFrameworkCore;
 namespace diet_tracker_api.BusinessLayer.Users;
 
 public record UpdateUser(string userId, string FirstName, string LastName, int WaterSize, int WaterTarget, bool Autosave) : IRequest<bool>;
-public class UpdateUserHandler : IRequestHandler<UpdateUser, bool>
+public class UpdateUserHandler(DietTrackerDbContext dbContext) : IRequestHandler<UpdateUser, bool>
 {
-    private readonly DietTrackerDbContext _dbContext;
-    public UpdateUserHandler(DietTrackerDbContext dbContext)
-    {
-        _dbContext = dbContext;
-    }
+    private readonly DietTrackerDbContext _dbContext = dbContext;
 
     public async ValueTask<bool> Handle(UpdateUser request, CancellationToken cancellationToken)
     {

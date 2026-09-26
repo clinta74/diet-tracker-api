@@ -10,16 +10,10 @@ namespace diet_tracker_api.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [Produces("application/json")]
-public class UserController
+public class UserController(IHttpContextAccessor httpContextAccessor, IMediator mediator)
 {
-    private readonly IHttpContextAccessor _httpContextAccessor;
-    private readonly IMediator _mediator;
-
-    public UserController(IHttpContextAccessor httpContextAccessor, IMediator mediator)
-    {
-        _httpContextAccessor = httpContextAccessor;
-        _mediator = mediator;
-    }
+    private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
+    private readonly IMediator _mediator = mediator;
 
     [Authorize("read:user")]
     [HttpGet("{userid}")]

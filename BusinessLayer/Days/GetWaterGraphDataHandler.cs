@@ -5,14 +5,9 @@ namespace diet_tracker_api.BusinessLayer.Days;
 
 public record GetWaterGraphData(string UserId, DateTime StartDate, DateTime? EndDate) : 
 GetGraphData(UserId, StartDate, EndDate), IStreamRequest<GraphValue>;
-public class GetWaterGraphDataHandler : IStreamRequestHandler<GetWaterGraphData, GraphValue>
+public class GetWaterGraphDataHandler(DietTrackerDbContext dbContext) : IStreamRequestHandler<GetWaterGraphData, GraphValue>
 {
-    private readonly DietTrackerDbContext _dbContext;
-
-    public GetWaterGraphDataHandler(DietTrackerDbContext dbContext)
-    {
-        _dbContext = dbContext;
-    }
+    private readonly DietTrackerDbContext _dbContext = dbContext;
 
     public IAsyncEnumerable<GraphValue> Handle(GetWaterGraphData request, CancellationToken cancellationToken)
     {

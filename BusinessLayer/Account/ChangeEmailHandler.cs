@@ -8,14 +8,9 @@ public record ChangeEmail(string UserId, string NewEmail) : IRequest<ChangeEmail
 
 public record ChangeEmailResult(bool Success, string? Error);
 
-public class ChangeEmailHandler : IRequestHandler<ChangeEmail, ChangeEmailResult>
+public class ChangeEmailHandler(DietTrackerDbContext dbContext) : IRequestHandler<ChangeEmail, ChangeEmailResult>
 {
-    private readonly DietTrackerDbContext _dbContext;
-
-    public ChangeEmailHandler(DietTrackerDbContext dbContext)
-    {
-        _dbContext = dbContext;
-    }
+    private readonly DietTrackerDbContext _dbContext = dbContext;
 
     public async ValueTask<ChangeEmailResult> Handle(ChangeEmail request, CancellationToken cancellationToken)
     {

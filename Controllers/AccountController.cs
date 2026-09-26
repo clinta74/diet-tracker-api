@@ -18,16 +18,10 @@ public record SessionInfo(int Id, DateTime CreatedAt, DateTime ExpiresAt, string
 [ApiController]
 [Route("api/[controller]")]
 [Produces("application/json")]
-public class AccountController : ControllerBase
+public class AccountController(IMediator mediator, IPasswordService passwordService) : ControllerBase
 {
-    private readonly IMediator _mediator;
-    private readonly IPasswordService _passwordService;
-
-    public AccountController(IMediator mediator, IPasswordService passwordService)
-    {
-        _mediator = mediator;
-        _passwordService = passwordService;
-    }
+    private readonly IMediator _mediator = mediator;
+    private readonly IPasswordService _passwordService = passwordService;
 
     [HttpPut("password")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]

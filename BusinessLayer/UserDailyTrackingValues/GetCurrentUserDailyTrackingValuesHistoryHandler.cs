@@ -6,14 +6,9 @@ namespace diet_tracker_api.BusinessLayer.UserDailyTrackingValues;
 
 public record GetCurrentUserDailyTrackingValuesHistory(string userId, int UserTrackingId, DateTime? StartDate, DateTime? EndDate) :
     IStreamRequest<UserDailyTrackingValue>;
-public class GetCurrentUserDailyTrackingValuesHistoryHandler : IStreamRequestHandler<GetCurrentUserDailyTrackingValuesHistory, UserDailyTrackingValue>
+public class GetCurrentUserDailyTrackingValuesHistoryHandler(DietTrackerDbContext dbContext) : IStreamRequestHandler<GetCurrentUserDailyTrackingValuesHistory, UserDailyTrackingValue>
 {
-    private readonly DietTrackerDbContext _dbContext;
-
-    public GetCurrentUserDailyTrackingValuesHistoryHandler(DietTrackerDbContext dbContext)
-    {
-        _dbContext = dbContext;
-    }
+    private readonly DietTrackerDbContext _dbContext = dbContext;
 
     public IAsyncEnumerable<UserDailyTrackingValue> Handle(GetCurrentUserDailyTrackingValuesHistory request, CancellationToken cancellationToken)
     {

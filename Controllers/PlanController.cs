@@ -11,16 +11,10 @@ namespace diet_tracker_api.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [Produces("application/json")]
-public class PlanController
+public class PlanController(IHttpContextAccessor httpContextAccessor, IMediator mediator)
 {
-    private readonly IHttpContextAccessor _httpContextAccessor;
-    private readonly IMediator _mediator;
-
-    public PlanController(IHttpContextAccessor httpContextAccessor, IMediator mediator)
-    {
-        _httpContextAccessor = httpContextAccessor;
-        _mediator = mediator;
-    }
+    private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
+    private readonly IMediator _mediator = mediator;
 
     [HttpGet("/api/plans")]
     [ProducesResponseType(StatusCodes.Status200OK)]

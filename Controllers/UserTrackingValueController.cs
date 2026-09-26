@@ -13,16 +13,10 @@ namespace diet_tracker_api.Controllers;
 [Route("api/[controller]")]
 [Produces("application/json")]
 [ServiceFilter(typeof(UserExistsFilter))]
-public class UserTrackingValueController
+public class UserTrackingValueController(IHttpContextAccessor httpContextAccessor, IMediator mediator)
 {
-    private readonly IHttpContextAccessor _httpContextAccessor;
-    private readonly IMediator _mediator;
-
-    public UserTrackingValueController(IHttpContextAccessor httpContextAccessor, IMediator mediator)
-    {
-        _httpContextAccessor = httpContextAccessor;
-        _mediator = mediator;
-    }
+    private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
+    private readonly IMediator _mediator = mediator;
 
     [HttpGet("/api/user-tracking-values/user-tracking/{userTrackingId}")]
     [ProducesResponseType(StatusCodes.Status200OK)]

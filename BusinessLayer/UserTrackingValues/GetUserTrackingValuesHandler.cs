@@ -5,14 +5,9 @@ using Microsoft.EntityFrameworkCore;
 namespace diet_tracker_api.BusinessLayer.UserTrackingValues;
 
 public record GetUserTrackingValues(string UserId, int UserTrackingId) : IRequest<IEnumerable<UserTrackingValue>>;
-public class GetUserTrackingValuesHandler : IRequestHandler<GetUserTrackingValues, IEnumerable<UserTrackingValue>>
+public class GetUserTrackingValuesHandler(DietTrackerDbContext dbContext) : IRequestHandler<GetUserTrackingValues, IEnumerable<UserTrackingValue>>
 {
-    private readonly DietTrackerDbContext _dbContext;
-
-    public GetUserTrackingValuesHandler(DietTrackerDbContext dbContext)
-    {
-        _dbContext = dbContext;
-    }
+    private readonly DietTrackerDbContext _dbContext = dbContext;
 
     public async ValueTask<IEnumerable<UserTrackingValue>> Handle(GetUserTrackingValues request, CancellationToken cancellationToken)
     {

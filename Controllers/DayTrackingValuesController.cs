@@ -14,16 +14,10 @@ public record UserDailyTrackingValueRequest(int Occurrence, int UserTrackingValu
 [ApiController]
 [Route("api/[controller]")]
 [Produces("application/json")]
-public class DayTrackingValuesController
+public class DayTrackingValuesController(IHttpContextAccessor httpContextAccessor, IMediator mediator)
 {
-    private readonly IHttpContextAccessor _httpContextAccessor;
-    private readonly IMediator _mediator;
-
-    public DayTrackingValuesController(IHttpContextAccessor httpContextAccessor, IMediator mediator)
-    {
-        _httpContextAccessor = httpContextAccessor;
-        _mediator = mediator;
-    }
+    private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
+    private readonly IMediator _mediator = mediator;
 
     [HttpGet("{day}")]
     [ProducesResponseType(StatusCodes.Status200OK)]

@@ -6,14 +6,9 @@ namespace diet_tracker_api.BusinessLayer.Admin;
 
 public record SetUserPermissions(string UserId, IReadOnlyList<string> Permissions) : IRequest<Unit>;
 
-public class SetUserPermissionsHandler : IRequestHandler<SetUserPermissions, Unit>
+public class SetUserPermissionsHandler(DietTrackerDbContext dbContext) : IRequestHandler<SetUserPermissions, Unit>
 {
-    private readonly DietTrackerDbContext _dbContext;
-
-    public SetUserPermissionsHandler(DietTrackerDbContext dbContext)
-    {
-        _dbContext = dbContext;
-    }
+    private readonly DietTrackerDbContext _dbContext = dbContext;
 
     public async ValueTask<Unit> Handle(SetUserPermissions request, CancellationToken cancellationToken)
     {

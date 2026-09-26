@@ -5,13 +5,9 @@ namespace diet_tracker_api.BusinessLayer.Plans;
 
 public record ChangeUserPlan(string UserId, int PlanId) : IRequest<int>;
 
-public class ChangeUserPlanHandler : IRequestHandler<ChangeUserPlan, int>
+public class ChangeUserPlanHandler(DietTrackerDbContext context) : IRequestHandler<ChangeUserPlan, int>
 {
-    private readonly DietTrackerDbContext ctx;
-    public ChangeUserPlanHandler(DietTrackerDbContext context)
-    {
-        ctx = context;
-    }
+    private readonly DietTrackerDbContext ctx = context;
 
     public async ValueTask<int> Handle(ChangeUserPlan request, CancellationToken cancellationToken)
     {

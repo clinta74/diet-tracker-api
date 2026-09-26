@@ -17,20 +17,12 @@ public record AuthResponse(string AccessToken, string RefreshToken, int ExpiresI
 [ApiController]
 [Route("api/[controller]")]
 [Produces("application/json")]
-public class AuthController : ControllerBase
+public class AuthController(IMediator mediator, IJwtTokenService jwtTokenService, IPasswordService passwordService, IHttpContextAccessor httpContextAccessor) : ControllerBase
 {
-    private readonly IMediator _mediator;
-    private readonly IJwtTokenService _jwtTokenService;
-    private readonly IPasswordService _passwordService;
-    private readonly IHttpContextAccessor _httpContextAccessor;
-
-    public AuthController(IMediator mediator, IJwtTokenService jwtTokenService, IPasswordService passwordService, IHttpContextAccessor httpContextAccessor)
-    {
-        _mediator = mediator;
-        _jwtTokenService = jwtTokenService;
-        _passwordService = passwordService;
-        _httpContextAccessor = httpContextAccessor;
-    }
+    private readonly IMediator _mediator = mediator;
+    private readonly IJwtTokenService _jwtTokenService = jwtTokenService;
+    private readonly IPasswordService _passwordService = passwordService;
+    private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
 
     [HttpPost("register")]
     [ProducesResponseType(StatusCodes.Status200OK)]

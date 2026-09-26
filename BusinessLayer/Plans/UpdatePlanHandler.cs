@@ -6,13 +6,9 @@ using Microsoft.EntityFrameworkCore;
 namespace diet_tracker_api.BusinessLayer.Plans;
 
 public record UpdatePlan(int PlanId, string Name, int FuelingCount, int MealCount) : IRequest<Plan?>;
-public class UpdatePlanHandler : IRequestHandler<UpdatePlan, Plan?>
+public class UpdatePlanHandler(DietTrackerDbContext dbContext) : IRequestHandler<UpdatePlan, Plan?>
 {
-    private readonly DietTrackerDbContext _dbContext;
-    public UpdatePlanHandler(DietTrackerDbContext dbContext)
-    {
-        _dbContext = dbContext;
-    }
+    private readonly DietTrackerDbContext _dbContext = dbContext;
 
     public async ValueTask<Plan?> Handle(UpdatePlan request, CancellationToken cancellationToken)
     {

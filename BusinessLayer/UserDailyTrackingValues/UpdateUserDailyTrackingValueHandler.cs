@@ -6,14 +6,9 @@ namespace diet_tracker_api.BusinessLayer.UserDailyTrackingValues;
 
 public record UpdateUserDailyTrackingValue(int UserTrackingValueId, int Occurance, decimal Value, DateTime? When);
 public record UpdateUserDailyTrackingValues(DateTime Day, string UserId, UpdateUserDailyTrackingValue[] Values) : IRequest<IEnumerable<UserDailyTrackingValue>>;
-public class UpdateUserDailyTrackingValueHandler : IRequestHandler<UpdateUserDailyTrackingValues, IEnumerable<UserDailyTrackingValue>>
+public class UpdateUserDailyTrackingValueHandler(DietTrackerDbContext dbContext) : IRequestHandler<UpdateUserDailyTrackingValues, IEnumerable<UserDailyTrackingValue>>
 {
-    private readonly DietTrackerDbContext _dbContext;
-
-    public UpdateUserDailyTrackingValueHandler(DietTrackerDbContext dbContext)
-    {
-        _dbContext = dbContext;
-    }
+    private readonly DietTrackerDbContext _dbContext = dbContext;
 
     public async ValueTask<IEnumerable<UserDailyTrackingValue>> Handle(UpdateUserDailyTrackingValues request, CancellationToken cancellationToken)
     {

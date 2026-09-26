@@ -5,13 +5,9 @@ namespace diet_tracker_api.BusinessLayer.Fuelings;
 
 public record AddFueling(string Name) : IRequest<Fueling>;
 
-public class AddFuelingHandler : IRequestHandler<AddFueling, Fueling>
+public class AddFuelingHandler(DietTrackerDbContext dbContext) : IRequestHandler<AddFueling, Fueling>
 {
-    private readonly DietTrackerDbContext _dbContext;
-    public AddFuelingHandler(DietTrackerDbContext dbContext)
-    {
-        _dbContext = dbContext;
-    }
+    private readonly DietTrackerDbContext _dbContext = dbContext;
 
     public async ValueTask<Fueling> Handle(AddFueling request, CancellationToken cancellationToken)
     {

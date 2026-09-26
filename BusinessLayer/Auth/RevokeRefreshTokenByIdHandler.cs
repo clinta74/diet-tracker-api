@@ -5,14 +5,9 @@ namespace diet_tracker_api.BusinessLayer.Auth;
 
 public record RevokeRefreshTokenById(int TokenId, string UserId) : IRequest<bool>;
 
-public class RevokeRefreshTokenByIdHandler : IRequestHandler<RevokeRefreshTokenById, bool>
+public class RevokeRefreshTokenByIdHandler(DietTrackerDbContext dbContext) : IRequestHandler<RevokeRefreshTokenById, bool>
 {
-    private readonly DietTrackerDbContext _dbContext;
-
-    public RevokeRefreshTokenByIdHandler(DietTrackerDbContext dbContext)
-    {
-        _dbContext = dbContext;
-    }
+    private readonly DietTrackerDbContext _dbContext = dbContext;
 
     public async ValueTask<bool> Handle(RevokeRefreshTokenById request, CancellationToken cancellationToken)
     {

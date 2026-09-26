@@ -5,16 +5,11 @@ using Microsoft.EntityFrameworkCore;
 namespace diet_tracker_api.BusinessLayer.Days;
 
 public record GetCurrentUserPlan(string UserId) : IRequest<Plan>;
-public class GetCurrentUserPlanHandler : IRequestHandler<GetCurrentUserPlan, Plan>
+public class GetCurrentUserPlanHandler(DietTrackerDbContext dbContext, IMediator mediator) : IRequestHandler<GetCurrentUserPlan, Plan>
 {
-    private readonly DietTrackerDbContext _dbContext;
-    private readonly IMediator _mediator;
+    private readonly DietTrackerDbContext _dbContext = dbContext;
+    private readonly IMediator _mediator = mediator;
 
-    public GetCurrentUserPlanHandler(DietTrackerDbContext dbContext, IMediator mediator)
-    {
-        _dbContext = dbContext;
-        _mediator = mediator;
-    }
     public async ValueTask<Plan> Handle(GetCurrentUserPlan request, CancellationToken cancellationToken)
     {
         var plan = await _dbContext.UserPlans

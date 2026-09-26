@@ -15,14 +15,9 @@ public interface IJwtTokenService
     int RefreshTokenExpiryDays { get; }
 }
 
-public class JwtTokenService : IJwtTokenService
+public class JwtTokenService(IConfiguration configuration) : IJwtTokenService
 {
-    private readonly IConfiguration _configuration;
-
-    public JwtTokenService(IConfiguration configuration)
-    {
-        _configuration = configuration;
-    }
+    private readonly IConfiguration _configuration = configuration;
 
     public int AccessTokenExpiryMinutes =>
         int.TryParse(_configuration["Jwt:AccessTokenExpiryMinutes"], out var m) ? m : 15;

@@ -7,16 +7,10 @@ public record GetDayFuelings(DateTime Date, string UserId) : IRequest<IEnumerabl
 
 public record UserDayFueling(int UserFuelingId, string UserId, DateTime Day, string Name, DateTime? When);
 
-public class GetDayFuelingsHandler : IRequestHandler<GetDayFuelings, IEnumerable<UserDayFueling>>
+public class GetDayFuelingsHandler(DietTrackerDbContext dbContext, IMediator mediator) : IRequestHandler<GetDayFuelings, IEnumerable<UserDayFueling>>
 {
-    private readonly DietTrackerDbContext _dbContext;
-    private readonly IMediator _mediator;
-
-    public GetDayFuelingsHandler(DietTrackerDbContext dbContext, IMediator mediator)
-    {
-        _dbContext = dbContext;
-        _mediator = mediator;
-    }
+    private readonly DietTrackerDbContext _dbContext = dbContext;
+    private readonly IMediator _mediator = mediator;
 
     public async ValueTask<IEnumerable<UserDayFueling>> Handle(GetDayFuelings request, CancellationToken cancellationToken)
     {

@@ -11,14 +11,9 @@ public record CreateRefreshToken(
     string? CreatedByIp
 ) : IRequest<int>;
 
-public class CreateRefreshTokenHandler : IRequestHandler<CreateRefreshToken, int>
+public class CreateRefreshTokenHandler(DietTrackerDbContext dbContext) : IRequestHandler<CreateRefreshToken, int>
 {
-    private readonly DietTrackerDbContext _dbContext;
-
-    public CreateRefreshTokenHandler(DietTrackerDbContext dbContext)
-    {
-        _dbContext = dbContext;
-    }
+    private readonly DietTrackerDbContext _dbContext = dbContext;
 
     public async ValueTask<int> Handle(CreateRefreshToken request, CancellationToken cancellationToken)
     {

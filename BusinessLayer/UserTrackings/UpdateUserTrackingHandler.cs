@@ -13,14 +13,9 @@ public record UpdateUserTracking(
     bool Disabled,
     bool UseTime,
     IEnumerable<UserTrackingValue> Values) : IRequest<UserTracking>;
-public class UpdateUserTrackingHandler : IRequestHandler<UpdateUserTracking, UserTracking>
+public class UpdateUserTrackingHandler(DietTrackerDbContext dbContext) : IRequestHandler<UpdateUserTracking, UserTracking>
 {
-    private readonly DietTrackerDbContext _dbContext;
-
-    public UpdateUserTrackingHandler(DietTrackerDbContext dbContext)
-    {
-        _dbContext = dbContext;
-    }
+    private readonly DietTrackerDbContext _dbContext = dbContext;
 
     public async ValueTask<UserTracking> Handle(UpdateUserTracking request, CancellationToken cancellationToken)
     {

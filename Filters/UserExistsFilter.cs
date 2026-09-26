@@ -5,13 +5,10 @@ using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace diet_tracker_api.Filters;
 
-public class UserExistsFilter : ActionFilterAttribute
+public class UserExistsFilter(IMediator mediator) : ActionFilterAttribute
 {
-    private readonly IMediator _mediator;
-    public UserExistsFilter(IMediator mediator)
-    {
-        _mediator = mediator;
-    }
+    private readonly IMediator _mediator = mediator;
+
     public override async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
     {
         var userId = context.HttpContext.GetUserId();

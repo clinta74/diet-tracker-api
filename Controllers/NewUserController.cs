@@ -17,16 +17,10 @@ public record NewUser
 [ApiController]
 [Route("api/[controller]")]
 [Produces("application/json")]
-public class NewUserController
+public class NewUserController(IHttpContextAccessor httpContextAccessor, IMediator mediator)
 {
-    private readonly IHttpContextAccessor _httpContextAccessor;
-    private readonly IMediator _mediator;
-
-    public NewUserController(IHttpContextAccessor httpContextAccessor, IMediator mediator)
-    {
-        _httpContextAccessor = httpContextAccessor;
-        _mediator = mediator;
-    }
+    private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
+    private readonly IMediator _mediator = mediator;
 
     [HttpPost]
     public async Task<ActionResult<string>> AddNewUser(NewUser userData, CancellationToken cancellationToken)

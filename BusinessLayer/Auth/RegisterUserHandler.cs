@@ -14,19 +14,14 @@ public record RegisterUser(
 
 public record RegisterUserResult(string UserId, IReadOnlyList<string> Permissions);
 
-public class RegisterUserHandler : IRequestHandler<RegisterUser, RegisterUserResult>
+public class RegisterUserHandler(DietTrackerDbContext dbContext) : IRequestHandler<RegisterUser, RegisterUserResult>
 {
     private static readonly string[] DefaultPermissions = new[]
     {
         "write:user", "write:fuelings", "write:plans", "write:lean-and-greens"
     };
 
-    private readonly DietTrackerDbContext _dbContext;
-
-    public RegisterUserHandler(DietTrackerDbContext dbContext)
-    {
-        _dbContext = dbContext;
-    }
+    private readonly DietTrackerDbContext _dbContext = dbContext;
 
     public async ValueTask<RegisterUserResult> Handle(RegisterUser request, CancellationToken cancellationToken)
     {

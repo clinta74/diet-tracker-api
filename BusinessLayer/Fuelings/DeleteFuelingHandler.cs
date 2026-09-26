@@ -5,13 +5,9 @@ namespace diet_tracker_api.BusinessLayer.Fuelings;
 
 public record DeleteFueling(int FuelingId) : IRequest<bool>;
 
-public class DeleteFuelingHandler : IRequestHandler<DeleteFueling, bool>
+public class DeleteFuelingHandler(DietTrackerDbContext dbContext) : IRequestHandler<DeleteFueling, bool>
 {
-    private readonly DietTrackerDbContext _dbContext;
-    public DeleteFuelingHandler(DietTrackerDbContext dbContext)
-    {
-        _dbContext = dbContext;
-    }
+    private readonly DietTrackerDbContext _dbContext = dbContext;
 
     public async ValueTask<bool> Handle(DeleteFueling request, CancellationToken cancellationToken)
     {

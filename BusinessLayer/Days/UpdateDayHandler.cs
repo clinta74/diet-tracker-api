@@ -6,13 +6,10 @@ namespace diet_tracker_api.BusinessLayer.Days;
 
 public record UpdateDay(DateTime Day, string UserId, CurrentUserDay UserDay) : IRequest<Unit>;
 
-public class UpdateDayHandler : IRequestHandler<UpdateDay, Unit>
+public class UpdateDayHandler(DietTrackerDbContext dbContext) : IRequestHandler<UpdateDay, Unit>
 {
-    private readonly DietTrackerDbContext _dbContext;
-    public UpdateDayHandler(DietTrackerDbContext dbContext)
-    {
-        _dbContext = dbContext;
-    }
+    private readonly DietTrackerDbContext _dbContext = dbContext;
+
     public async ValueTask<Unit> Handle(UpdateDay request, CancellationToken cancellationToken)
     {
         var trimmedNotes = request.UserDay.Notes?.Trim();

@@ -26,18 +26,11 @@ public record SetUserCredentialsRequest(string Email, string Password);
 [ApiController]
 [Route("api/[controller]")]
 [Produces("application/json")]
-public class AdminController : ControllerBase
+public class AdminController(IMediator mediator, IPasswordService passwordService, DietTrackerDbContext dbContext) : ControllerBase
 {
-    private readonly IMediator _mediator;
-    private readonly IPasswordService _passwordService;
-    private readonly DietTrackerDbContext _dbContext;
-
-    public AdminController(IMediator mediator, IPasswordService passwordService, DietTrackerDbContext dbContext)
-    {
-        _mediator = mediator;
-        _passwordService = passwordService;
-        _dbContext = dbContext;
-    }
+    private readonly IMediator _mediator = mediator;
+    private readonly IPasswordService _passwordService = passwordService;
+    private readonly DietTrackerDbContext _dbContext = dbContext;
 
     [HttpGet("users")]
     [ProducesResponseType(StatusCodes.Status200OK)]

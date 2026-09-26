@@ -6,14 +6,9 @@ namespace diet_tracker_api.BusinessLayer.Auth;
 
 public record GetActiveRefreshTokens(string UserId) : IRequest<IReadOnlyList<RefreshToken>>;
 
-public class GetActiveRefreshTokensHandler : IRequestHandler<GetActiveRefreshTokens, IReadOnlyList<RefreshToken>>
+public class GetActiveRefreshTokensHandler(DietTrackerDbContext dbContext) : IRequestHandler<GetActiveRefreshTokens, IReadOnlyList<RefreshToken>>
 {
-    private readonly DietTrackerDbContext _dbContext;
-
-    public GetActiveRefreshTokensHandler(DietTrackerDbContext dbContext)
-    {
-        _dbContext = dbContext;
-    }
+    private readonly DietTrackerDbContext _dbContext = dbContext;
 
     public async ValueTask<IReadOnlyList<RefreshToken>> Handle(GetActiveRefreshTokens request, CancellationToken cancellationToken)
     {

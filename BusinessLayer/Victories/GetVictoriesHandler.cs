@@ -5,13 +5,10 @@ namespace diet_tracker_api.BusinessLayer.Victories;
 
 public record GetVictories(string UserId, VictoryType? Type, DateTime? Day) : IRequest<IEnumerable<Victory>>;
 
-public class GetVictoriesHandler : IRequestHandler<GetVictories, IEnumerable<Victory>>
+public class GetVictoriesHandler(DietTrackerDbContext dbContext) : IRequestHandler<GetVictories, IEnumerable<Victory>>
 {
-    private readonly DietTrackerDbContext _dbContext;
-    public GetVictoriesHandler(DietTrackerDbContext dbContext)
-    {
-        _dbContext = dbContext;
-    }
+    private readonly DietTrackerDbContext _dbContext = dbContext;
+
     public async ValueTask<IEnumerable<Victory>> Handle(GetVictories request, CancellationToken cancellationToken)
     {
         var exp = _dbContext.Victories

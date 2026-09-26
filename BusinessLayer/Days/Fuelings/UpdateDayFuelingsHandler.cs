@@ -5,13 +5,9 @@ using Microsoft.EntityFrameworkCore;
 namespace diet_tracker_api.BusinessLayer.Days.Fuelings;
 
 public record UpdateDayFuelings(DateTime Day, string UserId, IEnumerable<UserFueling> Fuelings) : IRequest<Unit>;
-public class UpdateDayFuelingsHandler : IRequestHandler<UpdateDayFuelings, Unit>
+public class UpdateDayFuelingsHandler(DietTrackerDbContext dbContext) : IRequestHandler<UpdateDayFuelings, Unit>
 {
-    private readonly DietTrackerDbContext _dbContext;
-    public UpdateDayFuelingsHandler(DietTrackerDbContext dbContext)
-    {
-        _dbContext = dbContext;
-    }
+    private readonly DietTrackerDbContext _dbContext = dbContext;
 
     public async ValueTask<Unit> Handle(UpdateDayFuelings request, CancellationToken cancellationToken)
     {

@@ -15,16 +15,10 @@ public record CurrentUserDay
 }
 
 public record GetDay(DateTime Date, string UserId) : IRequest<CurrentUserDay>;
-public class GetDayHandler : IRequestHandler<GetDay, CurrentUserDay>
+public class GetDayHandler(DietTrackerDbContext dbContext, IMediator mediator) : IRequestHandler<GetDay, CurrentUserDay>
 {
-    private readonly DietTrackerDbContext _dbContext;
-    private readonly IMediator _mediator;
-
-    public GetDayHandler(DietTrackerDbContext dbContext, IMediator mediator)
-    {
-        _dbContext = dbContext;
-        _mediator = mediator;
-    }
+    private readonly DietTrackerDbContext _dbContext = dbContext;
+    private readonly IMediator _mediator = mediator;
 
     public async ValueTask<CurrentUserDay> Handle(GetDay request, CancellationToken cancellationToken)
     {

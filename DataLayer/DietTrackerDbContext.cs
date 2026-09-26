@@ -5,12 +5,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace diet_tracker_api.DataLayer;
 
-public class DietTrackerDbContext : DbContext
+public class DietTrackerDbContext([NotNull] DbContextOptions options) : DbContext(options)
 {
-    public DietTrackerDbContext([NotNull] DbContextOptions options) : base(options)
-    {
-    }
-
     public DbSet<Fueling> Fuelings { get; set; }
     public DbSet<Plan> Plans { get; set; }
     public DbSet<User> Users { get; set; }

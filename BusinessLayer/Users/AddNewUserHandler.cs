@@ -4,13 +4,9 @@ using diet_tracker_api.DataLayer.Models;
 namespace diet_tracker_api.BusinessLayer.Users;
 
 public record AddNewUser(string UserId, string FirstName, string LastName, string EmailAddress, int PlanId) : IRequest<string>;
-public class AddNewUserHandler : IRequestHandler<AddNewUser, string>
+public class AddNewUserHandler(DietTrackerDbContext dbContext) : IRequestHandler<AddNewUser, string>
 {
-    private readonly DietTrackerDbContext _dbContext;
-    public AddNewUserHandler(DietTrackerDbContext dbContext)
-    {
-        _dbContext = dbContext;
-    }
+    private readonly DietTrackerDbContext _dbContext = dbContext;
 
     public async ValueTask<string> Handle(AddNewUser request, CancellationToken cancellationToken)
     {
