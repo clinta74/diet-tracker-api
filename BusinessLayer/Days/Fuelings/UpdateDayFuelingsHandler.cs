@@ -4,36 +4,34 @@ using Microsoft.EntityFrameworkCore;
 
 namespace diet_tracker_api.BusinessLayer.Days.Fuelings;
 
-/// <returns>
-/// The ids in the request that are not the user's fuelings for that day. When any are returned the
-/// request is rejected and nothing is saved.
-/// </returns>
-public record UpdateDayFuelings(DateTime Day, string UserId, IEnumerable<UserFueling> Fuelings) : IRequest<IReadOnlyList<int>>;
-public class UpdateDayFuelingsHandler(DietTrackerDbContext dbContext) : IRequestHandler<UpdateDayFuelings, IReadOnlyList<int>>
+public record UpdateDayFuelings(DateTime Day, string UserId, IEnumerable<UserFueling> Fuelings) : IRequest<Unit>;
+public class UpdateDayFuelingsHandler(DietTrackerDbContext dbContext, ILogger<UpdateDayFuelingsHandler> logger) : IRequestHandler<UpdateDayFuelings, Unit>
 {
     private readonly DietTrackerDbContext _dbContext = dbContext;
+    private readonly ILogger<UpdateDayFuelingsHandler> _logger = logger;
 
-    public async ValueTask<IReadOnlyList<int>> Handle(UpdateDayFuelings request, CancellationToken cancellationToken)
+    public async ValueTask<Unit> Handle(UpdateDayFuelings request, CancellationToken cancellationToken)
     {
         var day = request.Day.Date;
 
-        // Only the user's own fuelings for this day can be changed.
+        // Only the user's own fuelings for this day can be changed; any other ids are pruned.
         var existing = await _dbContext.UserFuelings
             .Where(fueling => fueling.UserId == request.UserId && fueling.Day == day)
             .ToDictionaryAsync(fueling => fueling.UserFuelingId, cancellationToken);
 
-        var rejectedIds = request.Fuelings
+        var ignoredIds = request.Fuelings
             .Select(fueling => fueling.UserFuelingId)
             .Where(id => id != 0 && !existing.ContainsKey(id))
             .Distinct()
             .ToList();
 
-        if (rejectedIds.Count > 0)
+        if (ignoredIds.Count > 0)
         {
-            return rejectedIds;
+            _logger.LogWarning("Ignored fueling ids not belonging to user {UserId} on {Day:yyyy-MM-dd}: {FuelingIds}",
+                request.UserId, day, ignoredIds);
         }
 
-        foreach (var fueling in request.Fuelings)
+        foreach (var fueling in request.Fuelings.Where(fueling => fueling.UserFuelingId == 0 || existing.ContainsKey(fueling.UserFuelingId)))
         {
             // A fueling is only kept when it has a name; clearing the name removes it.
             var name = fueling.Name?.Trim();
@@ -69,6 +67,6 @@ public class UpdateDayFuelingsHandler(DietTrackerDbContext dbContext) : IRequest
 
         await _dbContext.SaveChangesAsync(cancellationToken);
 
-        return [];
+        return Unit.Value;
     }
 }
