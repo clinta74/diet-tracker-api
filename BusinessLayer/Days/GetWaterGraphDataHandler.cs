@@ -22,6 +22,7 @@ public class GetWaterGraphDataHandler(DietTrackerDbContext dbContext) : IStreamR
         }
 
         return exp.AsNoTracking()
+            .OrderBy(userDay => userDay.Day)
             .Select(userDay => new GraphValue(userDay.Water, userDay.Day))
             .AsAsyncEnumerable();
     }

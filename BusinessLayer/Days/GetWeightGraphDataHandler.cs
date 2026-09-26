@@ -22,6 +22,7 @@ public class GetWeightGraphDataHandler(DietTrackerDbContext dbContext) : IStream
         }
 
         return exp.AsNoTracking()
+            .OrderBy(userDay => userDay.Day)
             .Select(userDay => new GraphValue(userDay.Weight, userDay.Day))
             .AsAsyncEnumerable();
     }
