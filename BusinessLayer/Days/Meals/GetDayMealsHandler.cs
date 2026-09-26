@@ -17,6 +17,7 @@ public class GetDayMealsHandler(DietTrackerDbContext dbContext, IMediator mediat
         var data = await _dbContext.UserMeals
             .Where(userMeal => userMeal.UserId == request.UserId)
             .Where(userMeals => userMeals.Day == request.Date)
+            .OrderBy(userMeals => userMeals.UserMealId)
             .Select(userMeals => new UserDayMeal(
                 userMeals.UserMealId,
                 userMeals.UserId,
@@ -26,17 +27,13 @@ public class GetDayMealsHandler(DietTrackerDbContext dbContext, IMediator mediat
             .AsNoTracking()
             .ToListAsync(cancellationToken);
 
-        var plan = await _mediator.Send(new GetCurrentUserPlan(request.UserId));
+        var plan = await _mediator.Send(new GetCurrentUserPlan(request.UserId), cancellationToken);
 
-        var meals = new List<UserDayMeal>(data);
-        if (data.Count < plan.MealCount)
-        {
-            var _meals = new UserDayMeal[plan.MealCount - data.Count];
-            Array.Fill(_meals, new UserDayMeal(0, request.UserId, request.Date, "", null));
+        // Always return at least the plan's meals per day; unused slots are blank placeholders.
+        var placeholders = Enumerable.Repeat(
+            new UserDayMeal(0, request.UserId, request.Date, "", null),
+            Math.Max(0, plan.MealCount - data.Count));
 
-            meals.AddRange(_meals);
-        }
-
-        return meals;
+        return [.. data, .. placeholders];
     }
 }

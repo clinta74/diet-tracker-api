@@ -13,7 +13,7 @@ public class GetDayVictoriesHandler(DietTrackerDbContext dbContext, IMediator me
 
     public async ValueTask<IEnumerable<UserDayVictory>> Handle(GetDayVictories request, CancellationToken cancellationToken)
     {
-        var victories =  await _mediator.Send(new GetVictories(request.UserId, VictoryType.NonScale, request.Day));
+        var victories =  await _mediator.Send(new GetVictories(request.UserId, VictoryType.NonScale, request.Day), cancellationToken);
 
         return victories.Select(victory => 
             new UserDayVictory(victory.VictoryId, victory.UserId, request.Day, victory.Name, victory.When));

@@ -27,6 +27,7 @@ public class GetVictoriesHandler(DietTrackerDbContext dbContext) : IRequestHandl
         return await exp
             .AsNoTracking()
             .OrderBy(victory => victory.When)
+            .ThenBy(victory => victory.VictoryId)
             .ToListAsync(cancellationToken);
 
     }

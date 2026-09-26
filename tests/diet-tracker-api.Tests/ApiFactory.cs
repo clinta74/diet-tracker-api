@@ -5,6 +5,7 @@ using diet_tracker_api.DataLayer.Models;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Testcontainers.PostgreSql;
 
 namespace diet_tracker_api.Tests;
@@ -22,12 +23,14 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
 
     private readonly PostgreSqlContainer _postgres = new PostgreSqlBuilder("postgres:17").Build();
 
+    public CapturingLoggerProvider Logs { get; } = new();
     public int PlanId { get; private set; }
     public AuthResponse Admin { get; private set; } = null!;
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.UseEnvironment("Testing");
+        builder.ConfigureLogging(logging => logging.AddProvider(Logs));
         builder.UseSetting("DB_HOST", _postgres.Hostname);
         builder.UseSetting("DB_PORT", _postgres.GetMappedPublicPort(PostgreSqlBuilder.PostgreSqlPort).ToString());
         builder.UseSetting("DB_NAME", PostgreSqlBuilder.DefaultDatabase);
