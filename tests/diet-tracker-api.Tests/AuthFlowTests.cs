@@ -127,6 +127,19 @@ public class AuthFlowTests(ApiFactory factory) : IClassFixture<ApiFactory>
     }
 
     [Fact]
+    public async Task Concurrent_refreshes_with_the_same_token_succeed_only_once()
+    {
+        var auth = await factory.RegisterAsync(_client, ApiFactory.NewEmail(), Password);
+
+        var responses = await Task.WhenAll(Enumerable.Range(0, 8).Select(_ =>
+            factory.CreateClient().PostAsJsonAsync("/api/auth/refresh", new { auth.RefreshToken }, Ct)));
+
+        Assert.Equal(1, responses.Count(r => r.StatusCode == HttpStatusCode.OK));
+        Assert.All(responses.Where(r => r.StatusCode != HttpStatusCode.OK),
+            r => Assert.Equal(HttpStatusCode.Unauthorized, r.StatusCode));
+    }
+
+    [Fact]
     public async Task Revoked_refresh_token_cannot_be_used()
     {
         var auth = await factory.RegisterAsync(_client, ApiFactory.NewEmail(), Password);
