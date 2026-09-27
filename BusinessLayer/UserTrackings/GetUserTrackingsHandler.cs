@@ -13,6 +13,8 @@ public class GetUserTrackingsHandler(DietTrackerDbContext dbContext) : IRequestH
     {
         return await _dbContext.UserTrackings
             .Where(userTracking => userTracking.UserId == request.UserId)
+            .OrderBy(userTracking => userTracking.Order)
+            .ThenBy(userTracking => userTracking.UserTrackingId)
             .Select(userTracking => new UserTracking
             {
                 UserTrackingId = userTracking.UserTrackingId,
@@ -22,7 +24,10 @@ public class GetUserTrackingsHandler(DietTrackerDbContext dbContext) : IRequestH
                 Occurrences = userTracking.Occurrences,
                 Order = userTracking.Order,
                 Disabled = userTracking.Disabled,
+                UseTime = userTracking.UseTime,
                 Values = userTracking.Values!
+                    .OrderBy(v => v.Order)
+                    .ThenBy(v => v.UserTrackingValueId)
                     .Select(v => new UserTrackingValue
                     {
                         UserTrackingValueId = v.UserTrackingValueId,

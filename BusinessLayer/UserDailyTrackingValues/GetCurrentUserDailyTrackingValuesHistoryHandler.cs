@@ -17,6 +17,8 @@ public class GetCurrentUserDailyTrackingValuesHistoryHandler(DietTrackerDbContex
             .Where(u => u.UserId.Equals(request.userId))
             .Where(u => u.TrackingValue!.UserTrackingId.Equals(request.UserTrackingId))
             .OrderBy(u => u.Day)
+            .ThenBy(u => u.UserTrackingValueId)
+            .ThenBy(u => u.Occurrence)
             .Include(u => u.TrackingValue)
             .AsSingleQuery()
             .Select(u => new UserDailyTrackingValue

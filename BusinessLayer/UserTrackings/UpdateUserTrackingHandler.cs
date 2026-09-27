@@ -66,6 +66,15 @@ public class UpdateUserTrackingHandler(DietTrackerDbContext dbContext, ILogger<U
                 .SetProperty(u => u.UseTime, request.UseTime),
                 cancellationToken);
 
+        // Remove tracking values that are no longer in the request. This runs before new values are
+        // added; afterwards their ids would not be in the list and they would be deleted straight away.
+        var removeTrackingValueIds = existingValues.Select(value => value.UserTrackingValueId).ToList();
+        await _dbContext.UserTrackingValues
+            .Where(userTrackingValue => userTrackingValue.Tracking!.UserId == request.UserId)
+            .Where(userTrackingValue => userTrackingValue.UserTrackingId == request.UserTrackingId)
+            .Where(userTrackingValue => !removeTrackingValueIds.Contains(userTrackingValue.UserTrackingValueId))
+            .ExecuteDeleteAsync(cancellationToken);
+
         // Add new tracking values
         _dbContext.UserTrackingValues
             .AddRange(request.Values
@@ -114,14 +123,6 @@ public class UpdateUserTrackingHandler(DietTrackerDbContext dbContext, ILogger<U
         }
 
         await _dbContext.SaveChangesAsync(cancellationToken);
-
-        // Remove tracking values that are no longer in the request
-        var removeTrackingValueIds = existingValues.Select(value => value.UserTrackingValueId).ToList();
-        await _dbContext.UserTrackingValues
-            .Where(userTrackingValue => userTrackingValue.Tracking!.UserId == request.UserId)
-            .Where(userTrackingValue => userTrackingValue.UserTrackingId == request.UserTrackingId)
-            .Where(userTrackingValue => !removeTrackingValueIds.Contains(userTrackingValue.UserTrackingValueId))
-            .ExecuteDeleteAsync(cancellationToken);
 
         await transaction.CommitAsync(cancellationToken);
 

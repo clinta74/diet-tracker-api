@@ -94,7 +94,7 @@ public class TrackingOwnershipTests(ApiFactory factory) : IClassFixture<ApiFacto
 
         var value = (await GetTrackingAsync(client, tracking.UserTrackingId)).Values.Single(v => v.UserTrackingValueId == addedId);
         Assert.Equal("Restfulness", value.Name);
-        Assert.Equal([new Metadata("scale", "10")], value.Metadata);
+        Assert.Equal([new Metadata("scale", "10")], value.Metadata ?? []);
 
         var deleted = await client.DeleteAsync($"/api/user-tracking-value/{addedId}", Ct);
         Assert.Equal(HttpStatusCode.OK, deleted.StatusCode);
@@ -120,7 +120,7 @@ public class TrackingOwnershipTests(ApiFactory factory) : IClassFixture<ApiFacto
         Assert.Equal(HttpStatusCode.NotFound, missing.StatusCode);
         var value = (await GetTrackingAsync(owner, tracking.UserTrackingId)).Values.Single();
         Assert.Equal("Count", value.Name);
-        Assert.Equal([new Metadata("unit", "steps")], value.Metadata);
+        Assert.Equal([new Metadata("unit", "steps")], value.Metadata ?? []);
     }
 
     [Fact]
@@ -141,7 +141,7 @@ public class TrackingOwnershipTests(ApiFactory factory) : IClassFixture<ApiFacto
         Assert.Equal(["Cups"], (await GetTrackingAsync(other, othersTracking.UserTrackingId)).Values.Select(v => v.Name));
         var ownersValue = (await GetTrackingAsync(owner, ownersTracking.UserTrackingId)).Values.Single();
         Assert.Equal("Count", ownersValue.Name);
-        Assert.Equal([new Metadata("unit", "steps")], ownersValue.Metadata);
+        Assert.Equal([new Metadata("unit", "steps")], ownersValue.Metadata ?? []);
         Assert.True(WarningLogged("Ignored tracking value ids", ownersValueId));
     }
 

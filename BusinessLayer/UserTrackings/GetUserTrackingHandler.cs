@@ -25,6 +25,8 @@ public class GetUserTrackingHandler(DietTrackerDbContext dbContext) : IRequestHa
                 Disabled = userTracking.Disabled,
                 UseTime = userTracking.UseTime,
                 Values = userTracking.Values!
+                    .OrderBy(v => v.Order)
+                    .ThenBy(v => v.UserTrackingValueId)
                     .Select(v => new UserTrackingValue
                     {
                         UserTrackingValueId = v.UserTrackingValueId,

@@ -68,6 +68,13 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
         return (await response.Content.ReadFromJsonAsync<AuthResponse>())!;
     }
 
+    /// <summary>Registers a new (non-admin) user and returns a client authenticated as them.</summary>
+    public async Task<HttpClient> CreateUserClientAsync()
+    {
+        var auth = await RegisterAsync(CreateClient(), NewEmail(), "Correct-Horse-9");
+        return CreateAuthorizedClient(auth.AccessToken);
+    }
+
     public HttpClient CreateAuthorizedClient(string accessToken)
     {
         var client = CreateClient();

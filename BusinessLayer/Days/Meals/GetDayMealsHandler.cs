@@ -27,9 +27,9 @@ public class GetDayMealsHandler(DietTrackerDbContext dbContext, IMediator mediat
             .AsNoTracking()
             .ToListAsync(cancellationToken);
 
-        var plan = await _mediator.Send(new GetCurrentUserPlan(request.UserId), cancellationToken);
+        var plan = await _mediator.Send(new GetUserPlanForDay(request.UserId, request.Date), cancellationToken);
 
-        // Always return at least the plan's meals per day; unused slots are blank placeholders.
+        // Always return at least the meals per day of the plan in effect that day; unused slots are blank placeholders.
         var placeholders = Enumerable.Repeat(
             new UserDayMeal(0, request.UserId, request.Date, "", null),
             Math.Max(0, plan.MealCount - data.Count));
